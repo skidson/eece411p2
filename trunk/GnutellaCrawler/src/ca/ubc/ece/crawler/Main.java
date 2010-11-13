@@ -8,6 +8,7 @@ public class Main {
 	private static final String DELIM = ",:";
 	private static final int FRONT = 0;
 	private static final int MILLI_TO_MIN = 60000;
+	private static final int MS_TO_SEC = 1000;
 	
 	private int num_discovered = 0;
 	private int num_timeouts = 0;
@@ -38,7 +39,7 @@ public class Main {
         			full = false;
         		} else if (args[i].startsWith("timeout=")) {
         			String[] arg = args[i].split("=");
-        			timeout = Integer.parseInt(arg[1]);
+        			timeout = Integer.parseInt(arg[1])*MS_TO_SEC;
         			System.out.println("Connection timeout set for " + timeout + " second(s)");
         		} else if (args[i].indexOf(":") != -1) {
         			String[] arg = args[i].split(":");

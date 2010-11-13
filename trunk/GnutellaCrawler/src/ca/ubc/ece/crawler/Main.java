@@ -30,6 +30,8 @@ public class Main {
         	for (int i = 0; i < args.length; i++) {
         		if (args[i].equals("-full")) {
         			full = true;
+        		} else if (args[i].equals("-minimal")) {
+        			full = false;
         		} else if (args[i].startsWith("timeout=")) {
         			String[] arg = args[i].split("=");
         			timeout = Integer.parseInt(arg[1]);

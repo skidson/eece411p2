@@ -14,10 +14,10 @@ public class Crawler {
         cResult=new CrawlResult();
     }
     
-    public CrawlResult crawl(String ipAddress,int port){
+    public CrawlResult crawl(String ipAddress,int port, int timeout){
         
         System.out.println("Crawling " + ipAddress + ":" + port);
-        String nodePeers = crawlPeers(ipAddress,port);
+        String nodePeers = crawlPeers(ipAddress,port, timeout);
         if(nodePeers == null){
             System.out.println("Failed to crawl the peer");
             return (null);
@@ -29,15 +29,15 @@ public class Crawler {
             return cResult;
         }        
         
-        listFiles(ipAddress,port);
+        listFiles(ipAddress,port, timeout);
         
         return cResult;
     }
     
-public CrawlResult crawl(String ipAddress,int port, boolean full){
+public CrawlResult crawl(String ipAddress,int port, int timeout, boolean full){
         
         System.out.println("Crawling " + ipAddress + ":" + port);
-        String nodePeers = crawlPeers(ipAddress,port);
+        String nodePeers = crawlPeers(ipAddress,port, timeout);
         if(nodePeers == null){
             System.out.println("Failed to crawl the peer");
             return (null);
@@ -50,18 +50,19 @@ public CrawlResult crawl(String ipAddress,int port, boolean full){
         }        
         
         if(full = true)
-        	listFiles(ipAddress,port);
+        	listFiles(ipAddress,port, timeout);
         
         return cResult;
     }
     
-    private String crawlPeers(String ipAddress,int port){
+    private String crawlPeers(String ipAddress,int port, int timeout){
         InputStream in;
         OutputStream out;
         Socket socket;
         
         try {
             socket = new Socket(ipAddress, port);
+            socket.setSoTimeout(timeout*1000);
             System.out.println("Connected to node : " + ipAddress + " on port " + port);
 
             in = socket.getInputStream();
@@ -150,13 +151,14 @@ public CrawlResult crawl(String ipAddress,int port, boolean full){
     }
    
 
-   private void listFiles(String ipAddress, int port){
+   private void listFiles(String ipAddress, int port, int timeout){
         InputStream in;
         OutputStream out;
         Socket socket;
         
         try {
             socket = new Socket(ipAddress, port);
+            socket.setSoTimeout(timeout*1000);
             System.out.println("Connected to node : " + ipAddress + " on port " + port);
 
             in = socket.getInputStream();

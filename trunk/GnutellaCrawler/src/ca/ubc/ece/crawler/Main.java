@@ -47,7 +47,7 @@ public class Main {
         
         /* Initiate crawling */
         while(unvisited.size() != 0) {
-		    CrawlResult info = mainCrawler.crawl(unvisited.get(FRONT).address, unvisited.get(FRONT).portNum);
+		    CrawlResult info = mainCrawler.crawl(unvisited.get(FRONT).address, unvisited.get(FRONT).portNum, timeout, full);
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.remove(FRONT);
 		    print(info);
@@ -65,7 +65,7 @@ public class Main {
 			    	
 		    	CrawlResult leafInfo = null;
 		    	
-	    		leafInfo = mainCrawler.crawl(leaf.address, leaf.portNum);
+	    		leafInfo = mainCrawler.crawl(leaf.address, leaf.portNum, timeout, full);
 		    	
 		    	print(leafInfo);
 		    	String leafPeers = leafInfo.getUltrapeers();

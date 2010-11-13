@@ -9,49 +9,9 @@ import java.net.*;
  */
 public class Crawler {
     private CrawlResult cResult;
-    private final int DEFAULT_TIMEOUT = 20;
 
     public Crawler() {
         cResult=new CrawlResult();
-    }
-    
-    public CrawlResult crawl(String ipAddress, int port) {
-    	int timeout = DEFAULT_TIMEOUT;
-        System.out.println("Crawling " + ipAddress + ":" + port);
-        String nodePeers = crawlPeers(ipAddress,port, timeout);
-        if(nodePeers == null){
-            System.out.println("Failed to crawl the peer");
-            return (null);
-        }
-        if (nodePeers.length() > 0){
-            parsePeers(nodePeers);            
-        } else{
-            System.out.println("Error : Recieved zero-length list of peers");
-            return cResult;
-        }        
-        
-        listFiles(ipAddress,port, timeout);
-        
-        return cResult;
-    }
-    
-    public CrawlResult crawl(String ipAddress, int port, int timeout){
-        System.out.println("Crawling " + ipAddress + ":" + port);
-        String nodePeers = crawlPeers(ipAddress,port, timeout);
-        if(nodePeers == null){
-            System.out.println("Failed to crawl the peer");
-            return (null);
-        }
-        if (nodePeers.length() > 0){
-            parsePeers(nodePeers);            
-        } else{
-            System.out.println("Error : Recieved zero-length list of peers");
-            return cResult;
-        }        
-        
-        listFiles(ipAddress,port, timeout);
-        
-        return cResult;
     }
     
 public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){

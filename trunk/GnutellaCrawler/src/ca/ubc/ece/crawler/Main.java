@@ -54,6 +54,11 @@ public class Main {
 		    
 		    /* Get info from each leaf node but do not traverse its nodes yet */
 		    String leaves = info.getLeaves();
+		    
+		    // if unable to get info we likely timed out, ignore this node
+		    if (leaves == null)
+		    	continue;
+		    
 		    StringTokenizer tokens = new StringTokenizer(leaves, DELIM);
 		    
 		    while (tokens.hasMoreTokens()) {
@@ -65,10 +70,15 @@ public class Main {
 			    	
 		    	CrawlResult leafInfo = null;
 		    	
-	    		leafInfo = mainCrawler.crawl(leaf.address, leaf.portNum, timeout, full);
+		    	leafInfo = mainCrawler.crawl(leaf.address, leaf.portNum, timeout, full);
 		    	
 		    	print(leafInfo);
 		    	String leafPeers = leafInfo.getUltrapeers();
+		    	
+		    	// if unable to get info we likely timed out, ignore this node
+		    	if (leafPeers == null)
+		    		continue;
+		    	
 		    	StringTokenizer leafTokens = new StringTokenizer(leafPeers, DELIM);
 		    	
 		    	/* Add unknown ultrapeers of this leaf to our list */

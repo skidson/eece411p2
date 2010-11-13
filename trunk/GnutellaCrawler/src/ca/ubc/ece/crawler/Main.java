@@ -9,8 +9,13 @@ public class Main {
 	private static final int FRONT = 0;
 	
 	private int num_discovered = 0;
-	private int num_timeout = 0;
-    
+	private int num_timeouts = 0;
+	
+	private static int timeout = 30;
+	private static int duration = -1;
+	
+	private static boolean full = false;
+	
     public static void main(String[] args) {
         Crawler mainCrawler = new Crawler();
         
@@ -18,11 +23,26 @@ public class Main {
         ArrayList<Node> unvisited = new ArrayList<Node>();
         
         /* Parse command-line bootstrap parameters */
-        if (args.length != 2){
+        if (args.length < 2){
             System.out.println("Error: incorrect inputs\nUsage:\n\tMain <Node-address> <node-port>");
             return;
-        } else {
+        } else if (args.length == 2){
+        	// simplistic implementation
             unvisited.add(new Node(args[0], Integer.parseInt(args[1])));
+        } else {
+        	for (int i = 0; i < args.length; i++) {
+        		if (args[i].equals("-full")) {
+        			full = true;
+        		} else if (args[i].startsWith("timeout=")) {
+        			String[] arg = args[i].split("=");
+        			timeout = Integer.parseInt(arg[1]);
+        		} else if (args[i].indexOf(":") != -1) {
+        			String[] arg = args[i].split(":");
+        			unvisited.add(new Node(arg[0], Integer.parseInt(arg[1])));
+        		} else {
+        			duration = Integer.parseInt(args[i]);
+        		}
+        	}
         }
         
         /* Initiate crawling */

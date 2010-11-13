@@ -53,11 +53,13 @@ public class Main {
 		    print(info);
 		    
 		    /* Get info from each leaf node but do not traverse its nodes yet */
-		    String leaves = info.getLeaves();
-		    
-		    // if unable to get info we likely timed out, ignore this node
-		    if (leaves == null)
+		    String leaves;
+		    try {
+		    	leaves = info.getLeaves();
+		    } catch (NullPointerException e) {
+		    	// if unable to get info we likely timed out, ignore this node
 		    	continue;
+		    }
 		    
 		    StringTokenizer tokens = new StringTokenizer(leaves, DELIM);
 		    
@@ -73,11 +75,14 @@ public class Main {
 		    	leafInfo = mainCrawler.crawl(leaf.address, leaf.portNum, timeout, full);
 		    	
 		    	print(leafInfo);
-		    	String leafPeers = leafInfo.getUltrapeers();
 		    	
-		    	// if unable to get info we likely timed out, ignore this node
-		    	if (leafPeers == null)
+		    	String leafPeers;
+		    	try {
+		    		leafPeers = leafInfo.getUltrapeers();
+		    	} catch (NullPointerException e) {
+		    		// if unable to get info we likely timed out, ignore this node
 		    		continue;
+		    	}
 		    	
 		    	StringTokenizer leafTokens = new StringTokenizer(leafPeers, DELIM);
 		    	

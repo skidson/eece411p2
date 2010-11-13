@@ -37,7 +37,7 @@ public class Crawler {
         InputStream in = null;
         OutputStream out = null;
         Socket socket = new Socket();
-        
+
         try {
         	InetSocketAddress address = new InetSocketAddress(ipAddress, port);
             socket.connect(address, timeout);

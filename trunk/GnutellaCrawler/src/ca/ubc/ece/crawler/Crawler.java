@@ -77,28 +77,29 @@ public CrawlResult crawl(String ipAddress,int port, int timeout, boolean full){
     }
     
     private String crawlPeers(String ipAddress,int port, int timeout){
-        InputStream in;
-        OutputStream out;
-        Socket socket;
+        InputStream in = null;
+        OutputStream out = null;
+        Socket socket = null;
         
         try {
             socket = new Socket(ipAddress, port);
             socket.setSoTimeout(timeout*1000);
             System.out.println("Connected to node : " + ipAddress + " on port " + port);
-
             in = socket.getInputStream();
             out = socket.getOutputStream();
-        } catch (UnknownHostException ex) {
+    	}catch (UnknownHostException ex) {
             System.out.println("Error: Failed to connect to node "+ipAddress+":"+port);
+            cResult.setStatus("Unroutable IP address");
             ex.printStackTrace();
-            return (null);
-            
-        } catch (IOException ex) {
+            return (null);         
+        } catch (SocketTimeoutException ex){
+        	System.out.println("Timed out while connecting to node");
+        	cResult.setStatus("Connection Timeout");
+        }catch (IOException ex) {
             System.out.println("Error: Failed to connect to node "+ipAddress+":"+port);
             ex.printStackTrace();
             return (null);
         }
-        
         String GNodetName = socket.getInetAddress().getHostName();
         System.out.println("Host name is : " + GNodetName);
         String response  = new String();

@@ -9,6 +9,7 @@ public class CrawlResult {
     private int numOfFiles;
     private String filesList;
     private String Agent;
+    private String status;
     
     /** Creates a new instance of CrawlResults */
     public CrawlResult() {
@@ -21,6 +22,12 @@ public class CrawlResult {
     
     public void setUltrapeers(String upeers) {
         ultrapeers = upeers;
+    }
+    public void setStatus(String status){
+    	this.status = status;
+    }
+    public String getStatus(){
+    	return status;
     }
     public String getUltrapeers() {
         return ultrapeers;
@@ -53,6 +60,7 @@ public class CrawlResult {
         return Agent;
     }
     public void print() {
+    	System.out.println("Status : " + getStatus());
         System.out.println("Running Agent : " + getAgent());
         System.out.println("UltraPeers : " + getUltrapeers());
         System.out.println("Leaves : " + getLeaves());

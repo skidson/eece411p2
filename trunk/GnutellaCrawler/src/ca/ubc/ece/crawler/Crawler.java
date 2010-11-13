@@ -190,10 +190,12 @@ public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
             out = socket.getOutputStream();
         } catch (UnknownHostException ex) {
             System.out.println("Error: Failed to connect to node " + ipAddress + ":" + port);
+            cResult.setStatus("Unroutable IP address");
             ex.printStackTrace();
             return;
         } catch (IOException ex) {
             System.out.println("Error: Failed to connect to node " + ipAddress + ":" + port);
+            cResult.setStatus("Port Failure O_o");
             ex.printStackTrace();
             return;
         }

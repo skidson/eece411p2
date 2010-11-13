@@ -26,9 +26,6 @@ public class Main {
         if (args.length < 2){
             System.out.println("Error: incorrect inputs\nUsage:\n\tMain <Node-address> <node-port>");
             return;
-        } else if (args.length == 2){
-        	// simplistic implementation
-            unvisited.add(new Node(args[0], Integer.parseInt(args[1])));
         } else {
         	for (int i = 0; i < args.length; i++) {
         		if (args[i].equals("-full")) {

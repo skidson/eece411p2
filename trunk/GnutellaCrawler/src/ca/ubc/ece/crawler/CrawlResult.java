@@ -73,10 +73,10 @@ public class CrawlResult {
     	String stats = "Running Agent : " + getAgent() + "\n\r" +
         	"UltraPeers : " + getUltrapeers() + "\n\r" +
         	"Leaves : " + getLeaves() + "\n\r" +
-        	"Number of files: " + getNumOfFiles();
+        	"Number of files : " + getNumOfFiles();
         		
         if(getNumOfFiles() > 0)
-            stats += "list of files : " + getFilesList().replace("\0","\n\r");
+            stats += "List of files : " + getFilesList().replace("\0","\n\r\t");
         
         return stats;
     }

@@ -66,7 +66,7 @@ public class CrawlResult {
         System.out.println("Leaves : " + getLeaves());
         System.out.println("Number of files: " + getNumOfFiles());
         if(getNumOfFiles() > 0)
-            System.out.println("list of files : " + getFilesList().replace("\0"," : "));
+            System.out.println("list of files : " + getFilesList().replace("\0","\n\r"));
     }
     
     public String toString() {
@@ -76,7 +76,7 @@ public class CrawlResult {
         	"Number of files: " + getNumOfFiles();
         		
         if(getNumOfFiles() > 0)
-            stats += "list of files : " + getFilesList().replace("\0"," : ");
+            stats += "list of files : " + getFilesList().replace("\0","\n\r");
         
         return stats;
     }

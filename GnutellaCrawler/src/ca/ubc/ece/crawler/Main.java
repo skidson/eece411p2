@@ -40,7 +40,7 @@ public class Main {
         		} else if (args[i].startsWith("timeout=")) {
         			String[] arg = args[i].split("=");
         			timeout = Integer.parseInt(arg[1])*MS_TO_SEC;
-        			System.out.println("Connection timeout set for " + timeout + " second(s)");
+        			System.out.println("Connection timeout set for " + timeout/MS_TO_SEC + " second(s)");
         		} else if (args[i].indexOf(":") != -1) {
         			String[] arg = args[i].split(":");
         			unvisited.add(new Node(arg[0], Integer.parseInt(arg[1])));

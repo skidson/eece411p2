@@ -18,7 +18,7 @@ public class Crawler {
         System.out.println("Crawling " + ipAddress + ":" + port + "...");
         String nodePeers = crawlPeers(ipAddress, port, timeout);
         if(nodePeers == null){
-            System.out.println("Failed to crawl the peer");
+            System.out.println("Failed to crawl the peer\n");
             return (null);
         }
         if (nodePeers.length() > 0){
@@ -49,15 +49,17 @@ public class Crawler {
         	System.out.println("Timed out while connecting to node");
         	cResult.setStatus("Connection Timeout");
         	return (null);
-    	}catch (UnknownHostException ex) {
+    	} catch (UnknownHostException ex) {
             System.out.println("Error: Failed to connect to node "+ipAddress + ":" + port);
             cResult.setStatus("Unroutable IP address");
-            ex.printStackTrace();
             return (null);
-        }catch (IOException ex) {
+    	}catch (ConnectException ex) {
+    		System.out.println("Error: Connection was refused by "+ipAddress+":"+port);
+            cResult.setStatus("Connection Refused");
+            return (null);
+        } catch (IOException ex) {
             System.out.println("Error: Failed to connect to node "+ipAddress+":"+port);
-            cResult.setStatus("Random IOexception lul");
-            ex.printStackTrace();
+            cResult.setStatus("Internal Error");
             return (null);
         }
         String GNodetName = socket.getInetAddress().getHostName();
@@ -150,12 +152,10 @@ public class Crawler {
         } catch (UnknownHostException ex) {
             System.out.println("Error: Failed to connect to node " + ipAddress + ":" + port);
             cResult.setStatus("Unroutable IP address");
-            ex.printStackTrace();
             return;
         } catch (IOException ex) {
             System.out.println("Error: Failed to connect to node " + ipAddress + ":" + port);
-            cResult.setStatus("Port Failure O_o");
-            ex.printStackTrace();
+            cResult.setStatus("Port Unavailable");
             return;
         }
         

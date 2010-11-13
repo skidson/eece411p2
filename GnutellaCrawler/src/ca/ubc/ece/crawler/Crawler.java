@@ -15,7 +15,7 @@ public class Crawler {
         cResult=new CrawlResult();
     }
     
-    public CrawlResult crawl(String ipAddress,int port){
+    public CrawlResult crawl(String ipAddress, int port) {
     	int timeout = DEFAULT_TIMEOUT;
         System.out.println("Crawling " + ipAddress + ":" + port);
         String nodePeers = crawlPeers(ipAddress,port, timeout);
@@ -35,8 +35,7 @@ public class Crawler {
         return cResult;
     }
     
-    public CrawlResult crawl(String ipAddress,int port, int timeout){
-        
+    public CrawlResult crawl(String ipAddress, int port, int timeout){
         System.out.println("Crawling " + ipAddress + ":" + port);
         String nodePeers = crawlPeers(ipAddress,port, timeout);
         if(nodePeers == null){
@@ -55,8 +54,7 @@ public class Crawler {
         return cResult;
     }
     
-public CrawlResult crawl(String ipAddress,int port, int timeout, boolean full){
-        
+public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
         System.out.println("Crawling " + ipAddress + ":" + port);
         String nodePeers = crawlPeers(ipAddress,port, timeout);
         if(nodePeers == null){
@@ -76,7 +74,7 @@ public CrawlResult crawl(String ipAddress,int port, int timeout, boolean full){
         return cResult;
     }
     
-    private String crawlPeers(String ipAddress,int port, int timeout){
+    private String crawlPeers(String ipAddress, int port, int timeout){
         InputStream in = null;
         OutputStream out = null;
         Socket socket = null;

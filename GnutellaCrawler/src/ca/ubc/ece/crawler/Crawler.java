@@ -83,18 +83,21 @@ public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
             socket = new Socket(ipAddress, port);
             socket.setSoTimeout(timeout*1000);
             System.out.println("Connected to node : " + ipAddress + " on port " + port);
+            cResult.setStatus("Connected");
             in = socket.getInputStream();
             out = socket.getOutputStream();
     	}catch (UnknownHostException ex) {
             System.out.println("Error: Failed to connect to node "+ipAddress+":"+port);
             cResult.setStatus("Unroutable IP address");
             ex.printStackTrace();
-            return (null);         
+            return (null);
         } catch (SocketTimeoutException ex){
         	System.out.println("Timed out while connecting to node");
         	cResult.setStatus("Connection Timeout");
+        	return (null);
         }catch (IOException ex) {
             System.out.println("Error: Failed to connect to node "+ipAddress+":"+port);
+            cResult.setStatus("Random IOexception lul");
             ex.printStackTrace();
             return (null);
         }
@@ -116,6 +119,7 @@ public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
             out.flush();
         } catch (IOException ex) {
             System.out.println("Error: Failed to send the crawl message to " + ipAddress + ":" + port);
+            cResult.setStatus("Connected but unable to send message");
             ex.printStackTrace();
             return null;
         }
@@ -126,6 +130,7 @@ public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
                 responseLine = ByteOrder.readLine(in);
             } catch (IOException ex) {
                 System.out.println("Error: Failed to recieve the responce from the node " + ipAddress + ":" + port);
+                cResult.setStatus("Connected, message sent, failed to receive reply");
                 ex.printStackTrace();
                 return null;
             }

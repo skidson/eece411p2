@@ -9,14 +9,12 @@ public class Main {
 	private static final int FRONT = 0;
     
     public static void main(String[] args) {
-        int nodePort = 0;
-        String nodeAddress = new String();
         Crawler mainCrawler = new Crawler();
         
         ArrayList<Node> visited = new ArrayList<Node>();
         ArrayList<Node> unvisited = new ArrayList<Node>();
         
-        // parse parameters
+        /* Parse command-line bootstrap parameters */
         if (args.length != 2){
             System.out.println("Error: incorrect inputs\nUsage:\n\tMain <Node-address> <node-port>");
             return;
@@ -24,13 +22,14 @@ public class Main {
             unvisited.add(new Node(args[0], Integer.parseInt(args[1])));
         }
         
+        /* Initiate crawling */
         while(unvisited.size() != 0) {
 		    CrawlResult info = mainCrawler.crawl(unvisited.get(FRONT).address, unvisited.get(FRONT).portNum);
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.remove(FRONT);
 		    print(info);
 		    
-		    /* Get info from each leaf node but do not traverse it's nodes yet */
+		    /* Get info from each leaf node but do not traverse its nodes yet */
 		    String leaves = info.getLeaves();
 		    StringTokenizer tokens = new StringTokenizer(leaves, DELIM);
 		    
@@ -56,10 +55,23 @@ public class Main {
 		    	visited.add(leaf);
 		    }
 		    
+		    /* Add new ultrapeers from this ultrapeer to our unvisited list */
+		    String peers = info.getUltrapeers();
+		    tokens = new StringTokenizer(peers, DELIM);
 		    
+		    while (tokens.hasMoreTokens()) {
+			    Node ultra = new Node(tokens.nextToken(), Integer.parseInt(tokens.nextToken()));
+			    
+			    if (!contained(unvisited, ultra) && !contained(visited, ultra))
+			    	unvisited.add(ultra);
+		    }
 		    
+		    // move this ultrapeer to visited
+		    visited.add(unvisited.get(FRONT));
+		    unvisited.remove(FRONT);
+		    
+		    // repeat for next ultrapeer in list
         }
-        
         
     }
     

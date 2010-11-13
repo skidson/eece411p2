@@ -34,6 +34,27 @@ public class Crawler {
         return cResult;
     }
     
+public CrawlResult crawl(String ipAddress,int port, boolean full){
+        
+        System.out.println("Crawling " + ipAddress + ":" + port);
+        String nodePeers = crawlPeers(ipAddress,port);
+        if(nodePeers == null){
+            System.out.println("Failed to crawl the peer");
+            return (null);
+        }
+        if (nodePeers.length() > 0){
+            parsePeers(nodePeers);            
+        } else{
+            System.out.println("Error : Recieved zero-length list of peers");
+            return cResult;
+        }        
+        
+        if(full = true)
+        	listFiles(ipAddress,port);
+        
+        return cResult;
+    }
+    
     private String crawlPeers(String ipAddress,int port){
         InputStream in;
         OutputStream out;

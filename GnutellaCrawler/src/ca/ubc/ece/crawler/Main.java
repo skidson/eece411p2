@@ -53,7 +53,7 @@ public class Main {
         
         /* Initiate crawling */
         while(unvisited.size() != 0) {
-        	checkTime();
+        	if(checkTime()) calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN);
 		    CrawlResult info = mainCrawler.crawl(unvisited.get(FRONT).address, unvisited.get(FRONT).portNum, timeout, full);
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.remove(FRONT);
@@ -71,7 +71,7 @@ public class Main {
 		    StringTokenizer tokens = new StringTokenizer(leaves, DELIM);
 		    
 		    while (tokens.hasMoreTokens()) {
-		    	checkTime();
+		    	if(checkTime()) calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN);
 			    Node leaf = new Node(tokens.nextToken(), Integer.parseInt(tokens.nextToken()));
 			    
 			    // ignore this node if we have already visited it, otherwise get its information
@@ -150,12 +150,24 @@ public class Main {
         	info.print();
     }
     
-    private static void checkTime() {
+    private static boolean checkTime() {
     	System.out.println("Crawler has been active for " + (float)((int)((Calendar.getInstance().getTimeInMillis()/(double)MILLI_TO_MIN - startTime)*100))/100 + " minute(s)");
     	if (duration != 0 && (Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN - startTime) >= duration) {
     		System.out.println("Execution duration reached, terminating...");
-    		System.exit(0);
+    		return true;
     	}
+    	return false;
     }
-    
+    private static void calcStats(ArrayList<Node> visited, ArrayList<Node> unvisited, long finaltime){
+    	int num_nodes;
+    	double nodesPerSecond;
+    	long finalTimeSeconds = (finaltime - startTime) * 60;
+    	
+    	num_nodes = visited.size() + unvisited.size();
+    	nodesPerSecond = num_nodes / finalTimeSeconds;
+    	System.out.println("Number of Nodes Discovered : " + num_nodes);
+    	System.out.println("Nodes Discovered per Second : " + nodesPerSecond);
+    	System.exit(0);
+    	
+    }
 }

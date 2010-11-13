@@ -33,14 +33,30 @@ public class Main {
 		    /* Get info from each leaf node but do not traverse it's nodes yet */
 		    String leaves = info.getLeaves();
 		    StringTokenizer tokens = new StringTokenizer(leaves, DELIM);
+		    
 		    while (tokens.hasMoreTokens()) {
 			    Node leaf = new Node(tokens.nextToken(), Integer.parseInt(tokens.nextToken()));
 			    
-			    // ignore this node if we are already aware of it, otherwise add to back of list of nodes to visit
-			    if (!contained(visited, leaf) && !contained(unvisited, leaf))
-			    	unvisited.add(leaf);
-
+			    // ignore this node if we have already visited it, otherwise get its information
+			    if (contained(visited, leaf)) // leaf nodes will never be contained in unvisited (unless leaves have leaves...)
+			    	continue;
+			    	
+		    	CrawlResult leafInfo = mainCrawler.crawl(leaf.address, leaf.portNum);
+		    	print(leafInfo);
+		    	String leafPeers = leafInfo.getUltrapeers();
+		    	StringTokenizer leafTokens = new StringTokenizer(leafPeers, DELIM);
+		    	
+		    	/* Add unknown ultrapeers of this leaf to our list */
+		    	while (leafTokens.hasMoreTokens()) {
+		    		Node leafNode = new Node(leafTokens.nextToken(), Integer.parseInt(leafTokens.nextToken()));
+		    		if (!contained(unvisited, leafNode) && !contained(visited, leafNode))
+		    			unvisited.add(leafNode);
+		    	}
+		    	// we are done with this leaf
+		    	visited.add(leaf);
 		    }
+		    
+		    
 		    
         }
         

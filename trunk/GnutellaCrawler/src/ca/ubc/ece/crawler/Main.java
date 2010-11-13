@@ -7,6 +7,9 @@ public class Main {
 	private static final String OUTPUT_FILE = "results.txt";
 	private static final String DELIM = ",:";
 	private static final int FRONT = 0;
+	
+	private int num_discovered = 0;
+	private int num_timeout = 0;
     
     public static void main(String[] args) {
         Crawler mainCrawler = new Crawler();
@@ -40,7 +43,10 @@ public class Main {
 			    if (contained(visited, leaf)) // leaf nodes will never be contained in unvisited (unless leaves have leaves...)
 			    	continue;
 			    	
-		    	CrawlResult leafInfo = mainCrawler.crawl(leaf.address, leaf.portNum);
+		    	CrawlResult leafInfo = null;
+		    	
+	    		leafInfo = mainCrawler.crawl(leaf.address, leaf.portNum);
+		    	
 		    	print(leafInfo);
 		    	String leafPeers = leafInfo.getUltrapeers();
 		    	StringTokenizer leafTokens = new StringTokenizer(leafPeers, DELIM);

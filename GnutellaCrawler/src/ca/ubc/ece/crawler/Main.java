@@ -7,18 +7,20 @@ public class Main {
 	private static final String OUTPUT_FILE = "results.txt";
 	private static final String DELIM = ",:";
 	private static final int FRONT = 0;
+	private static final int MILLI_TO_MIN = 60000;
 	
 	private int num_discovered = 0;
 	private int num_timeouts = 0;
 	
 	private static int timeout = 30;
 	private static int duration = -1;
+	private static long startTime = 0;
 	
 	private static boolean full = false;
 	
     public static void main(String[] args) {
         Crawler mainCrawler = new Crawler();
-        
+        startTime = Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN;
         ArrayList<Node> visited = new ArrayList<Node>();
         ArrayList<Node> unvisited = new ArrayList<Node>();
         
@@ -29,23 +31,28 @@ public class Main {
         } else {
         	for (int i = 0; i < args.length; i++) {
         		if (args[i].equals("-full")) {
+        			System.out.println("Full output mode set");
         			full = true;
         		} else if (args[i].equals("-minimal")) {
+        			System.out.println("Minimal output mode set");
         			full = false;
         		} else if (args[i].startsWith("timeout=")) {
         			String[] arg = args[i].split("=");
         			timeout = Integer.parseInt(arg[1]);
+        			System.out.println("Connection timeout set for " + timeout + " second(s)");
         		} else if (args[i].indexOf(":") != -1) {
         			String[] arg = args[i].split(":");
         			unvisited.add(new Node(arg[0], Integer.parseInt(arg[1])));
         		} else {
         			duration = Integer.parseInt(args[i]);
+        			System.out.println("Execution time set for " + duration + " minute(s)");
         		}
         	}
         }
         
         /* Initiate crawling */
         while(unvisited.size() != 0) {
+        	checkTime();
 		    CrawlResult info = mainCrawler.crawl(unvisited.get(FRONT).address, unvisited.get(FRONT).portNum, timeout, full);
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.remove(FRONT);
@@ -63,6 +70,7 @@ public class Main {
 		    StringTokenizer tokens = new StringTokenizer(leaves, DELIM);
 		    
 		    while (tokens.hasMoreTokens()) {
+		    	checkTime();
 			    Node leaf = new Node(tokens.nextToken(), Integer.parseInt(tokens.nextToken()));
 			    
 			    // ignore this node if we have already visited it, otherwise get its information
@@ -124,19 +132,29 @@ public class Main {
     	return (false);
     }
     
-    private static void print(CrawlResult node) {
+    private static void print(CrawlResult info) {
     	// output info to text file
-    	/*PrintWriter out;
-    	try {
-        	out = new PrintWriter(new BufferedWriter(new FileWriter(OUTPUT_FILE, true)));
-        	if (node != null) 
-            	out.write(node.toString()); 
-        } catch (IOException e) {
-        	System.err.println("Could not write to 'results.txt'");
-        }*/
+    	if (full == true) {
+	    	PrintWriter out;
+	    	try {
+	        	out = new PrintWriter(new BufferedWriter(new FileWriter(OUTPUT_FILE, true)));
+	        	if (info != null) 
+	            	out.write(info.toString()); 
+	        } catch (IOException e) {
+	        	System.err.println("Could not write to 'results.txt'");
+	        }
+    	}
         // output info to console
-        if (node != null) 
-        	node.print();
+        if (info != null) 
+        	info.print();
+    }
+    
+    private static void checkTime() {
+    	System.out.println("Crawler has been active for " + (float)((int)((Calendar.getInstance().getTimeInMillis()/(double)MILLI_TO_MIN - startTime)*100))/100 + " minute(s)");
+    	if (duration != 0 && (Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN - startTime) >= duration) {
+    		System.out.println("Execution duration reached, terminating...");
+    		System.exit(0);
+    	}
     }
     
 }

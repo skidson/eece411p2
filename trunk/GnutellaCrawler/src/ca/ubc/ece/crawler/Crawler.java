@@ -2,7 +2,6 @@ package ca.ubc.ece.crawler;
 
 import java.io.*;
 import java.net.*;
-import java.util.Calendar;
 
 /**
  *
@@ -12,12 +11,11 @@ public class Crawler {
     private CrawlResult cResult;
 
     public Crawler() {
-        cResult=new CrawlResult();
+        cResult = new CrawlResult();
     }
     
-public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
-
-        System.out.println("Crawling " + ipAddress + ":" + port);
+    public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
+        System.out.println("Crawling " + ipAddress + ":" + port + "...");
         String nodePeers = crawlPeers(ipAddress,port, timeout);
         if(nodePeers == null){
             System.out.println("Failed to crawl the peer");
@@ -26,7 +24,7 @@ public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
         if (nodePeers.length() > 0){
             parsePeers(nodePeers);            
         } else{
-            System.out.println("Error : Recieved zero-length  peers");
+            System.out.println("Error : Recieved zero-length peers");
             return cResult;
         }        
         
@@ -161,19 +159,14 @@ public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
             return;
         }
         
-        String response = new String();
         StringBuffer strBuf = new StringBuffer();
-        
         String localAddress = socket.getLocalAddress().getHostAddress();
-        String localPort = String.format("%d",socket.getLocalPort());
-        
         strBuf.append("GET / HTTP/1.1\r\n" +
         		"Host: "+localAddress+"\r\n" +
         		"User-Agent: UBCECE/0.1\r\n" +
         		"Accept: text/html, application/x-gnutella-packets\r\n" +
         		"Connection: close\r\n" +
         		"\r\n");
-        
         byte[] bytes = strBuf.toString().getBytes();
         
         try {
@@ -262,10 +255,8 @@ public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
     }
 
     private void processQueryHit(byte[] qhit){
-        int beginIndex;
         int endIndex;
         int numOfFiles = qhit[0];
-        String sentList = new String();
         String filesList = new String();
         String msg = new String();
 
@@ -322,13 +313,11 @@ public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
     }
 
     private void trimBufferBegining(byte[] buffer, int trimBeginIndex){
-        
         if (trimBeginIndex > buffer.length)
             return;
 
         for (int i=trimBeginIndex ; i<buffer.length ; i++)
             buffer[i-trimBeginIndex] = buffer[i];
-        
     }
     
     private int bufferIndexOf(byte[] buffer,char c){

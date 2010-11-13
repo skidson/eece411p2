@@ -16,6 +16,7 @@ public class Crawler {
     }
     
 public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
+
         System.out.println("Crawling " + ipAddress + ":" + port);
         String nodePeers = crawlPeers(ipAddress,port, timeout);
         if(nodePeers == null){
@@ -29,8 +30,7 @@ public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
             return cResult;
         }        
         
-        if(full = true)
-        	listFiles(ipAddress,port, timeout);
+        if(full == true) listFiles(ipAddress,port, timeout);
         
         return cResult;
     }
@@ -47,15 +47,15 @@ public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
             cResult.setStatus("Connected");
             in = socket.getInputStream();
             out = socket.getOutputStream();
+    	} catch (SocketTimeoutException ex){
+        	System.out.println("Timed out while connecting to node");
+        	cResult.setStatus("Connection Timeout");
+        	return (null);
     	}catch (UnknownHostException ex) {
             System.out.println("Error: Failed to connect to node "+ipAddress + ":" + port);
             cResult.setStatus("Unroutable IP address");
             ex.printStackTrace();
             return (null);
-        } catch (SocketTimeoutException ex){
-        	System.out.println("Timed out while connecting to node");
-        	cResult.setStatus("Connection Timeout");
-        	return (null);
         }catch (IOException ex) {
             System.out.println("Error: Failed to connect to node "+ipAddress+":"+port);
             cResult.setStatus("Random IOexception lul");

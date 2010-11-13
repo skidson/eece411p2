@@ -127,14 +127,14 @@ public class Main {
     
     private static void print(CrawlResult node) {
     	// output info to text file
-    	PrintWriter out;
+    	/*PrintWriter out;
     	try {
         	out = new PrintWriter(new BufferedWriter(new FileWriter(OUTPUT_FILE, true)));
         	if (node != null) 
             	out.write(node.toString()); 
         } catch (IOException e) {
         	System.err.println("Could not write to 'results.txt'");
-        }
+        }*/
         // output info to console
         if (node != null) 
         	node.print();

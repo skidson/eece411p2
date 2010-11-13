@@ -2,6 +2,7 @@ package ca.ubc.ece.crawler;
 
 import java.io.*;
 import java.net.*;
+import java.util.Calendar;
 
 /**
  *
@@ -24,7 +25,7 @@ public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
         if (nodePeers.length() > 0){
             parsePeers(nodePeers);            
         } else{
-            System.out.println("Error : Recieved zero-length list of peers");
+            System.out.println("Error : Recieved zero-length  peers");
             return cResult;
         }        
         
@@ -47,7 +48,7 @@ public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
             in = socket.getInputStream();
             out = socket.getOutputStream();
     	}catch (UnknownHostException ex) {
-            System.out.println("Error: Failed to connect to node "+ipAddress+":"+port);
+            System.out.println("Error: Failed to connect to node "+ipAddress + ":" + port);
             cResult.setStatus("Unroutable IP address");
             ex.printStackTrace();
             return (null);

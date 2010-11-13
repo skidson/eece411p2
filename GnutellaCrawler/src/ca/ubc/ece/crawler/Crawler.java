@@ -16,7 +16,7 @@ public class Crawler {
     
     public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
         System.out.println("Crawling " + ipAddress + ":" + port + "...");
-        String nodePeers = crawlPeers(ipAddress,port, timeout);
+        String nodePeers = crawlPeers(ipAddress, port, timeout);
         if(nodePeers == null){
             System.out.println("Failed to crawl the peer");
             return (null);
@@ -28,7 +28,7 @@ public class Crawler {
             return cResult;
         }        
         
-        if(full == true) listFiles(ipAddress,port, timeout);
+        if(full == true) listFiles(ipAddress, port, timeout);
         
         return cResult;
     }
@@ -36,11 +36,11 @@ public class Crawler {
     private String crawlPeers(String ipAddress, int port, int timeout){
         InputStream in = null;
         OutputStream out = null;
-        Socket socket = null;
+        Socket socket = new Socket();
         
         try {
-            socket = new Socket(ipAddress, port);
-            socket.setSoTimeout(timeout*1000);
+        	InetSocketAddress address = new InetSocketAddress(ipAddress, port);
+            socket.connect(address, timeout);
             System.out.println("Connected to node : " + ipAddress + " on port " + port);
             cResult.setStatus("Connected");
             in = socket.getInputStream();
@@ -138,11 +138,11 @@ public class Crawler {
    private void listFiles(String ipAddress, int port, int timeout){
         InputStream in;
         OutputStream out;
-        Socket socket;
+        Socket socket = new Socket();
         
         try {
-            socket = new Socket(ipAddress, port);
-            socket.setSoTimeout(timeout*1000);
+        	InetSocketAddress address = new InetSocketAddress(ipAddress, port);
+            socket.connect(address, timeout);
             System.out.println("Connected to node : " + ipAddress + " on port " + port);
 
             in = socket.getInputStream();

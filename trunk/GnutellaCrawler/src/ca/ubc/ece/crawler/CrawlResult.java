@@ -76,7 +76,7 @@ public class CrawlResult {
         	"Number of files : " + getNumOfFiles();
         		
         if(getNumOfFiles() > 0)
-            stats += "List of files : " + getFilesList().replace("\0","\n\r\t");
+        	stats += "List of files : " + getFilesList().replace("\0","\n\r\t");
         
         return stats;
     }

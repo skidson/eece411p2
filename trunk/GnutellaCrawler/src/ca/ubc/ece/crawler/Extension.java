@@ -8,16 +8,19 @@ public class Extension {
 	private String numFiles;
 	private String[] results;
 	private String[] tempResults;
+	private Vector<String> nodeExt;
 	private String[] finalResults;
 	public void initExt() {
 		sortedFiles = new Vector<String>(500, 100);
 		numFiles = new String();
 		results = new String[400];
-		finalResults = new String[500];
+		nodeExt = new Vector<String>(500, 100);
+		finalResults = new String[1000];
 		tempResults = new String[2];
 	}
 	
-	public void getFiles(String files) {
+	/*public void getFiles(String files) {
+		
 		numFiles = files;
 		
 	}
@@ -31,28 +34,34 @@ public class Extension {
 			System.out.println(results[i]);
 		}
 	}
-	public void calcExt()
+	*/
+	//Calculate the extensions for the most current files.
+	public void calcExt(String files)
 	{
+		String friend;
+		numFiles = files;
+		results = numFiles.split("\0");
+		
 		for (int i = 0; i < results.length; i++){
 		results[i] = results[i].substring((results[i].length())-5);
 		//System.out.println(results[i]);
 		}
 		for (int i = 0; i < results.length; i++){		
-		//	for (int j = 0; j < 3; j++)
-		//	{
-		//		tempResults[j].compareTo("0");
-		//	}
 		tempResults = results[i].split("\\.");
-		//if (!(tempResults[2].equals("0"))) {
-		//	finalResults[i] = tempResults[2];
-		//} else {
-			finalResults[i] = tempResults[1];
-		//}
-			System.out.println(tempResults[0]);
-			System.out.println(tempResults[1]);
+		System.out.println(tempResults[0]);
+		System.out.println(tempResults[1]);
+		System.out.println(nodeExt.size());
+		friend = tempResults[1];
+		System.out.println(friend);
+		nodeExt.addElement(tempResults[1]);
 		}
-		
 	}
+	
+	public void commonExt()
+	{		
+	System.out.println("hi, i'm here");	
+	}
+	
 	public String returnFiles() {
 		
 		return numFiles;

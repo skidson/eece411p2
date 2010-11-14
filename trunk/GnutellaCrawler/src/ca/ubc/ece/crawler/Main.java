@@ -52,15 +52,15 @@ public class Main {
         }
         
         /* Initiate crawling */
-
+        
         while(unvisited.size() != 0) {	
-        	
+        	CrawlResult info = null;	
         	if(checkTime())
         		calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN, extInfo, info);
-        	CrawlResult info = mainCrawler.crawl(unvisited.get(FRONT).address, unvisited.get(FRONT).portNum, timeout, full);
+        	info = mainCrawler.crawl(unvisited.get(FRONT).address, unvisited.get(FRONT).portNum, timeout, full);
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.remove(FRONT);
-		    print(info);
+		    print(info, extInfo);
 		    
 		    /* Get info from each leaf node but do not traverse its nodes yet */
 		    String leaves;
@@ -86,7 +86,7 @@ public class Main {
 		    	CrawlResult leafInfo = null;
 		    	
 		    	leafInfo = mainCrawler.crawl(leaf.address, leaf.portNum, timeout, full);
-		    	print(leafInfo);
+		    	print(leafInfo, extInfo);
 		    	
 		    	String leafPeers;
 		    	try {
@@ -137,7 +137,7 @@ public class Main {
     	return (false);
     }
     
-    private static void print(CrawlResult info) {
+    private static void print(CrawlResult info, Extension extInfo) {
     	// output info to text file
     	updateStatus(info.getStatus());
     	if (full == true) {
@@ -154,6 +154,9 @@ public class Main {
         if (info != null)
         	if(info.getStatus().equals("Connected"))
         		info.print();
+        if (info.getNumOfFiles() > 0) {
+    		extInfo.calcExt(info.getFilesList());
+        }
 
     }
     
@@ -189,10 +192,8 @@ public class Main {
     	double nodesPerSecond;
     	long finalTimeSeconds = (finaltime - startTime) * 60;
     	
-		extInfo.getFiles(info.getFilesList());
+		extInfo.commonExt();
 		//System.out.println(extInfo.returnFiles());
-		extInfo.split();
-		extInfo.calcExt();
     	num_nodes = visited.size() + unvisited.size();
     	nodesPerSecond = num_nodes / finalTimeSeconds;
     	FoundNotCrawled = unvisited.size();

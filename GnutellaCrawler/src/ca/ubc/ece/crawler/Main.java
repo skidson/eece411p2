@@ -12,7 +12,7 @@ public class Main {
 	
 	private int num_discovered = 0;
 	private int num_timeouts = 0;
-	
+	private static int TimedOutNodes, SuccessfulCrawl, UnroutableIP, ConnectionRefused, InternalError, UnabletoSend, DidNotReceive, FoundNotCrawled;
 	private static int timeout = 30;
 	private static int duration = -1;
 	private static long startTime = 0;
@@ -54,7 +54,8 @@ public class Main {
         
         /* Initiate crawling */
         while(unvisited.size() != 0) {
-        	if(checkTime(extInfo, info)) calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN);
+        	if(checkTime(extInfo, info)) 
+        		calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN);
 		    CrawlResult info = mainCrawler.crawl(unvisited.get(FRONT).address, unvisited.get(FRONT).portNum, timeout, full);
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.remove(FRONT);
@@ -72,7 +73,9 @@ public class Main {
 		    StringTokenizer tokens = new StringTokenizer(leaves, DELIM);
 		    
 		    while (tokens.hasMoreTokens()) {
-		    	if(checkTime(extInfo, info)) calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN);
+		    	if(checkTime(extInfo, info)) 
+		    		calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN);
+		    	
 			    Node leaf = new Node(tokens.nextToken(), Integer.parseInt(tokens.nextToken()));
 			    
 			    // ignore this node if we have already visited it, otherwise get its information
@@ -82,7 +85,6 @@ public class Main {
 		    	CrawlResult leafInfo = null;
 		    	
 		    	leafInfo = mainCrawler.crawl(leaf.address, leaf.portNum, timeout, full);
-		    	
 		    	print(leafInfo);
 		    	
 		    	String leafPeers;
@@ -136,6 +138,7 @@ public class Main {
     
     private static void print(CrawlResult info) {
     	// output info to text file
+    	updateStatus(info.getStatus());
     	if (full == true) {
 	    	PrintWriter out;
 	    	try {
@@ -147,8 +150,10 @@ public class Main {
 	        }
     	}
         // output info to console
-        if (info != null) 
-        	info.print();
+        if (info != null)
+        	if(info.getStatus().equals("Connected"))
+        		info.print();
+
     }
     
     private static boolean checkTime(Extension extInfo, CrawlResult info) {
@@ -164,6 +169,24 @@ public class Main {
     	}
     	return false;
     }
+    
+    private static void updateStatus(String status){
+    	if(status == "Connected"){
+    		SuccessfulCrawl++;
+    	}else if(status == "Unroutable IP"){
+    		UnroutableIP++;
+    	}else if(status == "Connection Refused"){
+    		ConnectionRefused++;
+    	}else if(status == "Internal Error"){
+    		InternalError++;
+    	}else if(status == "Connection Timeout"){
+    		TimedOutNodes++;
+    	}else if(status == "Connected but unable to send message"){
+    		UnabletoSend++;
+    	}else if(status == "Connected, message sent, failed to receive reply"){
+    		DidNotReceive++;
+    	}
+    }
     private static void calcStats(ArrayList<Node> visited, ArrayList<Node> unvisited, long finaltime){
     	int num_nodes;
     	double nodesPerSecond;
@@ -171,8 +194,17 @@ public class Main {
     	
     	num_nodes = visited.size() + unvisited.size();
     	nodesPerSecond = num_nodes / finalTimeSeconds;
+    	FoundNotCrawled = unvisited.size();
+
     	System.out.println("Number of Nodes Discovered : " + num_nodes);
     	System.out.println("Nodes Discovered per Second : " + nodesPerSecond);
+    	System.out.println( "Number of Successful Crawls : " + SuccessfulCrawl + "\r\n" +
+    						"Number of TimeOuts : " + TimedOutNodes + "\r\n" +
+    						"Number of Refused Connections : " + ConnectionRefused + "\r\n" + 
+    						"Number of Internal Errors : " + InternalError + "\r\n" +
+    						"Number of Unable to Send Request Errors : " + UnabletoSend + "\r\n" +
+    						"Number of Failed to Receieve Reply Errors : " + DidNotReceive + "\r\n" +
+    						"Number of Discovered Nodes but have not visited yet : " + FoundNotCrawled + "\r\n");
     	System.exit(0);
     	
     }

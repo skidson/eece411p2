@@ -15,11 +15,12 @@ public class Crawler {
     }
     
     public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
+    	cResult = new CrawlResult();
         System.out.println("Crawling " + ipAddress + ":" + port + "...");
         String nodePeers = crawlPeers(ipAddress, port, timeout);
         if(nodePeers == null){
             System.out.println("Failed to crawl the peer\n");
-            return (null);
+            return cResult;
         }
         if (nodePeers.length() > 0){
             parsePeers(nodePeers);            
@@ -67,7 +68,7 @@ public class Crawler {
         String response  = new String();
         StringBuffer request = new StringBuffer();
         request.append("GNUTELLA CONNECT/0.6\r\n" +
-                        "User-Agent: UBCECE (carwl)\r\n" +
+                        "User-Agent: UBCECE (crawl)\r\n" +
                         "Query-Routing: 0.2\r\n"+
                         "X-Ultrapeer: False\r\n"+
                         "Crawler: 0.1\r\n" +
@@ -112,15 +113,20 @@ public class Crawler {
             ex.printStackTrace();
             return null;
         }
-        
+
         return response;
     }
     
     private void parsePeers(String topoCrawlResult){
         int beginIndex;
-        int endIndex;
+        int endIndex;        
+        String agent = new String();
         String upeers = new String();
         String leaves = new String();
+        
+        beginIndex = topoCrawlResult.indexOf("User-Agent:");
+        endIndex = topoCrawlResult.indexOf("\n", beginIndex);
+        agent = topoCrawlResult.substring(beginIndex+11, endIndex);
         
         beginIndex = topoCrawlResult.indexOf("Peers:");
         endIndex = topoCrawlResult.indexOf("\n",beginIndex);
@@ -130,8 +136,9 @@ public class Crawler {
         beginIndex = topoCrawlResult.indexOf("Leaves:");
         endIndex = topoCrawlResult.indexOf("\n", beginIndex);
         leaves = topoCrawlResult.substring(beginIndex+7,endIndex);
-        leaves = leaves.trim();        
+        leaves = leaves.trim();     
         
+        cResult.setAgent(agent);
         cResult.setUltrapeers(upeers);
         cResult.setLeaves(leaves);
     }

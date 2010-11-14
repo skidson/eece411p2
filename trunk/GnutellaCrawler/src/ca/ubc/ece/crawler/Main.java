@@ -212,7 +212,7 @@ public class Main {
     	int num_nodes;
     	double nodesPerSecond;
     	long finalTimeSeconds = (finaltime - startTime) * 60;
-		extInfo.commonExt();
+		
 
     	num_nodes = visited.size() + unvisited.size();
     	nodesPerSecond = (double)num_nodes / (double)finalTimeSeconds;
@@ -231,11 +231,13 @@ public class Main {
     	if(full){
     		avgFileSize = (double)totalFileSize / (double)totalNumOfFiles;
     		avgNumOfFiles = (double)totalNumOfFiles / (double)SuccessfulCrawl;
+    		String extensionTypes = extInfo.commonExt(); 
     		System.out.println( "Maximum Files on a node was : " + maxNumOfFiles + "\r\n" + 
     							"Average Files on all nodes was " + avgNumOfFiles + "\r\n" + 
     							"Smallest File found : " + smallestFile + "\r\n" +
     							"Largest File found : " + largestFile + "\r\n" +
-    							"Average File size was : " + avgFileSize);
+    							"Average File size was : " + avgFileSize + "\r\n" +
+    							extensionTypes);
     	}
     	System.exit(0);
     	

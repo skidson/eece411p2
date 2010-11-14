@@ -10,7 +10,9 @@ public class CrawlResult {
     private String filesList;
     private String Agent;
     private String status;
-    
+    private int minimumFileSize;
+    private int maximumFileSize;
+    private long totalFileSize; //File Size in bytes
     /** Creates a new instance of CrawlResults */
     public CrawlResult() {
         ultrapeers = new String();
@@ -19,12 +21,29 @@ public class CrawlResult {
         filesList = new String(); 
         Agent = new String();
     }
-    
+    public int getMinimumFileSize(){
+    	return minimumFileSize;
+    }
+    public void setMinimumFileSize(int fileSize){
+    	minimumFileSize = fileSize;
+    }
+    public long getTotalFileSize(){
+    	return totalFileSize;
+    }
+    public int getMaximumFileSize(){
+    	return maximumFileSize;
+    }
+    public void setMaximumFileSize(int fileSize){
+    	maximumFileSize = fileSize;
+    }
     public void setUltrapeers(String upeers) {
         ultrapeers = upeers;
     }
     public void setStatus(String status){
     	this.status = status;
+    }
+    public void addtotalFileSize(int fileSize){
+    	totalFileSize += fileSize;
     }
     public String getStatus(){
     	return status;

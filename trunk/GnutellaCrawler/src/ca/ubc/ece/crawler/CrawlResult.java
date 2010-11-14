@@ -20,6 +20,8 @@ public class CrawlResult {
         numOfFiles = 0;
         filesList = new String(); 
         Agent = new String();
+        minimumFileSize = 999999;
+        maximumFileSize = 0;
     }
     public int getMinimumFileSize(){
     	return minimumFileSize;

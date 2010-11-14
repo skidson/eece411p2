@@ -16,7 +16,6 @@ public class Main {
 	private static int timeout = 30;
 	private static int duration = -1;
 	private static long startTime = 0;
-	
 	private static boolean full = false;
 	
     public static void main(String[] args) {
@@ -53,10 +52,12 @@ public class Main {
         }
         
         /* Initiate crawling */
-        while(unvisited.size() != 0) {
-        	if(checkTime(extInfo, info)) 
-        		calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN);
-		    CrawlResult info = mainCrawler.crawl(unvisited.get(FRONT).address, unvisited.get(FRONT).portNum, timeout, full);
+
+        while(unvisited.size() != 0) {	
+        	
+        	if(checkTime())
+        		calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN, extInfo, info);
+        	CrawlResult info = mainCrawler.crawl(unvisited.get(FRONT).address, unvisited.get(FRONT).portNum, timeout, full);
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.remove(FRONT);
 		    print(info);
@@ -73,8 +74,8 @@ public class Main {
 		    StringTokenizer tokens = new StringTokenizer(leaves, DELIM);
 		    
 		    while (tokens.hasMoreTokens()) {
-		    	if(checkTime(extInfo, info)) 
-		    		calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN);
+		    	if(checkTime()) 
+		    		calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN, extInfo, info);
 		    	
 			    Node leaf = new Node(tokens.nextToken(), Integer.parseInt(tokens.nextToken()));
 			    
@@ -156,14 +157,10 @@ public class Main {
 
     }
     
-    private static boolean checkTime(Extension extInfo, CrawlResult info) {
+    private static boolean checkTime() {
     	System.out.println("Crawler has been active for " + (float)((int)((Calendar.getInstance().getTimeInMillis()/(double)MILLI_TO_MIN - startTime)*100))/100 + " minute(s)");
     	if (duration != 0 && (Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN - startTime) >= duration) {
     		System.out.println("Execution duration reached, terminating...");
-			extInfo.getFiles(info.getFilesList());
-    		//System.out.println(extInfo.returnFiles());
-    		extInfo.split();
-    		extInfo.calcExt();
     		System.exit(0);
     		return true;
     	}
@@ -187,11 +184,15 @@ public class Main {
     		DidNotReceive++;
     	}
     }
-    private static void calcStats(ArrayList<Node> visited, ArrayList<Node> unvisited, long finaltime){
+    private static void calcStats(ArrayList<Node> visited, ArrayList<Node> unvisited, long finaltime, Extension extInfo, CrawlResult info){
     	int num_nodes;
     	double nodesPerSecond;
     	long finalTimeSeconds = (finaltime - startTime) * 60;
     	
+		extInfo.getFiles(info.getFilesList());
+		//System.out.println(extInfo.returnFiles());
+		extInfo.split();
+		extInfo.calcExt();
     	num_nodes = visited.size() + unvisited.size();
     	nodesPerSecond = num_nodes / finalTimeSeconds;
     	FoundNotCrawled = unvisited.size();

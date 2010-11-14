@@ -12,8 +12,8 @@ public class Extension {
 	public void initExt() {
 		sortedFiles = new Vector<String>(500, 100);
 		numFiles = new String();
-		results = new String[500];
-		finalResults = new String[1000];
+		results = new String[400];
+		finalResults = new String[500];
 		tempResults = new String[2];
 	}
 	
@@ -38,15 +38,15 @@ public class Extension {
 		//System.out.println(results[i]);
 		}
 		for (int i = 0; i < results.length; i++){		
-			//for (int j = 0; j < 3; j++)
-			//{
-			//	tempResults[j].compareTo("0");
-			//}
-		tempResults = results[i].split(".");
+		//	for (int j = 0; j < 3; j++)
+		//	{
+		//		tempResults[j].compareTo("0");
+		//	}
+		tempResults = results[i].split("\\.");
 		//if (!(tempResults[2].equals("0"))) {
 		//	finalResults[i] = tempResults[2];
 		//} else {
-			//finalResults[i] = tempResults[1];
+			finalResults[i] = tempResults[1];
 		//}
 			System.out.println(tempResults[0]);
 			System.out.println(tempResults[1]);

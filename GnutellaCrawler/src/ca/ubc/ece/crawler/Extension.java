@@ -43,6 +43,7 @@ public class Extension {
 	{		
 	Vector<String> extTypes = new Vector<String>(10,1);
 	String Types;
+	try{
 	extTypes.add(nodeExt.elementAt(0));
 	
 	for (int i = 1; i < nodeExt.size(); i++)
@@ -57,7 +58,12 @@ public class Extension {
 		Types = Types + extTypes.elementAt(i) + ", ";
 	}
 	return Types;
+	} catch(ArrayIndexOutOfBoundsException e) {
+		Types = "Most Frequent File Extensions: none";
+		return Types;
 	}
+	}
+	
 	
 	public String returnFiles() {
 		

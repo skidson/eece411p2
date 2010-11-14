@@ -86,8 +86,8 @@ public class CrawlResult {
         System.out.println("UltraPeers : " + getUltrapeers());
         System.out.println("Leaves : " + getLeaves());
         System.out.println("Number of files: " + getNumOfFiles());
-        if(getNumOfFiles() > 0)
-            System.out.println("list of files : " + getFilesList().replace("\0","\n\r"));
+        if(getNumOfFiles() > 0);
+            //System.out.println("list of files : " + getFilesList().replace("\0","\n\r"));
     }
     
     public String toString() {
@@ -96,8 +96,8 @@ public class CrawlResult {
         	"Leaves : " + getLeaves() + "\n\r" +
         	"Number of files : " + getNumOfFiles();
         		
-        if(getNumOfFiles() > 0)
-        	stats += "List of files : " + getFilesList().replace("\0","\n\r\t");
+        if(getNumOfFiles() > 0);
+        	//stats += "List of files : " + getFilesList().replace("\0","\n\r\t");
         
         return stats;
     }

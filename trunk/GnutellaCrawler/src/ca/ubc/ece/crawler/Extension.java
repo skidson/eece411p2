@@ -14,7 +14,7 @@ public class Extension {
 		results = new String[400];
 		nodeExt = new Vector<String>(500, 100);
 		finalResults = new String[1000];
-		
+		Vector<Integer> aslkd = new Vector<Integer>(30,1);
 	}
 	
 

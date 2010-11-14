@@ -74,6 +74,10 @@ public class Main {
 		    String leaves;
 		    try {
 		    	leaves = info.getLeaves();
+		    	//if leaf is shielded skip node, otherwise blows up tokenizer
+	    		if(leaves.equalsIgnoreCase("LA/0.6 503 Shielded leaf node")){
+	    			continue;
+	    		}
 		    } catch (NullPointerException e) {
 		    	// if unable to get info we likely timed out, ignore this node
 		    	continue;
@@ -100,6 +104,9 @@ public class Main {
 		    	String leafPeers;
 		    	try {
 		    		leafPeers = leafInfo.getUltrapeers();
+		    		if(leafPeers.equalsIgnoreCase("LLA/0.6 503 Shielded leaf node")){
+		    			continue;
+		    		}
 		    	} catch (NullPointerException e) {
 		    		// if unable to get info we likely timed out, ignore this node
 		    		continue;
@@ -162,14 +169,14 @@ public class Main {
         if (info != null)
         	if(info.getStatus().equals("Connected"))
         		info.print();
-        if (info.getNumOfFiles() > 0) {
-    		extInfo.calcExt(info.getFilesList());
+        	if (info.getNumOfFiles() > 0) {
+        		extInfo.calcExt(info.getFilesList());
         }
 
     }
     private static void updateData(CrawlResult info){
     	updateStatus(info.getStatus());
-    	if(full){
+    	if( full ){
 	    	if(info.getNumOfFiles() > maxNumOfFiles){
 	    		maxNumOfFiles = info.getNumOfFiles();
 	    	}

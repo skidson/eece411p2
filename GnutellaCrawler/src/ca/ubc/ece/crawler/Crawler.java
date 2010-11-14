@@ -264,6 +264,7 @@ public class Crawler {
     private void processQueryHit(byte[] qhit){
         int endIndex;
         int numOfFiles = qhit[0];
+        int fileSize = 0;
         String filesList = new String();
         String msg = new String();
 
@@ -272,8 +273,15 @@ public class Crawler {
 
         byte[] fname = new byte[512];
         int num = 0;
-        while (qhit.length > 0 && num < numOfFiles){
-
+        while (qhit.length > 0 && num < numOfFiles){        	
+        	fileSize=ByteOrder.leb2int(subBuffer(qhit, 4, 7),0,3);
+        	if(fileSize < cResult.getMinimumFileSize()){
+        		cResult.setMinimumFileSize(fileSize);
+        	}else if(fileSize > cResult.getMaximumFileSize()){
+        		cResult.setMaximumFileSize(fileSize);
+        	}
+        	cResult.addtotalFileSize(fileSize);
+        	
             qhit=subBuffer(qhit, 8, qhit.length);         
             endIndex=bufferIndexOf(qhit, '\0');
             fname=subBuffer(qhit, 0, endIndex);

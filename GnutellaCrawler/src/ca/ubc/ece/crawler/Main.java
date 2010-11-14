@@ -12,6 +12,13 @@ public class Main {
 	
 	private int num_discovered = 0;
 	private int num_timeouts = 0;
+	private static double avgNumOfFiles = 0;
+	private static long totalNumOfFiles = 0;
+	private static int smallestFile = 999999;
+	private static int largestFile = 0;
+	private static double avgFileSize = 0;
+	private static long totalFileSize = 0;
+	private static int maxNumOfFiles = 0;
 	private static int TimedOutNodes, SuccessfulCrawl, UnroutableIP, ConnectionRefused, InternalError, UnabletoSend, DidNotReceive, FoundNotCrawled;
 	private static int timeout = 30;
 	private static int duration = -1;
@@ -52,15 +59,16 @@ public class Main {
         }
         
         /* Initiate crawling */
-        
+
         while(unvisited.size() != 0) {	
-        	CrawlResult info = null;	
+        	CrawlResult info = null;
         	if(checkTime())
         		calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN, extInfo, info);
         	info = mainCrawler.crawl(unvisited.get(FRONT).address, unvisited.get(FRONT).portNum, timeout, full);
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.remove(FRONT);
 		    print(info, extInfo);
+		    updateData(info);
 		    
 		    /* Get info from each leaf node but do not traverse its nodes yet */
 		    String leaves;
@@ -87,6 +95,7 @@ public class Main {
 		    	
 		    	leafInfo = mainCrawler.crawl(leaf.address, leaf.portNum, timeout, full);
 		    	print(leafInfo, extInfo);
+		    	updateData(leafInfo);
 		    	
 		    	String leafPeers;
 		    	try {
@@ -139,7 +148,6 @@ public class Main {
     
     private static void print(CrawlResult info, Extension extInfo) {
     	// output info to text file
-    	updateStatus(info.getStatus());
     	if (full == true) {
 	    	PrintWriter out;
 	    	try {
@@ -159,12 +167,25 @@ public class Main {
         }
 
     }
-    
+    private static void updateData(CrawlResult info){
+    	updateStatus(info.getStatus());
+    	if(full){
+	    	if(info.getNumOfFiles() > maxNumOfFiles){
+	    		maxNumOfFiles = info.getNumOfFiles();
+	    	}
+	    	totalNumOfFiles += info.getNumOfFiles(); 
+	    	if(info.getMaximumFileSize() > largestFile){
+	    		largestFile = info.getMaximumFileSize();
+	    	}else if (info.getMinimumFileSize() < smallestFile){
+	    		smallestFile = info.getMinimumFileSize();
+	    	}
+	    	totalFileSize += info.getTotalFileSize();
+    	}
+    }
     private static boolean checkTime() {
     	System.out.println("Crawler has been active for " + (float)((int)((Calendar.getInstance().getTimeInMillis()/(double)MILLI_TO_MIN - startTime)*100))/100 + " minute(s)");
     	if (duration != 0 && (Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN - startTime) >= duration) {
     		System.out.println("Execution duration reached, terminating...");
-    		System.exit(0);
     		return true;
     	}
     	return false;
@@ -191,13 +212,12 @@ public class Main {
     	int num_nodes;
     	double nodesPerSecond;
     	long finalTimeSeconds = (finaltime - startTime) * 60;
-    	
 		extInfo.commonExt();
-		//System.out.println(extInfo.returnFiles());
-    	num_nodes = visited.size() + unvisited.size();
-    	nodesPerSecond = num_nodes / finalTimeSeconds;
-    	FoundNotCrawled = unvisited.size();
 
+    	num_nodes = visited.size() + unvisited.size();
+    	nodesPerSecond = (double)num_nodes / (double)finalTimeSeconds;
+    	FoundNotCrawled = unvisited.size();
+    	avgNumOfFiles = totalNumOfFiles / SuccessfulCrawl;
     	System.out.println("Number of Nodes Discovered : " + num_nodes);
     	System.out.println("Nodes Discovered per Second : " + nodesPerSecond);
     	System.out.println( "Number of Successful Crawls : " + SuccessfulCrawl + "\r\n" +
@@ -207,6 +227,16 @@ public class Main {
     						"Number of Unable to Send Request Errors : " + UnabletoSend + "\r\n" +
     						"Number of Failed to Receieve Reply Errors : " + DidNotReceive + "\r\n" +
     						"Number of Discovered Nodes but have not visited yet : " + FoundNotCrawled + "\r\n");
+    	
+    	if(full){
+    		avgFileSize = (double)totalFileSize / (double)totalNumOfFiles;
+    		avgNumOfFiles = (double)totalNumOfFiles / (double)SuccessfulCrawl;
+    		System.out.println( "Maximum Files on a node was : " + maxNumOfFiles + "\r\n" + 
+    							"Average Files on all nodes was " + avgNumOfFiles + "\r\n" + 
+    							"Smallest File found : " + smallestFile + "\r\n" +
+    							"Largest File found : " + largestFile + "\r\n" +
+    							"Average File size was : " + avgFileSize);
+    	}
     	System.exit(0);
     	
     }

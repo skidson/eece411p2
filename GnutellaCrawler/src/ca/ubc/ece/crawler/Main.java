@@ -4,22 +4,20 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-	private static final String OUTPUT_FILE = "results.txt";
 	private static final String DELIM = ",:";
 	private static final int FRONT = 0;
 	private static final int MILLI_TO_MIN = 60000;
 	private static final int MS_TO_SEC = 1000;
 	
-	private int num_discovered = 0;
-	private int num_timeouts = 0;
-	private static double avgNumOfFiles = 0;
+	private static Vector<Extension> extensions;
+	
 	private static long totalNumOfFiles = 0;
-	private static int smallestFile = 999999;
+	private static int smallestFile = -1;
 	private static int largestFile = 0;
-	private static double avgFileSize = 0;
 	private static long totalFileSize = 0;
 	private static int maxNumOfFiles = 0;
-	private static int TimedOutNodes, SuccessfulCrawl, UnroutableIP, ConnectionRefused, InternalError, UnabletoSend, DidNotReceive, FoundNotCrawled;
+	private static int num_timeout, num_success, num_unroutable, num_refused, num_internal, num_mute, num_noreply;
+	
 	private static int timeout = 30;
 	private static int duration = -1;
 	private static long startTime = 0;
@@ -27,10 +25,9 @@ public class Main {
 	
     public static void main(String[] args) {
         Crawler mainCrawler = new Crawler();
-		Extension extInfo = new Extension();
-        startTime = Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN;
         ArrayList<Node> visited = new ArrayList<Node>();
         ArrayList<Node> unvisited = new ArrayList<Node>();
+        extensions = new Vector<Extension>();
         
         /* Parse command-line bootstrap parameters */
         if (args.length < 2){
@@ -59,65 +56,54 @@ public class Main {
         }
         
         /* Initiate crawling */
-
+        startTime = System.currentTimeMillis();
         while(unvisited.size() != 0) {	
         	CrawlResult info = null;
+        	
         	if(checkTime())
-        		calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN, extInfo, info);
-        	info = mainCrawler.crawl(unvisited.get(FRONT).address, unvisited.get(FRONT).portNum, timeout, full);
+        		print(visited, unvisited);
+        	
+        	info = mainCrawler.crawl(unvisited.get(FRONT), timeout, full);
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.remove(FRONT);
-		    print(info, extInfo);
-		    updateData(info);
+		    
+		    update(info);
 		    
 		    /* Get info from each leaf node but do not traverse its nodes yet */
-		    String leaves;
-		    try {
-		    	leaves = info.getLeaves();
-		    	//if leaf is shielded skip node, otherwise blows up tokenizer
-	    		if(leaves.equalsIgnoreCase("LA/0.6 503 Shielded leaf node")){
-	    			continue;
-	    		}
-		    } catch (NullPointerException e) {
-		    	// if unable to get info we likely timed out, ignore this node
-		    	continue;
-		    }
+		    String leaves = info.getLeaves();
+    		if(leaves == null || checkShielded(leaves))
+    			continue;
 		    
 		    StringTokenizer tokens = new StringTokenizer(leaves, DELIM);
 		    
 		    while (tokens.hasMoreTokens()) {
 		    	if(checkTime()) 
-		    		calcStats(visited, unvisited, Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN, extInfo, info);
+		    		print(visited, unvisited);
 		    	
 			    Node leaf = new Node(tokens.nextToken(), Integer.parseInt(tokens.nextToken()));
 			    
 			    // ignore this node if we have already visited it, otherwise get its information
-			    if (contained(visited, leaf)) // leaf nodes will never be contained in unvisited (unless leaves have leaves...)
+			    if (leaf.containedIn(visited)) // leaf nodes will never be contained in unvisited (unless leaves have leaves...)
 			    	continue;
 			    	
 		    	CrawlResult leafInfo = null;
 		    	
-		    	leafInfo = mainCrawler.crawl(leaf.address, leaf.portNum, timeout, full);
-		    	print(leafInfo, extInfo);
-		    	updateData(leafInfo);
+		    	leafInfo = mainCrawler.crawl(leaf, timeout, full);
+		    	update(info);
 		    	
-		    	String leafPeers;
-		    	try {
-		    		leafPeers = leafInfo.getUltrapeers();
-		    		if(leafPeers.equalsIgnoreCase("LLA/0.6 503 Shielded leaf node")){
-		    			continue;
-		    		}
-		    	} catch (NullPointerException e) {
-		    		// if unable to get info we likely timed out, ignore this node
-		    		continue;
-		    	}
+		    	String leafPeers = leafInfo.getUltrapeers();
+	    		if(leafPeers == null || checkShielded(leafPeers)) {
+	    			visited.add(leaf);
+	    			continue;
+	    		}
+
 		    	
 		    	StringTokenizer leafTokens = new StringTokenizer(leafPeers, DELIM);
 		    	
 		    	/* Add unknown ultrapeers of this leaf to our list */
 		    	while (leafTokens.hasMoreTokens()) {
 		    		Node leafNode = new Node(leafTokens.nextToken(), Integer.parseInt(leafTokens.nextToken()));
-		    		if (!contained(unvisited, leafNode) && !contained(visited, leafNode))
+		    		if (!leafNode.containedIn(unvisited) && !leafNode.containedIn(visited))
 		    			unvisited.add(leafNode);
 		    	}
 		    	// we are done with this leaf
@@ -136,8 +122,13 @@ public class Main {
 		    }
 		    
 		    // move this ultrapeer to visited
-		    visited.add(unvisited.get(FRONT));
-		    unvisited.remove(FRONT);
+		    try {
+			    visited.add(unvisited.get(FRONT));
+			    unvisited.remove(FRONT);
+		    } catch (IndexOutOfBoundsException e) {
+		    	// this current node is null, abort
+		    	System.exit(1);
+		    }
 		    
 		    // repeat for next ultrapeer in list
         }
@@ -147,50 +138,58 @@ public class Main {
     private static boolean contained(ArrayList<Node> list, Node node) {
     	// returns true if the node is in the list
     	for (int i = 0; i < list.size(); i++) {
-    		if (list.get(i).address == node.address && list.get(i).portNum == node.portNum)
+    		if (list.get(i).equals(node))
     			return (true);
     	}
     	return (false);
     }
     
-    private static void print(CrawlResult info, Extension extInfo) {
-    	// output info to text file
-    	if (full == true) {
-	    	PrintWriter out;
-	    	try {
-	        	out = new PrintWriter(new BufferedWriter(new FileWriter(OUTPUT_FILE, true)));
-	        	if (info != null) 
-	            	out.write(info.toString()); 
-	        } catch (IOException e) {
-	        	System.err.println("Could not write to 'results.txt'");
-	        }
-    	}
-        // output info to console
-        if (info != null)
-        	if(info.getStatus().equals("Connected"))
-        		info.print();
-        	if (info.getNumOfFiles() > 0) {
-        		extInfo.calcExt(info.getFilesList());
-        }
-
-    }
-    private static void updateData(CrawlResult info){
-    	updateStatus(info.getStatus());
-    	if( full ){
-	    	if(info.getNumOfFiles() > maxNumOfFiles){
-	    		maxNumOfFiles = info.getNumOfFiles();
+    private static void update(CrawlResult info){
+    	try {
+	    	switch(info.getStatus()) {
+	    	case CONNECTED:
+	    		num_success++;
+	    		break;
+	    	case UNROUTABLE:
+	    		num_unroutable++;
+	    		break;
+	    	case REFUSED:
+	    		num_refused++;
+	    		break;
+	    	case INTERNAL:
+	    		num_internal++;
+	    		break;
+	    	case TIMEOUT:
+	    		num_timeout++;
+	    		break;
+	    	case MUTE:
+	    		num_mute++;
+	    		break;
+	    	case NOREPLY:
+	    		num_noreply++;
+	    		break;
 	    	}
-	    	totalNumOfFiles += info.getNumOfFiles(); 
-	    	if(info.getMaximumFileSize() > largestFile){
-	    		largestFile = info.getMaximumFileSize();
-	    	}else if (info.getMinimumFileSize() < smallestFile){
-	    		smallestFile = info.getMinimumFileSize();
+	    	
+	    	if (full) {
+	    		parseExtensions(info.getFilesList());
+		    	if(info.getNumOfFiles() > maxNumOfFiles)
+		    		maxNumOfFiles = info.getNumOfFiles();
+	
+		    	totalNumOfFiles += info.getNumOfFiles(); 
+		    	if (info.getMaximumFileSize() > largestFile)
+		    		largestFile = info.getMaximumFileSize();
+		    	else if (info.getMinimumFileSize() < smallestFile || smallestFile == -1)
+		    		smallestFile = info.getMinimumFileSize();
+		    	
+		    	totalFileSize += info.getTotalFileSize();
 	    	}
-	    	totalFileSize += info.getTotalFileSize();
+    	} catch (NullPointerException e){
+    		// could not obtain node information, nothing to update
     	}
     }
+    
     private static boolean checkTime() {
-    	System.out.println("Crawler has been active for " + (float)((int)((Calendar.getInstance().getTimeInMillis()/(double)MILLI_TO_MIN - startTime)*100))/100 + " minute(s)");
+    	System.out.println("Crawler has been active for " + (float)(System.currentTimeMillis()- startTime)/(double)MILLI_TO_MIN + " minute(s)");
     	if (duration != 0 && (Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN - startTime) >= duration) {
     		System.out.println("Execution duration reached, terminating...");
     		return true;
@@ -198,55 +197,71 @@ public class Main {
     	return false;
     }
     
-    private static void updateStatus(String status){
-    	if(status == "Connected"){
-    		SuccessfulCrawl++;
-    	}else if(status == "Unroutable IP"){
-    		UnroutableIP++;
-    	}else if(status == "Connection Refused"){
-    		ConnectionRefused++;
-    	}else if(status == "Internal Error"){
-    		InternalError++;
-    	}else if(status == "Connection Timeout"){
-    		TimedOutNodes++;
-    	}else if(status == "Connected but unable to send message"){
-    		UnabletoSend++;
-    	}else if(status == "Connected, message sent, failed to receive reply"){
-    		DidNotReceive++;
-    	}
+    private static boolean checkShielded(String info) {
+    	if (info.equals("LLA/0.6 503 Shielded leaf node") || info.equals("LA/0.6 503 Shielded leaf node"))
+    		return true;
+    	return false;
     }
-    private static void calcStats(ArrayList<Node> visited, ArrayList<Node> unvisited, long finaltime, Extension extInfo, CrawlResult info){
-    	int num_nodes;
-    	double nodesPerSecond;
-    	long finalTimeSeconds = (finaltime - startTime) * 60;
-		
-
-    	num_nodes = visited.size() + unvisited.size();
-    	nodesPerSecond = (double)num_nodes / (double)finalTimeSeconds;
-    	FoundNotCrawled = unvisited.size();
-    	avgNumOfFiles = totalNumOfFiles / SuccessfulCrawl;
-    	System.out.println("Number of Nodes Discovered : " + num_nodes);
-    	System.out.println("Nodes Discovered per Second : " + nodesPerSecond);
-    	System.out.println( "Number of Successful Crawls : " + SuccessfulCrawl + "\r\n" +
-    						"Number of TimeOuts : " + TimedOutNodes + "\r\n" +
-    						"Number of Refused Connections : " + ConnectionRefused + "\r\n" + 
-    						"Number of Internal Errors : " + InternalError + "\r\n" +
-    						"Number of Unable to Send Request Errors : " + UnabletoSend + "\r\n" +
-    						"Number of Failed to Receieve Reply Errors : " + DidNotReceive + "\r\n" +
-    						"Number of Discovered Nodes but have not visited yet : " + FoundNotCrawled + "\r\n");
+    
+    private static void print(ArrayList<Node> visited, ArrayList<Node> unvisited){
+    	System.out.println("Number of Nodes Discovered : " + visited.size() + unvisited.size());
+    	System.out.println("Nodes Discovered per Second : " + (double)(visited.size() + unvisited.size()) /((float)(System.currentTimeMillis() - startTime)/(double) MILLI_TO_MIN * 60.0));
+    	System.out.println( "Number of Successful Crawls : " + num_success + "\r\n" +
+    						"Number of Timeouts : " + num_timeout + "\r\n" +
+    						"Number of Refused Connections : " + num_refused + "\r\n" + 
+    						"Number of Internal Errors : " + num_internal + "\r\n" +
+    						"Number of Unable to Send Request Errors : " + num_mute + "\r\n" +
+    						"Number of Failed to Receieve Reply Errors : " + num_noreply + "\r\n" +
+    						"Number of Discovered Nodes but have not visited yet : " + unvisited.size() + "\r\n");
     	
-    	if(full){
-    		avgFileSize = (double)totalFileSize / (double)totalNumOfFiles;
-    		avgNumOfFiles = (double)totalNumOfFiles / (double)SuccessfulCrawl;
-    		String extensionTypes = extInfo.commonExt(); 
+    	if (full) {
     		System.out.println( "Maximum Files on a node was : " + maxNumOfFiles + "\r\n" + 
-    							"Average Files on all nodes was " + avgNumOfFiles + "\r\n" + 
+    							"Average Files on all nodes was " + ((double)totalNumOfFiles/(double)num_success) + "\r\n" + 
     							"Smallest File found : " + smallestFile + "\r\n" +
     							"Largest File found : " + largestFile + "\r\n" +
-    							"Average File size was : " + avgFileSize + "\r\n" +
-    							extensionTypes);
+    							"Average File size was : " + totalFileSize/totalNumOfFiles + "\r\n");
+    		extensions = sort(extensions);
+    		System.out.println("File Extension \t\tNumber of Occurences");
+    		for (int i = 0; i < 10; i++) {
+    			try {
+    				System.out.println("." + extensions.get(i).getName() + "\t\t" + extensions.get(i).getCount());
+    			} catch (NullPointerException e) {
+    				break;
+    			}
+    			
+    		}
     	}
     	System.exit(0);
     	
+    }
+    
+    private static Vector<Extension> sort(Vector<Extension> list) {
+    	// sorts the list of file extensions by decreasing popularity
+    	int index = 1;
+    	while (list.get(index) != null) {
+    		if (list.get(index-1) == null) {
+    			index++;
+    		} else if (list.get(index).getCount() > list.get(index-1).getCount()){
+    			list.insertElementAt(list.get(index), index - 1);
+    			list.removeElementAt(index + 1);
+    			index--;
+    		} else {
+    			index++;
+    		}
+    	}
+    	return list;
+    }
+    
+    private static void parseExtensions(String filelist) {
+    	String[] files = filelist.split("\0");
+    	for (int i = 0; i < files.length; i++) {
+    		Extension ext = new Extension(Extension.findExtension(files[i]));
+    		for (int j = 0; j < extensions.size(); i++) {
+    			if (extensions.get(i).equals(ext)) {
+    				extensions.get(i).increment();
+    				return;
+    			}
+    		}
+    	}
     }
 }

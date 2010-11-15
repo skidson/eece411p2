@@ -281,7 +281,8 @@ public class Crawler {
         	System.out.println(fileSize);
         	if(fileSize < cResult.getMinimumFileSize() || cResult.getMinimumFileSize() == -1){
         		cResult.setMinimumFileSize(fileSize);
-        	}else if(fileSize > cResult.getMaximumFileSize()){
+        	}
+        	if(fileSize > cResult.getMaximumFileSize()){
         		cResult.setMaximumFileSize(fileSize);
         	}
         	cResult.addtotalFileSize(fileSize);

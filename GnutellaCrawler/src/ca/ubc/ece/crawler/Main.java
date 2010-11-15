@@ -181,7 +181,8 @@ public class Main {
 		    	totalNumOfFiles += info.getNumOfFiles(); 
 		    	if (info.getMaximumFileSize() > largestFile)
 		    		largestFile = info.getMaximumFileSize();
-		    	else if (info.getMinimumFileSize() < smallestFile || smallestFile == -1 && info.getMinimumFileSize() != -1)
+		    	
+		    	if ((info.getMinimumFileSize() != -1) && (info.getMinimumFileSize() < smallestFile || smallestFile == -1) )
 		    		smallestFile = info.getMinimumFileSize();
 		    	
 		    	totalFileSize += info.getTotalFileSize();
@@ -209,8 +210,11 @@ public class Main {
     }
     
     private static void print(ArrayList<Node> visited, ArrayList<Node> unvisited){
+    	float formattedTime = Round((float)(System.currentTimeMillis() - startTime)/(float)MILLI_TO_MIN, 2);
+    	formattedTime *= 60;
+    	
     	System.out.println("Number of Nodes Discovered : " + (visited.size() + unvisited.size()));
-    	System.out.println("Nodes Discovered per Second : " + ((float)(visited.size() + unvisited.size()) /((float)(System.currentTimeMillis() - startTime)/(float) MILLI_TO_MIN) * 60));
+    	System.out.println("Nodes Discovered per Second : " + Round(((visited.size() + unvisited.size())/formattedTime), 2));
     	System.out.println( "Number of Successful Crawls : " + num_success + "\r\n" +
     						"Number of Timeouts : " + num_timeout + "\r\n" +
     						"Number of Refused Connections : " + num_refused + "\r\n" + 

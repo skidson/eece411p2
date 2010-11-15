@@ -1,5 +1,7 @@
 package ca.ubc.ece.crawler;
 
+import java.util.Vector;
+
 // Represents an extension type specified in name
 public class Extension {
 	private String name;
@@ -35,5 +37,14 @@ public class Extension {
 	
 	public String toString() {
 		return(name);
+	}
+	
+	public boolean containedIn(Vector<Extension> list) {
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).equals(this))
+				list.get(i).increment();
+				return true;
+		}
+		return false;
 	}
 }

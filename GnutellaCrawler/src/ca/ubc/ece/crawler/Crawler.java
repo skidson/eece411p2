@@ -29,8 +29,12 @@ public class Crawler {
             return cResult;
         }        
         
-        if(full == true) 
+        if(full == true) {
         	listFiles(node.getAddress(), node.getPortNum(), timeout);
+        	if(cResult.getNumOfFiles() == 0){
+        		cResult.setMinimumFileSize(99999999);
+        	}
+        }
         
         return cResult;
     }
@@ -273,8 +277,9 @@ public class Crawler {
         byte[] fname = new byte[512];
         int num = 0;
         while (qhit.length > 0 && num < numOfFiles){        	
-        	fileSize=ByteOrder.leb2int(subBuffer(qhit, 4, 7),0,3);
-        	if(fileSize < cResult.getMinimumFileSize()){
+        	fileSize=ByteOrder.leb2int(subBuffer(qhit, 4, 8),0,4);
+        	System.out.println(fileSize);
+        	if(fileSize < cResult.getMinimumFileSize() || cResult.getMinimumFileSize() == -1){
         		cResult.setMinimumFileSize(fileSize);
         	}else if(fileSize > cResult.getMaximumFileSize()){
         		cResult.setMaximumFileSize(fileSize);

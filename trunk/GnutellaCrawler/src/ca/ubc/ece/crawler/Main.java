@@ -1,6 +1,7 @@
 package ca.ubc.ece.crawler;
 
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class Main {
@@ -65,8 +66,9 @@ public class Main {
         	
         	info = mainCrawler.crawl(unvisited.get(FRONT), timeout, full);
 		    visited.add(unvisited.get(FRONT));
+		    System.out.println(visited.size());
 		    unvisited.remove(FRONT);
-		    
+		    info.print();
 		    update(info);
 		    
 		    /* Get info from each leaf node but do not traverse its nodes yet */
@@ -89,7 +91,8 @@ public class Main {
 		    	CrawlResult leafInfo = null;
 		    	
 		    	leafInfo = mainCrawler.crawl(leaf, timeout, full);
-		    	update(info);
+		    	update(leafInfo);
+		    	leafInfo.print();
 		    	
 		    	String leafPeers = leafInfo.getUltrapeers();
 	    		if(leafPeers == null || checkShielded(leafPeers)) {
@@ -178,7 +181,7 @@ public class Main {
 		    	totalNumOfFiles += info.getNumOfFiles(); 
 		    	if (info.getMaximumFileSize() > largestFile)
 		    		largestFile = info.getMaximumFileSize();
-		    	else if (info.getMinimumFileSize() < smallestFile || smallestFile == -1)
+		    	else if (info.getMinimumFileSize() < smallestFile || smallestFile == -1 && info.getMinimumFileSize() != -1)
 		    		smallestFile = info.getMinimumFileSize();
 		    	
 		    	totalFileSize += info.getTotalFileSize();
@@ -189,8 +192,10 @@ public class Main {
     }
     
     private static boolean checkTime() {
-    	System.out.println("Crawler has been active for " + (float)(System.currentTimeMillis()- startTime)/(double)MILLI_TO_MIN + " minute(s)");
-    	if (duration != 0 && (Calendar.getInstance().getTimeInMillis()/MILLI_TO_MIN - startTime) >= duration) {
+    	float formattedTime = Round((float)(System.currentTimeMillis() - startTime)/(float)MILLI_TO_MIN, 2);
+    	System.out.println("Crawler has been active for " + formattedTime + " minute(s)");
+    	
+    	if (duration != 0 && (formattedTime >= duration)) {
     		System.out.println("Execution duration reached, terminating...");
     		return true;
     	}
@@ -204,8 +209,8 @@ public class Main {
     }
     
     private static void print(ArrayList<Node> visited, ArrayList<Node> unvisited){
-    	System.out.println("Number of Nodes Discovered : " + visited.size() + unvisited.size());
-    	System.out.println("Nodes Discovered per Second : " + (double)(visited.size() + unvisited.size()) /((float)(System.currentTimeMillis() - startTime)/(double) MILLI_TO_MIN * 60.0));
+    	System.out.println("Number of Nodes Discovered : " + (visited.size() + unvisited.size()));
+    	System.out.println("Nodes Discovered per Second : " + ((float)(visited.size() + unvisited.size()) /((float)(System.currentTimeMillis() - startTime)/(float) MILLI_TO_MIN) * 60));
     	System.out.println( "Number of Successful Crawls : " + num_success + "\r\n" +
     						"Number of Timeouts : " + num_timeout + "\r\n" +
     						"Number of Refused Connections : " + num_refused + "\r\n" + 
@@ -216,16 +221,16 @@ public class Main {
     	
     	if (full) {
     		System.out.println( "Maximum Files on a node was : " + maxNumOfFiles + "\r\n" + 
-    							"Average Files on all nodes was " + ((double)totalNumOfFiles/(double)num_success) + "\r\n" + 
-    							"Smallest File found : " + smallestFile + "\r\n" +
-    							"Largest File found : " + largestFile + "\r\n" +
-    							"Average File size was : " + totalFileSize/totalNumOfFiles + "\r\n");
+    							"Average Files on all nodes was " + Round(((float)totalNumOfFiles/(float)num_success),2) + "\r\n" + 
+    							"Smallest File found : " + smallestFile + "B\r\n" +
+    							"Largest File found : " + largestFile + "B\r\n" +
+    							"Average File size was : " + totalFileSize/totalNumOfFiles + "B\r\n");
     		extensions = sort(extensions);
     		System.out.println("File Extension \t\tNumber of Occurences");
     		for (int i = 0; i < 10; i++) {
     			try {
     				System.out.println("." + extensions.get(i).getName() + "\t\t" + extensions.get(i).getCount());
-    			} catch (NullPointerException e) {
+    			} catch (Exception e) {
     				break;
     			}
     			
@@ -236,19 +241,24 @@ public class Main {
     }
     
     private static Vector<Extension> sort(Vector<Extension> list) {
-    	// sorts the list of file extensions by decreasing popularity
+    	/*// sorts the list of file extensions by decreasing popularity
     	int index = 1;
-    	while (list.get(index) != null) {
-    		if (list.get(index-1) == null) {
-    			index++;
-    		} else if (list.get(index).getCount() > list.get(index-1).getCount()){
-    			list.insertElementAt(list.get(index), index - 1);
-    			list.removeElementAt(index + 1);
-    			index--;
-    		} else {
-    			index++;
+    	while (true) {
+    		System.out.println("Oh hai");
+    		try {
+	    		if (list.get(index-1) == null) {
+	    			index++;
+	    		} else if (list.get(index).getCount() > list.get(index-1).getCount()){
+	    			list.insertElementAt(list.get(index), index - 1);
+	    			list.removeElementAt(index + 1);
+	    			index--;
+	    		} else {
+	    			index++;
+	    		}
+    		} catch (ArrayIndexOutOfBoundsException e) {
+    			break;
     		}
-    	}
+    	}*/
     	return list;
     }
     
@@ -256,12 +266,15 @@ public class Main {
     	String[] files = filelist.split("\0");
     	for (int i = 0; i < files.length; i++) {
     		Extension ext = new Extension(Extension.findExtension(files[i]));
-    		for (int j = 0; j < extensions.size(); i++) {
-    			if (extensions.get(i).equals(ext)) {
-    				extensions.get(i).increment();
-    				return;
-    			}
-    		}
+    		if (!ext.containedIn(extensions))
+    			extensions.add(ext);
     	}
     }
+    public static float Round(float Rval, int Rpl) {
+    	  float p = (float)Math.pow(10,Rpl);
+    	  Rval = Rval * p;
+    	  float tmp = Math.round(Rval);
+    	  return (float)tmp/p;
+    }
+    	
 }

@@ -22,7 +22,7 @@ public class CrawlResult {
         numOfFiles = 0;
         filesList = new String(); 
         Agent = new String();
-        minimumFileSize = 999999;
+        minimumFileSize = -1;
         maximumFileSize = 0;
     }
     
@@ -123,8 +123,8 @@ public class CrawlResult {
         System.out.println("UltraPeers : " + getUltrapeers());
         System.out.println("Leaves : " + getLeaves());
         System.out.println("Number of files: " + getNumOfFiles());
-        if(getNumOfFiles() > 0);
-            //System.out.println("list of files : " + getFilesList().replace("\0","\n\r"));
+        if(getNumOfFiles() > 0)
+            System.out.println("list of files : " + getFilesList().replace("\0","\n\r"));
     }
     
     public String toString() {
@@ -133,10 +133,10 @@ public class CrawlResult {
         	"Leaves : " + getLeaves().replace(",", ", ") + "\n\r" +
         	"Number of files : " + getNumOfFiles();
 
-       /* if(getNumOfFiles() > 0)
-            stats += "List of files :\n\t" + getFilesList().replace("\0","\n"); */
+       if(getNumOfFiles() > 0)
+            stats += "List of files :\n\t" + getFilesList().replace("\0","\n"); 
         if(getNumOfFiles() > 0);
-        	//stats += "List of files : " + getFilesList().replace("\0","\n\r\t");
+        	stats += "List of files : " + getFilesList().replace("\0","\n\r\t");
         
         return stats;
     }

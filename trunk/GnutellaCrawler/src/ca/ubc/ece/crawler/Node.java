@@ -33,5 +33,11 @@ public class Node {
 		}
 		return false;
 	}
+	
+	public String toString() {
+		String info = "Address: " + this.address;
+		
+		return info;
+	}
 
 }

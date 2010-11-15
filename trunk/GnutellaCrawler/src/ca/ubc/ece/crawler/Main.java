@@ -1,7 +1,5 @@
 package ca.ubc.ece.crawler;
 
-import java.io.*;
-import java.text.DecimalFormat;
 import java.util.*;
 
 public class Main {
@@ -65,7 +63,6 @@ public class Main {
         	
         	info = mainCrawler.crawl(unvisited.get(FRONT), timeout, full);
 		    visited.add(unvisited.get(FRONT));
-		    System.out.println(visited.size());
 		    unvisited.remove(FRONT);
 		    info.print();
 		    update(info);
@@ -86,20 +83,17 @@ public class Main {
 			    // ignore this node if we have already visited it, otherwise get its information
 			    if (leaf.containedIn(visited)) // leaf nodes will never be contained in unvisited (unless leaves have leaves...)
 			    	continue;
-			    	
-		    	CrawlResult leafInfo = null;
-		    	
-		    	leafInfo = mainCrawler.crawl(leaf, timeout, full);
+			    
+			    visited.add(leaf);
+		    	CrawlResult leafInfo = mainCrawler.crawl(leaf, timeout, full);
 		    	update(leafInfo);
 		    	leafInfo.print();
 		    	
 		    	String leafPeers = leafInfo.getUltrapeers();
 	    		if(leafPeers == null || checkShielded(leafPeers)) {
-	    			visited.add(leaf);
 	    			continue;
 	    		}
 
-		    	
 		    	StringTokenizer leafTokens = new StringTokenizer(leafPeers, DELIM);
 		    	
 		    	/* Add unknown ultrapeers of this leaf to our list */
@@ -108,8 +102,8 @@ public class Main {
 		    		if (!leafNode.containedIn(unvisited) && !leafNode.containedIn(visited))
 		    			unvisited.add(leafNode);
 		    	}
+		    	
 		    	// we are done with this leaf
-		    	visited.add(leaf);
 		    }
 		    
 		    /* Add new ultrapeers from this ultrapeer to our unvisited list */
@@ -121,15 +115,6 @@ public class Main {
 			    
 			    if (!contained(unvisited, ultra) && !contained(visited, ultra))
 			    	unvisited.add(ultra);
-		    }
-		    
-		    // move this ultrapeer to visited
-		    try {
-			    visited.add(unvisited.get(FRONT));
-			    unvisited.remove(FRONT);
-		    } catch (IndexOutOfBoundsException e) {
-		    	// this current node is null, abort
-		    	System.exit(1);
 		    }
 		    
 		    // repeat for next ultrapeer in list
@@ -183,7 +168,8 @@ public class Main {
 		    	
 		    	if (info.getMaximumFileSize() > largestFile)
 		    		largestFile = info.getMaximumFileSize();
-		    	else if ((info.getMinimumFileSize() < smallestFile || smallestFile == -1) && info.getMinimumFileSize() != -1)
+
+		    	if ((info.getMinimumFileSize() < smallestFile || smallestFile == -1) && info.getMinimumFileSize() != -1)
 		    		smallestFile = info.getMinimumFileSize();
 		    	
 		    	totalFileSize += info.getTotalFileSize();
@@ -226,7 +212,7 @@ public class Main {
     	
     	if (full) {
     		System.out.println( "Maximum Files on a node was : " + maxNumOfFiles + "\r\n" + 
-    							"Average Files on all nodes was " + Round(((float)totalNumOfFiles/(float)num_success),2) + "\r\n" + 
+    							"Average Files on all nodes was " + Round(((float)totalNumOfFiles/(float)num_success),4) + "\r\n" + 
     							"Smallest File found : " + smallestFile + "B\r\n" +
     							"Largest File found : " + largestFile + "B\r\n" +
     							"Average File size was : " + totalFileSize/totalNumOfFiles + "B\r\n");
@@ -234,11 +220,13 @@ public class Main {
     		System.out.println("File Extension \tNumber of Occurences");
     		for (int i = 0; i < 10; i++) {
     			try {
-    				System.out.println("." + extensions.get(i).getName() + "\t\t\t" + extensions.get(i).getCount());
+    				if (extensions.get(i).getName().length() < 5)
+    					System.out.println("." + extensions.get(i).getName() + "\t\t\t" + extensions.get(i).getCount());
+    				else
+    					System.out.println("." + extensions.get(i).getName() + "\t\t" + extensions.get(i).getCount());
     			} catch (Exception e) {
-    				break;
+    				//break;
     			}
-    			
     		}
     	}
     	System.exit(0);
@@ -246,10 +234,9 @@ public class Main {
     }
     
     private static Vector<Extension> sort(Vector<Extension> list) {
-    	/*// sorts the list of file extensions by decreasing popularity
+    	// sorts the list of file extensions by decreasing popularity
     	int index = 1;
     	while (true) {
-    		System.out.println("Oh hai");
     		try {
 	    		if (list.get(index-1) == null) {
 	    			index++;
@@ -263,7 +250,7 @@ public class Main {
     		} catch (ArrayIndexOutOfBoundsException e) {
     			break;
     		}
-    	}*/
+    	}
     	return list;
     }
     
@@ -275,6 +262,7 @@ public class Main {
     			extensions.add(ext);
     	}
     }
+    
     public static float Round(float Rval, int Rpl) {
     	  float p = (float)Math.pow(10,Rpl);
     	  Rval = Rval * p;

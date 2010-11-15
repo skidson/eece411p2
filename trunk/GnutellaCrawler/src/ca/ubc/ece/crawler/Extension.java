@@ -9,7 +9,7 @@ public class Extension {
 	
 	public Extension(String name) {
 		this.name = name;
-		count = 0;
+		count = 1;
 	}
 	
 	public static String findExtension(String filename) {
@@ -26,12 +26,11 @@ public class Extension {
 	}
 	
 	public void increment() {
-		System.out.println("Incrementing occurences of extension '." + this.name + "' ...");
 		this.count++;
 	}
 	
 	public boolean equals (Extension other) {
-		if (this.name.equals(other.getName()))
+		if (this.name.equalsIgnoreCase(other.getName()))
 			return true;
 		return false;
 	}
@@ -42,9 +41,10 @@ public class Extension {
 	
 	public boolean containedIn(Vector<Extension> list) {
 		for (int i = 0; i < list.size(); i++) {
-			if (list.get(i).equals(this))
+			if (list.get(i).equals(this)) {
 				list.get(i).increment();
 				return true;
+			}
 		}
 		return false;
 	}

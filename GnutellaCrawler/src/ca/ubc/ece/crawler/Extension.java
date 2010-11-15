@@ -26,6 +26,7 @@ public class Extension {
 	}
 	
 	public void increment() {
+		System.out.println("Incrementing occurences of extension '." + this.name + "' ...");
 		this.count++;
 	}
 	

@@ -29,12 +29,8 @@ public class Crawler {
             return cResult;
         }        
         
-        if(full == true) {
+        if(full == true)
         	listFiles(node.getAddress(), node.getPortNum(), timeout);
-        	if(cResult.getNumOfFiles() == 0){
-        		cResult.setMinimumFileSize(99999999);
-        	}
-        }
         
         return cResult;
     }

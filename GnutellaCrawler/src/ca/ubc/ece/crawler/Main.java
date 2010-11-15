@@ -10,7 +10,7 @@ public class Main {
 	private static final int MILLI_TO_MIN = 60000;
 	private static final int MS_TO_SEC = 1000;
 	
-	private static Vector<Extension> extensions;
+	private static Vector<Extension> extensions = new Vector<Extension>();
 	
 	private static long totalNumOfFiles = 0;
 	private static int smallestFile = -1;
@@ -28,7 +28,6 @@ public class Main {
         Crawler mainCrawler = new Crawler();
         ArrayList<Node> visited = new ArrayList<Node>();
         ArrayList<Node> unvisited = new ArrayList<Node>();
-        extensions = new Vector<Extension>();
         
         /* Parse command-line bootstrap parameters */
         if (args.length < 2){
@@ -174,15 +173,17 @@ public class Main {
 	    	}
 	    	
 	    	if (full) {
-	    		parseExtensions(info.getFilesList());
+	    		if (info.getNumOfFiles() > 0)
+		    		parseExtensions(info.getFilesList());
+	    		
 		    	if(info.getNumOfFiles() > maxNumOfFiles)
 		    		maxNumOfFiles = info.getNumOfFiles();
-	
+		    	
 		    	totalNumOfFiles += info.getNumOfFiles(); 
+		    	
 		    	if (info.getMaximumFileSize() > largestFile)
 		    		largestFile = info.getMaximumFileSize();
-		    	
-		    	if ((info.getMinimumFileSize() != -1) && (info.getMinimumFileSize() < smallestFile || smallestFile == -1) )
+		    	else if ((info.getMinimumFileSize() < smallestFile || smallestFile == -1) && info.getMinimumFileSize() != -1)
 		    		smallestFile = info.getMinimumFileSize();
 		    	
 		    	totalFileSize += info.getTotalFileSize();
@@ -230,10 +231,10 @@ public class Main {
     							"Largest File found : " + largestFile + "B\r\n" +
     							"Average File size was : " + totalFileSize/totalNumOfFiles + "B\r\n");
     		extensions = sort(extensions);
-    		System.out.println("File Extension \t\tNumber of Occurences");
+    		System.out.println("File Extension \tNumber of Occurences");
     		for (int i = 0; i < 10; i++) {
     			try {
-    				System.out.println("." + extensions.get(i).getName() + "\t\t" + extensions.get(i).getCount());
+    				System.out.println("." + extensions.get(i).getName() + "\t\t\t" + extensions.get(i).getCount());
     			} catch (Exception e) {
     				break;
     			}

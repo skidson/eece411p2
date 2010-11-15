@@ -133,10 +133,8 @@ public class CrawlResult {
         	"Leaves : " + getLeaves().replace(",", ", ") + "\n\r" +
         	"Number of files : " + getNumOfFiles();
 
-       if(getNumOfFiles() > 0)
-            stats += "List of files :\n\t" + getFilesList().replace("\0","\n"); 
         if(getNumOfFiles() > 0);
-        	stats += "List of files : " + getFilesList().replace("\0","\n\r\t");
+        	stats += "List of files : " + getFilesList().replace("\0","\n");
         
         return stats;
     }

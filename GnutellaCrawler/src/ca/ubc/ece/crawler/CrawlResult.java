@@ -8,7 +8,6 @@ public class CrawlResult {
     private int numOfFiles;
     private String filesList;
     private String Agent;
-    //private String status;
     private int minimumFileSize;
     private int maximumFileSize;
     private long totalFileSize; //File Size in bytes

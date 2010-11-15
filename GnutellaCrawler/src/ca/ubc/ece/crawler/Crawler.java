@@ -274,7 +274,7 @@ public class Crawler {
         int num = 0;
         while (qhit.length > 0 && num < numOfFiles){        	
         	fileSize=ByteOrder.leb2int(subBuffer(qhit, 4, 8),0,4);
-        	System.out.println(fileSize);
+        	//System.out.println(fileSize);
         	if(fileSize < cResult.getMinimumFileSize() || cResult.getMinimumFileSize() == -1){
         		cResult.setMinimumFileSize(fileSize);
         	}

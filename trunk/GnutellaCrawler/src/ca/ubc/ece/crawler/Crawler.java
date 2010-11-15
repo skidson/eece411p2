@@ -3,25 +3,25 @@ package ca.ubc.ece.crawler;
 import java.io.*;
 import java.net.*;
 
-/**
- *
- * @author Samer Al-Kiswany
- */
 public class Crawler {
     private CrawlResult cResult;
+    
+    public enum Status { CONNECTED, UNROUTABLE, REFUSED, INTERNAL, TIMEOUT, MUTE, NOREPLY };
 
     public Crawler() {
         cResult = new CrawlResult();
     }
     
-    public CrawlResult crawl(String ipAddress, int port, int timeout, boolean full){
+    public CrawlResult crawl(Node node, int timeout, boolean full){
     	cResult = new CrawlResult();
-        System.out.println("Crawling " + ipAddress + ":" + port + "...");
-        String nodePeers = crawlPeers(ipAddress, port, timeout);
+        System.out.println("Crawling " + node.getAddress() + ":" + node.getPortNum() + "...");
+        String nodePeers = crawlPeers(node.getAddress(), node.getPortNum(), timeout);
+        
         if(nodePeers == null){
             System.out.println("Failed to crawl the peer\n");
             return cResult;
         }
+        
         if (nodePeers.length() > 0){
             parsePeers(nodePeers);            
         } else{
@@ -29,7 +29,8 @@ public class Crawler {
             return cResult;
         }        
         
-        if(full == true) listFiles(ipAddress, port, timeout);
+        if(full == true) 
+        	listFiles(node.getAddress(), node.getPortNum(), timeout);
         
         return cResult;
     }
@@ -43,24 +44,24 @@ public class Crawler {
         	InetSocketAddress address = new InetSocketAddress(ipAddress, port);
             socket.connect(address, timeout);
             System.out.println("Connected to node : " + ipAddress + " on port " + port);
-            cResult.setStatus("Connected");
+            cResult.setStatus(Status.CONNECTED);
             in = socket.getInputStream();
             out = socket.getOutputStream();
     	} catch (SocketTimeoutException ex){
         	System.out.println("Timed out while connecting to node");
-        	cResult.setStatus("Connection Timeout");
+        	cResult.setStatus(Status.TIMEOUT);
         	return (null);
     	} catch (UnknownHostException ex) {
             System.out.println("Error: Failed to connect to node "+ipAddress + ":" + port);
-            cResult.setStatus("Unroutable IP address");
+            cResult.setStatus(Status.UNROUTABLE);
             return (null);
     	}catch (ConnectException ex) {
     		System.out.println("Error: Connection was refused by "+ipAddress+":"+port);
-            cResult.setStatus("Connection Refused");
+            cResult.setStatus(Status.REFUSED);
             return (null);
         } catch (IOException ex) {
             System.out.println("Error: Failed to connect to node "+ipAddress+":"+port);
-            cResult.setStatus("Internal Error");
+            cResult.setStatus(Status.INTERNAL);
             return (null);
         }
         String GNodetName = socket.getInetAddress().getHostName();
@@ -81,18 +82,18 @@ public class Crawler {
             out.flush();
         } catch (IOException ex) {
             System.out.println("Error: Failed to send the crawl message to " + ipAddress + ":" + port);
-            cResult.setStatus("Connected but unable to send message");
+            cResult.setStatus(Status.MUTE);
             ex.printStackTrace();
             return null;
         }
 
-        String responseLine=new String();
+        String responseLine = new String();
         while (true){
             try {
                 responseLine = ByteOrder.readLine(in);
             } catch (IOException ex) {
-                System.out.println("Error: Failed to recieve the responce from the node " + ipAddress + ":" + port);
-                cResult.setStatus("Connected, message sent, failed to receive reply");
+                System.out.println("Error: Failed to recieve the response from the node " + ipAddress + ":" + port);
+                cResult.setStatus(Status.NOREPLY);
                 ex.printStackTrace();
                 return null;
             }
@@ -152,17 +153,16 @@ public class Crawler {
         try {
         	InetSocketAddress address = new InetSocketAddress(ipAddress, port);
             socket.connect(address, timeout);
-            System.out.println("Connected to node : " + ipAddress + " on port " + port);
 
             in = socket.getInputStream();
             out = socket.getOutputStream();
         } catch (UnknownHostException ex) {
             System.out.println("Error: Failed to connect to node " + ipAddress + ":" + port);
-            cResult.setStatus("Unroutable IP address");
+            cResult.setStatus(Status.UNROUTABLE);
             return;
         } catch (IOException ex) {
             System.out.println("Error: Failed to connect to node " + ipAddress + ":" + port);
-            cResult.setStatus("Port Unavailable");
+            cResult.setStatus(Status.INTERNAL);
             return;
         }
         
@@ -196,7 +196,6 @@ public class Crawler {
         while (true){
             try {
                 numOfBytesRead = ByteOrder.readBufferWithLimit(in , buffer, endIndex, bufferSize-endIndex);
-
                 moreAvailableInStream = in.available();
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -210,28 +209,28 @@ public class Crawler {
                 break;                
             
             if(parsingStage == 0) {
-                    headerEndIndex = findEndOfHeader(buffer);
-                    if (headerEndIndex > 0) {
-                        parseFilesListHeader(buffer, headerEndIndex);
-                        endIndex -= headerEndIndex;
-                        trimBufferBegining(buffer, headerEndIndex);
-                        parsingStage = 1;
-                    }
+	            headerEndIndex = findEndOfHeader(buffer);
+	            if (headerEndIndex > 0) {
+	                parseFilesListHeader(buffer, headerEndIndex);
+	                endIndex -= headerEndIndex;
+	                trimBufferBegining(buffer, headerEndIndex);
+	                parsingStage = 1;
+	            }
             }
             
             if(parsingStage == 1) {
-                    if (endIndex <23)
-                        continue;
-                    
-                    qHitSize = ByteOrder.leb2int(subBuffer(buffer,19,23),0);
-                    
-                    if(endIndex < qHitSize )
-                        continue;
-                    
-                    byte[] qhit=subBuffer(buffer, 23,qHitSize+23);
-                    processQueryHit(qhit);
-                    endIndex -= (qHitSize + 23);
-                    trimBufferBegining(buffer, qHitSize+23);
+	            if (endIndex <23)
+	                continue;
+	            
+	            qHitSize = ByteOrder.leb2int(subBuffer(buffer,19,23),0);
+	            
+	            if(endIndex < qHitSize )
+	                continue;
+	            
+	            byte[] qhit = subBuffer(buffer, 23,qHitSize+23);
+	            processQueryHit(qhit);
+	            endIndex -= (qHitSize + 23);
+	            trimBufferBegining(buffer, qHitSize+23);
             }
         }
 

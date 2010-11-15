@@ -11,7 +11,7 @@ public class Extension {
 	}
 	
 	public static String findExtension(String filename) {
-		String[] temp = filename.split(".");
+		String[] temp = filename.split("\\.");
 		return(temp[temp.length - 1]);
 	}
 	

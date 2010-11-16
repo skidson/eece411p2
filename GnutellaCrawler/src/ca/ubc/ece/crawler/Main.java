@@ -1,6 +1,7 @@
 package ca.ubc.ece.crawler;
 
 import java.util.*;
+import ca.ubc.ece.crawler.Crawler.Status;
 
 public class Main {
 	private static final String DELIM = ",:";
@@ -63,10 +64,11 @@ public class Main {
         	
         	info = mainCrawler.crawl(unvisited.get(FRONT), timeout, full);
 		    visited.add(unvisited.get(FRONT));
+		    unvisited.get(FRONT).setInfo(info);
 		    unvisited.remove(FRONT);
+
 		    update(info);
-		    info.print();
-		    
+
 		    /* Get info from each leaf node but do not traverse its nodes yet */
 		    String leaves = info.getLeaves();
     		if(leaves == null || checkShielded(leaves))
@@ -87,7 +89,7 @@ public class Main {
 			    visited.add(leaf);
 		    	CrawlResult leafInfo = mainCrawler.crawl(leaf, timeout, full);
 		    	update(leafInfo);
-		    	leafInfo.print();
+		    	leaf.setInfo(leafInfo);
 		    	
 		    	String leafPeers = leafInfo.getUltrapeers();
 	    		if(leafPeers == null || checkShielded(leafPeers)) {
@@ -198,7 +200,15 @@ public class Main {
     private static void print(ArrayList<Node> visited, ArrayList<Node> unvisited){
     	float formattedTime = Round((float)(System.currentTimeMillis() - startTime)/(float)MILLI_TO_MIN, 2);
     	formattedTime *= 60;
-    	
+    	for(int i = 0; i < visited.size(); i++){
+    		if(visited.get(i).getInfo().getStatus().equals(Status.CONNECTED)){
+    			System.out.println("Address : " + visited.get(i).getAddress() + " Port : " + visited.get(i).getPortNum());
+    			visited.get(i).getInfo().print();
+    		}else{
+    			System.out.println("Address : " + visited.get(i).getAddress() + " Port : " + visited.get(i).getPortNum());
+    			System.out.println(visited.get(i).getInfo().getStatus());
+    		}
+    	}
     	System.out.println("Number of Nodes Discovered : " + (visited.size() + unvisited.size()));
     	System.out.println("Nodes Discovered per Second : " + Round(((visited.size() + unvisited.size())/formattedTime), 2));
     	System.out.println( "Number of Successful Crawls : " + num_success + "\r\n" +
@@ -258,9 +268,10 @@ public class Main {
     	for (int i = 0; i < files.length; i++) {
     		Extension ext = new Extension(Extension.findExtension(files[i]));
     		System.out.println("MORE TESTS BITCH" + ext.getName());
-    		if (!ext.containedIn(extensions))
+    		if (!ext.containedIn(extensions)){
     			System.out.println("SHOULD BE ADDING " + ext.getName());
     			extensions.add(ext);
+    		}
     	}
     	System.out.println("EXTENSION SIZE NIGGAS " +  extensions.size());
     }

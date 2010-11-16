@@ -65,6 +65,7 @@ public class Main {
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.remove(FRONT);
 		    update(info);
+		    info.print();
 		    
 		    /* Get info from each leaf node but do not traverse its nodes yet */
 		    String leaves = info.getLeaves();
@@ -167,7 +168,6 @@ public class Main {
 		    	
 		    	if (info.getMaximumFileSize() > largestFile)
 		    		largestFile = info.getMaximumFileSize();
-
 		    	if ((info.getMinimumFileSize() < smallestFile || smallestFile == -1) && info.getMinimumFileSize() != -1)
 		    		smallestFile = info.getMinimumFileSize();
 		    	
@@ -211,7 +211,7 @@ public class Main {
     	
     	if (full) {
     		System.out.println( "Maximum Files on a node was : " + maxNumOfFiles + "\r\n" + 
-    							"Average Files on all nodes was " + Round(((float)totalNumOfFiles/(float)num_success),4) + "\r\n" + 
+    							"Average Files on all nodes was " + Round((float)totalNumOfFiles/(float)num_success,2) + "\r\n" + 
     							"Smallest File found : " + smallestFile + "B\r\n" +
     							"Largest File found : " + largestFile + "B\r\n" +
     							"Average File size was : " + totalFileSize/totalNumOfFiles + "B\r\n");
@@ -257,9 +257,12 @@ public class Main {
     	String[] files = filelist.split("\0");
     	for (int i = 0; i < files.length; i++) {
     		Extension ext = new Extension(Extension.findExtension(files[i]));
+    		System.out.println("MORE TESTS BITCH" + ext.getName());
     		if (!ext.containedIn(extensions))
+    			System.out.println("SHOULD BE ADDING " + ext.getName());
     			extensions.add(ext);
     	}
+    	System.out.println("EXTENSION SIZE NIGGAS " +  extensions.size());
     }
     
     public static float Round(float Rval, int Rpl) {

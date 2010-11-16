@@ -6,9 +6,12 @@ public class Node {
 	private String address;
 	private int portNum;
 	
+	private CrawlResult info;
+	
 	public Node(String address, int portNum) {
 		this.address = address;
 		this.portNum = portNum;
+		this.info = null;
 	}
 	
 	public boolean equals(Node other) {
@@ -25,6 +28,14 @@ public class Node {
 		return(address);
 	}
 	
+	public void setInfo(CrawlResult info) {
+		this.info = info;
+	}
+	
+	public CrawlResult getInfo() {
+		return info;
+	}
+	
 	public boolean containedIn(ArrayList<Node> list) {
 		// determines if this node is contained in the list
 		for (int i = 0; i < list.size(); i++) {
@@ -35,7 +46,10 @@ public class Node {
 	}
 	
 	public String toString() {
-		String info = "Address: " + this.address;
+		String info = "Address: " + this.address + "\n" +
+			"Port: " + this.portNum + "\n" + 
+			"Status: " + this.info.getStatus() + "\n" +
+			"Agent: " + this.info.getAgent() + "\n";
 		
 		return info;
 	}

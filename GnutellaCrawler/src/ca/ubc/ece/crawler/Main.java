@@ -64,7 +64,6 @@ public class Main {
         	info = mainCrawler.crawl(unvisited.get(FRONT), timeout, full);
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.remove(FRONT);
-		    info.print();
 		    update(info);
 		    
 		    /* Get info from each leaf node but do not traverse its nodes yet */

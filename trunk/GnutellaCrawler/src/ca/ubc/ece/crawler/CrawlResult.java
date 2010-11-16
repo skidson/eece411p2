@@ -8,6 +8,7 @@ public class CrawlResult {
     private int numOfFiles;
     private String filesList;
     private String Agent;
+
     private int minimumFileSize;
     private int maximumFileSize;
     private long totalFileSize; //File Size in bytes
@@ -122,8 +123,6 @@ public class CrawlResult {
         System.out.println("UltraPeers : " + getUltrapeers());
         System.out.println("Leaves : " + getLeaves());
         System.out.println("Number of files: " + getNumOfFiles());
-        if(getNumOfFiles() > 0)
-            System.out.println("list of files : " + getFilesList().replace("\0","\n\r"));
     }
     
     public String toString() {
@@ -131,10 +130,6 @@ public class CrawlResult {
         	"UltraPeers : " + getUltrapeers().replace(",", ", ") + "\n\r" +
         	"Leaves : " + getLeaves().replace(",", ", ") + "\n\r" +
         	"Number of files : " + getNumOfFiles();
-
-        if(getNumOfFiles() > 0);
-        	stats += "List of files : " + getFilesList().replace("\0","\n");
-        
         return stats;
     }
 }

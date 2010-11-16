@@ -64,8 +64,8 @@ public class Crawler {
             cResult.setStatus(Status.INTERNAL);
             return (null);
         }
-        String GNodetName = socket.getInetAddress().getHostName();
-        System.out.println("Host name is : " + GNodetName);
+
+        System.out.println("Host name is : " + socket.getInetAddress().getHostName());
         String response  = new String();
         StringBuffer request = new StringBuffer();
         request.append("GNUTELLA CONNECT/0.6\r\n" +
@@ -244,7 +244,6 @@ public class Crawler {
     }
 
     private void parseFilesListHeader(byte[] flist, int headerEndIndex){
-
         String header = new String(subBuffer(flist, 0, headerEndIndex));
         int strBegin = header.indexOf("Server:");
         int strEnd = header.indexOf('\n', strBegin);
@@ -274,7 +273,6 @@ public class Crawler {
         int num = 0;
         while (qhit.length > 0 && num < numOfFiles){        	
         	fileSize=ByteOrder.leb2int(subBuffer(qhit, 4, 8),0,4);
-        	//System.out.println(fileSize);
         	if(fileSize < cResult.getMinimumFileSize() || cResult.getMinimumFileSize() == -1){
         		cResult.setMinimumFileSize(fileSize);
         	}

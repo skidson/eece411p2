@@ -54,11 +54,11 @@ public class Node {
 	public String toString() {
 		String ret = "Address: " + this.address + "\n" +
 		
-		"Port: " + this.portNum + "\n" + 
-		"Status: " + this.info.getStatus() + "\n";
+		"Port: " + this.portNum + "\r\n" + 
+		"Status: " + this.info.getStatus() + "\r\n";
 		if (this.info.getStatus() == Crawler.Status.CONNECTED) {
-			ret += "Hostname: " + this.info.getHostname() + "\n" +
-				"Agent: " + this.info.getAgent() + "\n";
+			ret += "Hostname: " + this.info.getHostname() + "\r\n" +
+				"Agent: " + this.info.getAgent() + "\r\n";
 		}
 		
 		return ret;

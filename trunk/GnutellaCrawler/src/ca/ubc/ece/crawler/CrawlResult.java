@@ -45,6 +45,8 @@ public class CrawlResult {
     }
     
     public String getHostname() {
+    	if (hostname == null) 
+    		return ("N/A");
     	return hostname;
     }
     
@@ -94,6 +96,8 @@ public class CrawlResult {
     }
     
     public String getUltrapeers() {
+    	if (ultrapeers == null) 
+    		return ("N/A");
         return ultrapeers;
     }
     
@@ -102,6 +106,8 @@ public class CrawlResult {
     }
     
     public String getLeaves() {
+    	if (leaves == null) 
+    		return ("N/A");
         return leaves;
     }
     
@@ -118,6 +124,8 @@ public class CrawlResult {
     }
     
     public String getFilesList() {
+    	if (filesList == null) 
+    		return ("N/A");
         return filesList;
     }
     
@@ -126,6 +134,8 @@ public class CrawlResult {
     }
     
     public String getAgent() {
+    	if (Agent == null) 
+    		return ("N/A");
         return Agent;
     }
     

@@ -214,7 +214,8 @@ public class Main {
     
     private static boolean checkTime() {
     	float formattedTime = Round((float)(System.currentTimeMillis() - startTime)/(float)MILLI_TO_MIN, 2);
-    	System.out.println(">>> Crawler has been active for " + formattedTime + " minute(s) <<<");
+    	if (verbose) 
+    		System.out.println(">>> Crawler has been active for " + formattedTime + " minute(s) <<<");
     	
     	if (duration != -1 && (formattedTime >= duration)) {
     		System.out.println("Execution duration reached, terminating...");

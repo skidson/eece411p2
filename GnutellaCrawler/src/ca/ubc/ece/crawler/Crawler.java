@@ -22,6 +22,7 @@ public class Crawler {
             parsePeers(nodePeers);            
         } else{
             System.out.println("Error : Recieved zero-length peers");
+            cResult.setStatus(Status.INTERNAL);
             return cResult;
         }        
         
@@ -79,7 +80,6 @@ public class Crawler {
         } catch (IOException ex) {
             System.out.println("Error: Failed to send the crawl message to " + ipAddress + ":" + port);
             cResult.setStatus(Status.MUTE);
-            ex.printStackTrace();
             return null;
         }
 
@@ -90,7 +90,6 @@ public class Crawler {
             } catch (IOException ex) {
                 System.out.println("Error: Failed to recieve the response from the node " + ipAddress + ":" + port);
                 cResult.setStatus(Status.NOREPLY);
-                ex.printStackTrace();
                 return null;
             }
             
@@ -107,7 +106,6 @@ public class Crawler {
             in.close();
             out.close();
         } catch (IOException ex) {
-            ex.printStackTrace();
             return null;
         }
 
@@ -180,7 +178,7 @@ public class Crawler {
             out.write(bytes);
             out.flush();
         } catch (IOException ex) {
-            ex.printStackTrace();
+        	// ignore
         }
         
         int parsingStage = 0;
@@ -198,7 +196,6 @@ public class Crawler {
                 numOfBytesRead = ByteOrder.readBufferWithLimit(in , buffer, endIndex, bufferSize-endIndex);
                 moreAvailableInStream = in.available();
             } catch (IOException ex) {
-                ex.printStackTrace();
                 return;
             }
 
@@ -239,7 +236,7 @@ public class Crawler {
             in.close();
             out.close();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            // ignore
         }
     }
 

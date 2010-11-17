@@ -1,3 +1,13 @@
+/*	Name: main.java
+ * 		- driver & tools to facilitate crawling of the gnutella network
+ * 
+ * 	Authors:	Stephen Kidson - #15345077
+ * 				David Lo - #20123071
+ * 				Jeffrey Payan - #18618074
+ * 
+ * 	Last updated: November 17, 2010
+ */
+
 package ca.ubc.ece.crawler;
 
 import java.io.BufferedWriter;

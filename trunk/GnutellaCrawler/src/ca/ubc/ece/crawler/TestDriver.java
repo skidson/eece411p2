@@ -62,7 +62,6 @@ public class TestDriver {
 	private static Vector<Extension> jeffisAwesomeSort(Vector<Extension> ext){
 		for(int i = 0; i < ext.size(); i++){
 			for(int j = 0; j < ext.size(); j++){
-				complexity++;
 				if(ext.get(i).getCount() > ext.get(j).getCount())
 					Collections.swap(ext, i, j);
 			}
@@ -73,10 +72,10 @@ public class TestDriver {
 	private static Vector<Extension> steveSort(Vector<Extension> list) {
 		int index = 1;
 		while(true) {
-			complexity++;
-			if (index == 0) {
+			if (index == 0)
 				index++;
-			} else if (list.get(index).getCount() > list.get(index-1).getCount()) {
+			
+			if (list.get(index).getCount() > list.get(index-1).getCount()) {
 				Collections.swap(list, index, index-1);
 				index--;
 			} else if (index == list.size() - 1) {
@@ -86,14 +85,6 @@ public class TestDriver {
 			}
 		}
 		return(list);
-	}
-	
-	private static String calculateComplexity(int base) {
-		String order = "O(n";
-		for (int i = 0; i < complexity/base; i++)
-			order += "*n";
-		complexity =  0;
-		return(order + ")");
 	}
 	
 	private static String generateExt() {

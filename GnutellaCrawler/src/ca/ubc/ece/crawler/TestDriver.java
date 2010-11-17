@@ -82,7 +82,7 @@ public class TestDriver {
 		return(temp);*/
 		
 		// DIRTYSORT
-		Vector<Extension> temp = new Vector<Extension>();
+		/*Vector<Extension> temp = new Vector<Extension>();
 		int cacheIndex = 0;
 		int max = 0, num = 0;
 		int maxIndex;
@@ -101,10 +101,10 @@ public class TestDriver {
 			temp.add(list.get(maxIndex));
 			list.removeElementAt(maxIndex);
 		}
-		return(temp);
+		return(temp);*/
 		
 		// OLDSORT
-		/*int index = 1;
+		int index = 1;
 		while(true) {
 			if (index == 0)
 				index++;
@@ -118,7 +118,7 @@ public class TestDriver {
 				index++;
 			}
 		}
-		return(list);*/
+		return(list);
 		
 	}
 	

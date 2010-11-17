@@ -1,5 +1,9 @@
 package ca.ubc.ece.crawler;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -77,13 +81,6 @@ public class Main {
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.get(FRONT).setInfo(info);
 		    unvisited.removeElementAt(FRONT);
-		    
-		    /*System.err.println("UNVISITED: ");
-		    for (int i = 0; i < unvisited.size(); i++)
-		    	System.err.println("\n" + unvisited.get(i).toString());
-		    System.err.println("VISITED: ");
-		    for (int i = 0; i < visited.size(); i++)
-		    	System.err.println("\n" + visited.get(i).toString());*/
 		    
 		    update(info);
 		    
@@ -215,51 +212,80 @@ public class Main {
     private static void print(Vector<Node> visited, Vector<Node> unvisited){
     	float formattedTime = Round((float)(System.currentTimeMillis() - startTime)/(float)MILLI_TO_MIN, 2);
     	formattedTime *= 60;
-    	for(int i = 0; i < visited.size(); i++){
-    		System.out.println(visited.get(i).toString());
-    	}
-    	System.out.println("\nNumber of Nodes Discovered : " + (visited.size() + unvisited.size()));
-    	System.out.println("Nodes Discovered per Second : " + Round(((visited.size() + unvisited.size())/formattedTime), 2));
-    	System.out.println( "Number of Successful Crawls : " + num_success + "\r\n" +
-    						"Number of Timeouts : " + num_timeout + "\r\n" +
-    						"Number of Refused Connections : " + num_refused + "\r\n" +
-    						"Number of Shielded nodes: " + num_shielded + "\r\n" +
-    						"Number of Internal Errors : " + num_internal + "\r\n" +
-    						"Number of Unable to Send Request Errors : " + num_mute + "\r\n" +
-    						"Number of Failed to Receieve Reply Errors : " + num_noreply + "\r\n" +
-    						"Number of Discovered Nodes but have not visited yet : " + unvisited.size() + "\r\n");
+    	PrintWriter out = null;
+    	String output = "";
     	
-    	if (full) {
-    		System.out.println( "Maximum Files on a node was : " + maxNumOfFiles + "\r\n" + 
-    							"Average Files on all nodes was " + Round((float)totalNumOfFiles/(float)num_success,2) + "\r\n" + 
-    							"Smallest File found : " + smallestFile + "B\r\n" +
-    							"Largest File found : " + largestFile + "B\r\n" +
-    							"Average File size was : " + totalFileSize/totalNumOfFiles + "B\r\n");
-    		extensions = jeffisAwesomeSort(extensions);
-    		System.out.println("File Extension \tNumber of Occurences");
+    	try {
+    		out = new PrintWriter(new BufferedWriter(new FileWriter("results.txt")));
+    	} catch (IOException e) {
+    		System.err.println("Could not write to 'results.txt'");
+    	}
+    	
+    	for(int i = 0; i < visited.size(); i++){
+    		output += visited.get(i).toString() + "\n";
+    	}
+    	output += "\nNumber of Nodes Discovered : " + (visited.size() + unvisited.size()) + "\n" +
+    		"\nNumber of Nodes Discovered : " + (visited.size() + unvisited.size()) + "\n" +
+    		"Nodes Discovered per Second : " + Round(((visited.size() + unvisited.size())/formattedTime), 2) + "\n" +
+    		"Number of Successful Crawls : " + num_success + "\r\n" +
+			"Number of Timeouts : " + num_timeout + "\r\n" +
+			"Number of Refused Connections : " + num_refused + "\r\n" +
+			"Number of Shielded nodes: " + num_shielded + "\r\n" +
+			"Number of Internal Errors : " + num_internal + "\r\n" +
+			"Number of Unable to Send Request Errors : " + num_mute + "\r\n" +
+			"Number of Failed to Receieve Reply Errors : " + num_noreply + "\r\n" +
+			"Number of Discovered Nodes but have not visited yet : " + unvisited.size() + "\r\n\n";
+    	
+    	if (full && totalNumOfFiles != 0) {
+    		output += "Maximum Files on a node was : " + maxNumOfFiles + "\r\n" + 
+				"Average Files on all nodes was " + Round((float)totalNumOfFiles/(float)num_success,2) + "\r\n" + 
+				"Smallest File found : " + smallestFile + "B\r\n" +
+				"Largest File found : " + largestFile + "B\r\n" +
+				"Average File size was : " + totalFileSize/totalNumOfFiles + "B\r\n" +
+				"\nFile Extension \tNumber of Occurences\n";
+    		extensions = steveSort(extensions);
     		for (int i = 0; i < extensions.size(); i++) {
     			try {
     				if (extensions.get(i).getName().length() < 5)
-    					System.out.println("." + extensions.get(i).getName() + "\t\t\t" + extensions.get(i).getCount());
+    					output += "." + extensions.get(i).getName() + "\t\t\t" + extensions.get(i).getCount()+ "\n";
     				else
-    					System.out.println("." + extensions.get(i).getName() + "\t\t" + extensions.get(i).getCount());
+    					output += "." + extensions.get(i).getName() + "\t\t" + extensions.get(i).getCount() + "\n";
     			} catch (Exception e) {
     				//break;
     			}
     		}
     	}
+    	System.out.println(output);
+    	try {
+    		out.print(output);
+    	} catch (NullPointerException e) {
+    		// do not print to file
+    	}
     	System.exit(0);
     	
     }
     
-    private static Vector<Extension> jeffisAwesomeSort(Vector<Extension> ext){
-		for(int i = 0; i < ext.size(); i++){
-			for(int j = 0; j < ext.size(); j++){
-				if(ext.get(0).getCount() > ext.get(j).getCount())
-					Collections.swap(ext, i, j);
+    private static Vector<Extension> steveSort(Vector<Extension> list) {
+		Vector<Extension> temp = new Vector<Extension>();
+		int cacheIndex = 0;
+		int max = 0, num = 0;
+		int maxIndex;
+		
+		while(!list.isEmpty()) {
+			maxIndex = 0;
+			max = 0;
+			for(int i = (cacheIndex%list.size()); i < list.size(); i++) {
+				num = list.get(i).getCount();
+				if (num > max) {
+					max = num;
+					cacheIndex = maxIndex;
+					maxIndex = i;
+				}
 			}
+			temp.add(list.get(maxIndex));
+			list.removeElementAt(maxIndex);
 		}
-		return ext;
+		return(temp);
 	}
     
     private static void parseExtensions(String filelist) {

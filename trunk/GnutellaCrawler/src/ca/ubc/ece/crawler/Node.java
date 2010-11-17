@@ -15,12 +15,8 @@ public class Node {
 	}
 	
 	public boolean equals(Node other) {
-		//System.err.println("this: " + this.address + " other: " + other.getAddress());
-		if (this.address.equals(other.getAddress()) && this.portNum == other.getPortNum()) {
-			//System.err.println("EQUAL");
+		if (this.address.equals(other.getAddress()) && this.portNum == other.getPortNum())
 			return true;
-		}
-		//System.err.println("NOT EQUAL");
 		return false;
 	}
 	
@@ -41,10 +37,8 @@ public class Node {
 	}
 	
 	public boolean containedIn(Vector<Node> list) {
-		// determines if this node is contained in the list
 		for (Node other : list) {
 			if (this.equals(other))	{
-				System.err.println(other.getAddress() + " was in the list already");
 				return true;
 			}
 		}

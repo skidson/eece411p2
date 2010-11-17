@@ -5,9 +5,10 @@ import ca.ubc.ece.crawler.Crawler.Status;
 public class CrawlResult {
     private String ultrapeers;
     private String leaves;
-    private int numOfFiles;
     private String filesList;
     private String Agent;
+    private String hostname;
+    private int numOfFiles;
 
     private int minimumFileSize;
     private int maximumFileSize;
@@ -17,11 +18,12 @@ public class CrawlResult {
     
     /** Creates a new instance of CrawlResults */
     public CrawlResult() {
-        ultrapeers = new String();
-        leaves = new String();
+        ultrapeers = new String("N/A");
+        leaves = new String("N/A");
+        filesList = new String("N/A"); 
+        Agent = new String("N/A");
+        hostname = new String("N/A");
         numOfFiles = 0;
-        filesList = new String(); 
-        Agent = new String();
         minimumFileSize = -1;
         maximumFileSize = 0;
     }
@@ -40,6 +42,14 @@ public class CrawlResult {
     
     public int getMaximumFileSize(){
     	return maximumFileSize;
+    }
+    
+    public String getHostname() {
+    	return hostname;
+    }
+    
+    public void setHostname(String hostname) {
+    	this.hostname = hostname;
     }
     
     public void setMaximumFileSize(int fileSize){
@@ -77,6 +87,8 @@ public class CrawlResult {
     		return("Connected but unable to send message");
     	case NOREPLY:
     		return("Connected, message sent, failed to recieve reply");
+    	case SHIELDED:
+    		return("Connected, message sent, but information was shielded");
     	}
     	return(" - ");
     }

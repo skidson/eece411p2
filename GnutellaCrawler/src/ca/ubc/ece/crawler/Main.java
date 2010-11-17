@@ -1,7 +1,8 @@
 package ca.ubc.ece.crawler;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
-import ca.ubc.ece.crawler.Crawler.Status;
 
 public class Main {
 	private static final String DELIM = ",:";
@@ -16,21 +17,20 @@ public class Main {
 	private static int largestFile = 0;
 	private static long totalFileSize = 0;
 	private static int maxNumOfFiles = 0;
-	private static int num_timeout, num_success, num_unroutable, num_refused, num_internal, num_mute, num_noreply;
+	private static int num_timeout, num_success, num_unroutable, num_refused, num_internal, num_mute, num_noreply, num_shielded;
 	
 	private static int timeout = 30;
-	private static int duration = -1;
+	private static double duration = -1;
 	private static long startTime = 0;
 	private static boolean full = false;
 	
     public static void main(String[] args) {
-        Crawler mainCrawler = new Crawler();
-        ArrayList<Node> visited = new ArrayList<Node>();
-        ArrayList<Node> unvisited = new ArrayList<Node>();
+        Vector<Node> visited = new Vector<Node>();
+        Vector<Node> unvisited = new Vector<Node>();
         
         /* Parse command-line bootstrap parameters */
         if (args.length < 2){
-            System.out.println("Error: incorrect inputs\nUsage:\n\tMain <Node-address> <node-port>");
+            System.out.println("Usage:\n\tMain <-full | -minimal> timeout=XX <address:port> <timetorun>");
             return;
         } else {
         	for (int i = 0; i < args.length; i++) {
@@ -46,32 +46,51 @@ public class Main {
         			System.out.println("Connection timeout set for " + timeout/MS_TO_SEC + " second(s)");
         		} else if (args[i].indexOf(":") != -1) {
         			String[] arg = args[i].split(":");
-        			unvisited.add(new Node(arg[0], Integer.parseInt(arg[1])));
+        			try {
+						unvisited.add(new Node(InetAddress.getByName(arg[0]).getHostAddress(), Integer.parseInt(arg[1])));
+					} catch (NumberFormatException e) {
+						System.out.println("\nUsage:\n\tMain <-full | -minimal> timeout=XX <address:port> <timetorun>");
+						return;
+					} catch (UnknownHostException e) {
+						System.out.println("\nUsage:\n\tMain <-full | -minimal> timeout=XX <address:port> <timetorun>");
+						return;
+					}
         		} else {
-        			duration = Integer.parseInt(args[i]);
+        			duration = Double.parseDouble(args[i]);
         			System.out.println("Execution time set for " + duration + " minute(s)");
         		}
         	}
         }
         
+        System.out.print("\n");
+        
         /* Initiate crawling */
         startTime = System.currentTimeMillis();
-        while(unvisited.size() != 0) {	
+        while(unvisited.size() != 0) {
         	CrawlResult info = null;
         	
         	if(checkTime())
         		print(visited, unvisited);
         	
-        	info = mainCrawler.crawl(unvisited.get(FRONT), timeout, full);
+        	info = Crawler.crawl(unvisited.get(FRONT), timeout, full);
+        	System.out.println("Inside ultrapeer " + unvisited.get(FRONT).getAddress() + ":");
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.get(FRONT).setInfo(info);
-		    unvisited.remove(FRONT);
-
+		    unvisited.removeElementAt(FRONT);
+		    
+		    System.err.println("UNVISITED: ");
+		    for (int i = 0; i < unvisited.size(); i++)
+		    	System.err.println("\n" + unvisited.get(i).toString());
+		    System.err.println("VISITED: ");
+		    for (int i = 0; i < visited.size(); i++)
+		    	System.err.println("\n" + visited.get(i).toString());
+		    
 		    update(info);
-
+		    
+		    /* ******************** START OF LEAF CHECKING ******************** */
 		    /* Get info from each leaf node but do not traverse its nodes yet */
 		    String leaves = info.getLeaves();
-    		if(leaves == null || checkShielded(leaves))
+    		if(info.getStatus() != Crawler.Status.CONNECTED)
     			continue;
 		    
 		    StringTokenizer tokens = new StringTokenizer(leaves, DELIM);
@@ -81,32 +100,38 @@ public class Main {
 		    		print(visited, unvisited);
 		    	
 			    Node leaf = new Node(tokens.nextToken(), Integer.parseInt(tokens.nextToken()));
-			    
+			    System.out.println("Inside leaf " + leaf.getAddress() + ":");
 			    // ignore this node if we have already visited it, otherwise get its information
-			    if (leaf.containedIn(visited)) // leaf nodes will never be contained in unvisited (unless leaves have leaves...)
+			    if (leaf.containedIn(visited)) {// leaf nodes will never be contained in unvisited (unless leaves have leaves...)
+			    	System.out.println("Leaf " + leaf.getAddress() + " has already been visited, skipping...");
 			    	continue;
+			    }
 			    
 			    visited.add(leaf);
-		    	CrawlResult leafInfo = mainCrawler.crawl(leaf, timeout, full);
+		    	CrawlResult leafInfo = Crawler.crawl(leaf, timeout, full);
 		    	update(leafInfo);
 		    	leaf.setInfo(leafInfo);
 		    	
 		    	String leafPeers = leafInfo.getUltrapeers();
-	    		if(leafPeers == null || checkShielded(leafPeers)) {
+	    		if(leaf.getInfo().getStatus() != Crawler.Status.CONNECTED)
 	    			continue;
-	    		}
 
 		    	StringTokenizer leafTokens = new StringTokenizer(leafPeers, DELIM);
 		    	
 		    	/* Add unknown ultrapeers of this leaf to our list */
+		    	System.out.println("Checking ultrapeers of " + leaf.getAddress() + "...");
 		    	while (leafTokens.hasMoreTokens()) {
-		    		Node leafNode = new Node(leafTokens.nextToken(), Integer.parseInt(leafTokens.nextToken()));
-		    		if (!leafNode.containedIn(unvisited) && !leafNode.containedIn(visited))
-		    			unvisited.add(leafNode);
+		    		Node ultrapeer = new Node(leafTokens.nextToken(), Integer.parseInt(leafTokens.nextToken()));
+		    		System.out.println("Ultrapeer: " + ultrapeer.getAddress() + ":" + ultrapeer.getPortNum());
+		    		if (!ultrapeer.containedIn(unvisited) && !ultrapeer.containedIn(visited)) {
+		    			System.err.println("Adding : " + ultrapeer.getAddress() + " to unvisited");
+		    			unvisited.add(ultrapeer);
+		    		}
 		    	}
 		    	
 		    	// we are done with this leaf
 		    }
+		    /* ******************** END OF LEAF CHECKING ******************** */
 		    
 		    /* Add new ultrapeers from this ultrapeer to our unvisited list */
 		    String peers = info.getUltrapeers();
@@ -114,23 +139,17 @@ public class Main {
 		    
 		    while (tokens.hasMoreTokens()) {
 			    Node ultra = new Node(tokens.nextToken(), Integer.parseInt(tokens.nextToken()));
-			    
-			    if (!contained(unvisited, ultra) && !contained(visited, ultra))
+			    System.out.println("Checking ultrapeer: " + ultra.getAddress() + ":" + ultra.getPortNum());
+			    if (!ultra.containedIn(unvisited) && !ultra.containedIn(visited)) {
+			    	System.err.println("Adding : " + ultra.getAddress() + " to unvisited");
 			    	unvisited.add(ultra);
+			    }
 		    }
 		    
 		    // repeat for next ultrapeer in list
         }
+        print(visited, unvisited);
         
-    }
-    
-    private static boolean contained(ArrayList<Node> list, Node node) {
-    	// returns true if the node is in the list
-    	for (int i = 0; i < list.size(); i++) {
-    		if (list.get(i).equals(node))
-    			return (true);
-    	}
-    	return (false);
     }
     
     private static void update(CrawlResult info){
@@ -157,12 +176,14 @@ public class Main {
 	    	case NOREPLY:
 	    		num_noreply++;
 	    		break;
+	    	case SHIELDED:
+	    		num_shielded++;
+	    		break;
 	    	}
 	    	
-	    	if (full) {
+	    	if (full && info.getStatus() == Crawler.Status.CONNECTED) {
 	    		if (info.getNumOfFiles() > 0)
 		    		parseExtensions(info.getFilesList());
-	    		
 		    	if(info.getNumOfFiles() > maxNumOfFiles)
 		    		maxNumOfFiles = info.getNumOfFiles();
 		    	
@@ -182,38 +203,27 @@ public class Main {
     
     private static boolean checkTime() {
     	float formattedTime = Round((float)(System.currentTimeMillis() - startTime)/(float)MILLI_TO_MIN, 2);
-    	System.out.println("Crawler has been active for " + formattedTime + " minute(s)");
+    	System.out.println(">>> Crawler has been active for " + formattedTime + " minute(s) <<<");
     	
-    	if (duration != 0 && (formattedTime >= duration)) {
+    	if (duration != -1 && (formattedTime >= duration)) {
     		System.out.println("Execution duration reached, terminating...");
     		return true;
     	}
     	return false;
     }
     
-    private static boolean checkShielded(String info) {
-    	if (info.equals("LLA/0.6 503 Shielded leaf node") || info.equals("LA/0.6 503 Shielded leaf node"))
-    		return true;
-    	return false;
-    }
-    
-    private static void print(ArrayList<Node> visited, ArrayList<Node> unvisited){
+    private static void print(Vector<Node> visited, Vector<Node> unvisited){
     	float formattedTime = Round((float)(System.currentTimeMillis() - startTime)/(float)MILLI_TO_MIN, 2);
     	formattedTime *= 60;
     	for(int i = 0; i < visited.size(); i++){
-    		if(visited.get(i).getInfo().getStatus().equals(Status.CONNECTED)){
-    			System.out.println("Address : " + visited.get(i).getAddress() + " Port : " + visited.get(i).getPortNum());
-    			visited.get(i).getInfo().print();
-    		}else{
-    			System.out.println("Address : " + visited.get(i).getAddress() + " Port : " + visited.get(i).getPortNum());
-    			System.out.println(visited.get(i).getInfo().getStatus());
-    		}
+    		System.out.println(visited.get(i).toString());
     	}
-    	System.out.println("Number of Nodes Discovered : " + (visited.size() + unvisited.size()));
+    	System.out.println("\nNumber of Nodes Discovered : " + (visited.size() + unvisited.size()));
     	System.out.println("Nodes Discovered per Second : " + Round(((visited.size() + unvisited.size())/formattedTime), 2));
     	System.out.println( "Number of Successful Crawls : " + num_success + "\r\n" +
     						"Number of Timeouts : " + num_timeout + "\r\n" +
-    						"Number of Refused Connections : " + num_refused + "\r\n" + 
+    						"Number of Refused Connections : " + num_refused + "\r\n" +
+    						"Number of Shielded nodes: " + num_shielded + "\r\n" +
     						"Number of Internal Errors : " + num_internal + "\r\n" +
     						"Number of Unable to Send Request Errors : " + num_mute + "\r\n" +
     						"Number of Failed to Receieve Reply Errors : " + num_noreply + "\r\n" +
@@ -267,13 +277,9 @@ public class Main {
     	String[] files = filelist.split("\0");
     	for (int i = 0; i < files.length; i++) {
     		Extension ext = new Extension(Extension.findExtension(files[i]));
-    		System.out.println("MORE TESTS BITCH" + ext.getName());
-    		if (!ext.containedIn(extensions)){
-    			System.out.println("SHOULD BE ADDING " + ext.getName());
+    		if (!ext.containedIn(extensions))
     			extensions.add(ext);
-    		}
     	}
-    	System.out.println("EXTENSION SIZE NIGGAS " +  extensions.size());
     }
     
     public static float Round(float Rval, int Rpl) {

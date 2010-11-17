@@ -1,6 +1,6 @@
 package ca.ubc.ece.crawler;
 
-import java.util.ArrayList;
+import java.util.Vector;
 
 public class Node {
 	private String address;
@@ -15,8 +15,12 @@ public class Node {
 	}
 	
 	public boolean equals(Node other) {
-		if (this.address.equals(other.getAddress()) && this.portNum == other.getPortNum())
+		//System.err.println("this: " + this.address + " other: " + other.getAddress());
+		if (this.address.equals(other.getAddress()) && this.portNum == other.getPortNum()) {
+			//System.err.println("EQUAL");
 			return true;
+		}
+		//System.err.println("NOT EQUAL");
 		return false;
 	}
 	
@@ -36,22 +40,26 @@ public class Node {
 		return info;
 	}
 	
-	public boolean containedIn(ArrayList<Node> list) {
+	public boolean containedIn(Vector<Node> list) {
 		// determines if this node is contained in the list
-		for (int i = 0; i < list.size(); i++) {
-			if (list.get(i).equals(this))
+		for (Node other : list) {
+			if (this.equals(other))	{
+				System.err.println(other.getAddress() + " was in the list already");
 				return true;
+			}
 		}
 		return false;
 	}
 	
 	public String toString() {
-		String info = "Address: " + this.address + "\n" +
-			"Port: " + this.portNum + "\n" + 
-			"Status: " + this.info.getStatus() + "\n" +
-			"Agent: " + this.info.getAgent() + "\n";
+		String ret = "Address: " + this.address + "\n" +
+		"Hostname: " + this.info.getHostname() + "\n" +
+		"Port: " + this.portNum + "\n" + 
+		"Status: " + this.info.getStatus() + "\n";
+		if (this.info.getStatus() == Crawler.Status.CONNECTED)
+			ret += "Agent: " + this.info.getAgent() + "\n";
 		
-		return info;
+		return ret;
 	}
 
 }

@@ -4,15 +4,11 @@ import java.io.*;
 import java.net.*;
 
 public class Crawler {
-    private CrawlResult cResult;
+    private static CrawlResult cResult;
     
-    public enum Status { CONNECTED, UNROUTABLE, REFUSED, INTERNAL, TIMEOUT, MUTE, NOREPLY };
+    public enum Status { CONNECTED, UNROUTABLE, REFUSED, INTERNAL, TIMEOUT, MUTE, NOREPLY, SHIELDED };
 
-    public Crawler() {
-        cResult = new CrawlResult();
-    }
-    
-    public CrawlResult crawl(Node node, int timeout, boolean full){
+    public static CrawlResult crawl(Node node, int timeout, boolean full){
     	cResult = new CrawlResult();
         System.out.println("Crawling " + node.getAddress() + ":" + node.getPortNum() + "...");
         String nodePeers = crawlPeers(node.getAddress(), node.getPortNum(), timeout);
@@ -35,7 +31,7 @@ public class Crawler {
         return cResult;
     }
     
-    private String crawlPeers(String ipAddress, int port, int timeout){
+    private static String crawlPeers(String ipAddress, int port, int timeout){
         InputStream in = null;
         OutputStream out = null;
         Socket socket = new Socket();
@@ -65,7 +61,7 @@ public class Crawler {
             return (null);
         }
 
-        System.out.println("Host name is : " + socket.getInetAddress().getHostName());
+        cResult.setHostname(socket.getInetAddress().getHostName());
         String response  = new String();
         StringBuffer request = new StringBuffer();
         request.append("GNUTELLA CONNECT/0.6\r\n" +
@@ -118,7 +114,7 @@ public class Crawler {
         return response;
     }
     
-    private void parsePeers(String topoCrawlResult){
+    private static void parsePeers(String topoCrawlResult){
         int beginIndex;
         int endIndex;        
         String agent = new String();
@@ -139,13 +135,17 @@ public class Crawler {
         leaves = topoCrawlResult.substring(beginIndex+7,endIndex);
         leaves = leaves.trim();     
         
-        cResult.setAgent(agent);
-        cResult.setUltrapeers(upeers);
-        cResult.setLeaves(leaves);
+        if (upeers.equals("LLA/0.6 503 Shielded leaf node") || leaves.equals("LA/0.6 503 Shielded leaf node")) {
+        	cResult.setStatus(Status.SHIELDED);
+        } else {
+	        cResult.setAgent(agent);
+	        cResult.setUltrapeers(upeers);
+	        cResult.setLeaves(leaves);
+        }
     }
    
 
-   private void listFiles(String ipAddress, int port, int timeout){
+   private static void listFiles(String ipAddress, int port, int timeout){
         InputStream in;
         OutputStream out;
         Socket socket = new Socket();
@@ -243,7 +243,7 @@ public class Crawler {
         }
     }
 
-    private void parseFilesListHeader(byte[] flist, int headerEndIndex){
+    private static void parseFilesListHeader(byte[] flist, int headerEndIndex){
         String header = new String(subBuffer(flist, 0, headerEndIndex));
         int strBegin = header.indexOf("Server:");
         int strEnd = header.indexOf('\n', strBegin);
@@ -259,7 +259,7 @@ public class Crawler {
            
     }
 
-    private void processQueryHit(byte[] qhit){
+    private static void processQueryHit(byte[] qhit){
         int endIndex;
         int numOfFiles = qhit[0];
         int fileSize = 0;
@@ -301,7 +301,7 @@ public class Crawler {
     
     }
     
-    private int findEndOfHeader(byte[] packet){
+    private static int findEndOfHeader(byte[] packet){
 
         for (int i = 0; i <= packet.length-4; i++){
             if (packet[i] == '\r' && packet[i+1] == '\n' && packet[i+2] == '\r' && packet[i+3] == '\n')
@@ -310,7 +310,7 @@ public class Crawler {
         return (-1);
     }
     
-    private byte[] subBuffer(byte[] buffer,int beginIndex,int endIndex){
+    private static byte[] subBuffer(byte[] buffer,int beginIndex,int endIndex){
         
         if (beginIndex>buffer.length)
             return null;
@@ -326,7 +326,7 @@ public class Crawler {
         return result;
     }
 
-    private void trimBufferBegining(byte[] buffer, int trimBeginIndex){
+    private static void trimBufferBegining(byte[] buffer, int trimBeginIndex){
         if (trimBeginIndex > buffer.length)
             return;
 
@@ -334,7 +334,7 @@ public class Crawler {
             buffer[i-trimBeginIndex] = buffer[i];
     }
     
-    private int bufferIndexOf(byte[] buffer,char c){
+    private static int bufferIndexOf(byte[] buffer,char c){
         for (int i=0;i<buffer.length;i++){
             if (buffer[i]==c)
                 return i;

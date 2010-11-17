@@ -27,6 +27,7 @@ public class Main {
 	private static double duration = -1;
 	private static long startTime = 0;
 	private static boolean full = false;
+	private static boolean verbose = false;
 	
     public static void main(String[] args) {
         Vector<Node> visited = new Vector<Node>();
@@ -44,6 +45,9 @@ public class Main {
         		} else if (args[i].equals("-minimal")) {
         			System.out.println("Minimal output mode set");
         			full = false;
+        		} else if (args[i].equals("-v")) {
+        			System.out.println("Verbose mode set");
+        			verbose = true;
         		} else if (args[i].startsWith("timeout=")) {
         			String[] arg = args[i].split("=");
         			timeout = Integer.parseInt(arg[1])*MS_TO_SEC;
@@ -61,12 +65,10 @@ public class Main {
 					}
         		} else {
         			duration = Double.parseDouble(args[i]);
-        			System.out.println("Execution time set for " + duration + " minute(s)");
+        			System.out.println("Execution time set for " + duration + " minute(s)\n");
         		}
         	}
         }
-        
-        System.out.print("\n");
         
         /* Initiate crawling */
         startTime = System.currentTimeMillis();
@@ -77,7 +79,10 @@ public class Main {
         		print(visited, unvisited);
         	
         	info = Crawler.crawl(unvisited.get(FRONT), timeout, full);
-        	System.out.println("Inside ultrapeer " + unvisited.get(FRONT).getAddress() + ":");
+        	
+        	if (verbose) 
+        		System.out.println("Inside ultrapeer " + unvisited.get(FRONT).getAddress() + ":");
+        	
 		    visited.add(unvisited.get(FRONT));
 		    unvisited.get(FRONT).setInfo(info);
 		    unvisited.removeElementAt(FRONT);
@@ -97,10 +102,12 @@ public class Main {
 		    		print(visited, unvisited);
 		    	
 			    Node leaf = new Node(tokens.nextToken(), Integer.parseInt(tokens.nextToken()));
-			    System.out.println("Inside leaf " + leaf.getAddress() + ":");
+			    if (verbose) 
+			    	System.out.println("Inside leaf " + leaf.getAddress() + ":");
 			    // ignore this node if we have already visited it, otherwise get its information
 			    if (leaf.containedIn(visited)) {// leaf nodes will never be contained in unvisited (unless leaves have leaves...)
-			    	System.out.println("Leaf " + leaf.getAddress() + " has already been visited, skipping...");
+			    	if (verbose) 
+			    		System.out.println("Leaf " + leaf.getAddress() + " has already been visited, skipping...");
 			    	continue;
 			    }
 			    
@@ -116,12 +123,15 @@ public class Main {
 		    	StringTokenizer leafTokens = new StringTokenizer(leafPeers, DELIM);
 		    	
 		    	/* Add unknown ultrapeers of this leaf to our list */
-		    	System.out.println("Checking ultrapeers of " + leaf.getAddress() + "...");
+		    	if (verbose) 
+		    		System.out.println("Checking ultrapeers of " + leaf.getAddress() + "...");
 		    	while (leafTokens.hasMoreTokens()) {
 		    		Node ultrapeer = new Node(leafTokens.nextToken(), Integer.parseInt(leafTokens.nextToken()));
-		    		System.out.println("Ultrapeer: " + ultrapeer.getAddress() + ":" + ultrapeer.getPortNum());
+		    		if (verbose) 
+		    			System.out.println("Ultrapeer: " + ultrapeer.getAddress() + ":" + ultrapeer.getPortNum());
 		    		if (!ultrapeer.containedIn(unvisited) && !ultrapeer.containedIn(visited)) {
-		    			System.err.println("Adding : " + ultrapeer.getAddress() + " to unvisited");
+		    			if (verbose) 
+		    				System.out.println("Adding : " + ultrapeer.getAddress() + " to unvisited");
 		    			unvisited.add(ultrapeer);
 		    		}
 		    	}
@@ -136,15 +146,19 @@ public class Main {
 		    
 		    while (tokens.hasMoreTokens()) {
 			    Node ultra = new Node(tokens.nextToken(), Integer.parseInt(tokens.nextToken()));
-			    System.out.println("Checking ultrapeer: " + ultra.getAddress() + ":" + ultra.getPortNum());
+			    if (verbose) 
+			    	System.out.println("Checking ultrapeer: " + ultra.getAddress() + ":" + ultra.getPortNum());
 			    if (!ultra.containedIn(unvisited) && !ultra.containedIn(visited)) {
-			    	System.err.println("Adding : " + ultra.getAddress() + " to unvisited");
+			    	if (verbose) 
+			    		System.out.println("Adding : " + ultra.getAddress() + " to unvisited");
 			    	unvisited.add(ultra);
 			    }
 		    }
 		    
 		    // repeat for next ultrapeer in list
         }
+        
+        // list of unvisited nodes exhausted, print statistics and terminate
         print(visited, unvisited);
         
     }
@@ -255,7 +269,6 @@ public class Main {
     	out.close();
     	System.out.println(output);
     	System.exit(0);
-    	
     }
     
     private static Vector<Extension> steveSort(Vector<Extension> list) {

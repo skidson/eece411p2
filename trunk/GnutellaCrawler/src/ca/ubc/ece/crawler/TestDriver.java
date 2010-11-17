@@ -5,37 +5,65 @@ import java.util.Random;
 import java.util.Vector;
 
 public class TestDriver {
+	private static int complexity;
 
 	public static void main(String[] args) {
 		final int RANGE = 2000;
-		long time;
-		Vector<Extension> sortMe = new Vector<Extension>();
+		complexity = 0;
+		long t0, t1;
+		Vector<Extension> unsorted = new Vector<Extension>();
+		Vector<Extension> sorted = new Vector<Extension>();
+		Vector<Score> scores = new Vector<Score>();
+		
 		for (int i = 0; i < RANGE; i++) {
 			Extension ext = new Extension(generateExt());
-			if (!ext.containedIn(sortMe))
-				sortMe.add(ext);
+			if (!ext.containedIn(unsorted))
+				unsorted.add(ext);
 		}
-		
+
 		System.out.println("\n********************* BEFORE *********************");
-		time = System.nanoTime();
-		print(sortMe);
-		System.out.println("Execution time: " + (System.nanoTime() - time) + "ms");
+		print(unsorted);
 		
 		System.out.println("\n********************* STEVESORT *********************");
-		time = System.nanoTime();
-		print(steveSort(sortMe));
-		System.out.println("Execution time: " + (System.nanoTime() - time) + "ns");
+		t0 = System.nanoTime();
+		sorted = steveSort(unsorted);
+		t1 = System.nanoTime();
+		print(sorted);
+		System.out.println("Execution time: " + (t1-t0) + "ns");
+		scores.add(new Score(t1-t0, "Stephen"));
 		
 		System.out.println("\n********************* JEFFSORT *********************");
-		time = System.nanoTime();
-		print(jeffisAwesomeSort(sortMe));
-		System.out.println("Execution time: " + (System.nanoTime() - time) + "ns");
+		t0 = System.nanoTime();
+		sorted = jeffisAwesomeSort(unsorted);
+		t1 = System.nanoTime();
+		print(sorted);
+		System.out.println("Execution time: " + (t1-t0) + "ns");
+		scores.add(new Score(t1-t0, "Jeff"));
+		
+		System.out.println("\n********************* STATISTICS *********************");
+		double fastest = -1, slowest= -1;
+		String winner = "", loser= "";
+		int j = 0;
+		for (int i = 0; i < scores.size(); i++) {
+			if (scores.get(i).time < fastest || fastest == -1) {
+				fastest = scores.get(i).time;
+				winner = scores.get(i).player;
+			}
+			if (scores.get(i).time > slowest || slowest == -1) {
+				slowest = scores.get(i).time;
+				loser = scores.get(i).player;
+			}
+		}
+		System.out.println("Winner is " + winner + "!");
+		System.out.println(winner + " beat " + loser + " by " + (slowest-fastest) + "ns!");
+		System.out.println(winner + " is " + slowest/fastest + " times better than " + loser);
 	}
 	
 	private static Vector<Extension> jeffisAwesomeSort(Vector<Extension> ext){
 		for(int i = 0; i < ext.size(); i++){
 			for(int j = 0; j < ext.size(); j++){
-				if(ext.get(0).getCount() > ext.get(j).getCount())
+				complexity++;
+				if(ext.get(i).getCount() > ext.get(j).getCount())
 					Collections.swap(ext, i, j);
 			}
 		}
@@ -45,6 +73,7 @@ public class TestDriver {
 	private static Vector<Extension> steveSort(Vector<Extension> list) {
 		int index = 1;
 		while(true) {
+			complexity++;
 			if (index == 0) {
 				index++;
 			} else if (list.get(index).getCount() > list.get(index-1).getCount()) {
@@ -59,6 +88,14 @@ public class TestDriver {
 		return(list);
 	}
 	
+	private static String calculateComplexity(int base) {
+		String order = "O(n";
+		for (int i = 0; i < complexity/base; i++)
+			order += "*n";
+		complexity =  0;
+		return(order + ")");
+	}
+	
 	private static String generateExt() {
 		String[] extensions = {"lol", "wtf", "nou", "fag", "ass", "slt", "cnt", "bch", "pro", "nub", "hoe"};
 		return(extensions[(new Random()).nextInt(extensions.length)]);
@@ -71,6 +108,16 @@ public class TestDriver {
 				System.out.println("." + list.get(i).getName() + "\t\t\t" + list.get(i).getCount());
 			else
 				System.out.println("." + list.get(i).getName() + "\t\t" + list.get(i).getCount());
+		}
+	}
+	
+	private static class Score {
+		public long time;
+		public String player;
+		
+		public Score(long time, String player) {
+			this.time = time;
+			this.player = player;
 		}
 	}
 }

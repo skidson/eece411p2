@@ -235,7 +235,7 @@ public class Main {
     							"Smallest File found : " + smallestFile + "B\r\n" +
     							"Largest File found : " + largestFile + "B\r\n" +
     							"Average File size was : " + totalFileSize/totalNumOfFiles + "B\r\n");
-    		extensions = sort(extensions);
+    		extensions = jeffisAwesomeSort(extensions);
     		System.out.println("File Extension \tNumber of Occurences");
     		for (int i = 0; i < extensions.size(); i++) {
     			try {
@@ -252,45 +252,15 @@ public class Main {
     	
     }
     
-    private static Vector<Extension> sort(Vector<Extension> list) {
-    	// returns a sorted list of file extensions in decreasing popularity
-    	if (list.size() <= 1)
-    		return list;
-    	
-    	Vector<Extension> less = new Vector<Extension>();
-    	Vector<Extension> greater = new Vector<Extension>();
-    	
-    	// partition
-    	int pivot = list.size()/2;
-    	for (int i = 0; i < list.size(); i++) {
-    		if (list.get(i).getCount() <= list.get(pivot).getCount())
-    			less.add(list.get(i));
-    		else
-    			greater.add(list.get(i));
-    	}
-    	greater.add(list.get(pivot));
-    	greater.addAll(less);
-    	return (greater);
-    	
-    	
-    	/*int index = 1;
-    	while (true) {
-    		try {
-	    		if (list.get(index-1) == null) {
-	    			index++;
-	    		} else if (list.get(index).getCount() > list.get(index-1).getCount()){
-	    			list.insertElementAt(list.get(index), index - 1);
-	    			list.removeElementAt(index + 1);
-	    			index--;
-	    		} else {
-	    			index++;
-	    		}
-    		} catch (ArrayIndexOutOfBoundsException e) {
-    			break;
-    		}
-    	}
-    	return list; */
-    }
+    private static Vector<Extension> jeffisAwesomeSort(Vector<Extension> ext){
+		for(int i = 0; i < ext.size(); i++){
+			for(int j = 0; j < ext.size(); j++){
+				if(ext.get(0).getCount() > ext.get(j).getCount())
+					Collections.swap(ext, i, j);
+			}
+		}
+		return ext;
+	}
     
     private static void parseExtensions(String filelist) {
     	String[] files = filelist.split("\0");

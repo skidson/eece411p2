@@ -78,12 +78,12 @@ public class Main {
 		    unvisited.get(FRONT).setInfo(info);
 		    unvisited.removeElementAt(FRONT);
 		    
-		    System.err.println("UNVISITED: ");
+		    /*System.err.println("UNVISITED: ");
 		    for (int i = 0; i < unvisited.size(); i++)
 		    	System.err.println("\n" + unvisited.get(i).toString());
 		    System.err.println("VISITED: ");
 		    for (int i = 0; i < visited.size(); i++)
-		    	System.err.println("\n" + visited.get(i).toString());
+		    	System.err.println("\n" + visited.get(i).toString());*/
 		    
 		    update(info);
 		    
@@ -237,7 +237,7 @@ public class Main {
     							"Average File size was : " + totalFileSize/totalNumOfFiles + "B\r\n");
     		extensions = sort(extensions);
     		System.out.println("File Extension \tNumber of Occurences");
-    		for (int i = 0; i < 10; i++) {
+    		for (int i = 0; i < extensions.size(); i++) {
     			try {
     				if (extensions.get(i).getName().length() < 5)
     					System.out.println("." + extensions.get(i).getName() + "\t\t\t" + extensions.get(i).getCount());
@@ -253,8 +253,27 @@ public class Main {
     }
     
     private static Vector<Extension> sort(Vector<Extension> list) {
-    	// sorts the list of file extensions by decreasing popularity
-    	int index = 1;
+    	// returns a sorted list of file extensions in decreasing popularity
+    	if (list.size() <= 1)
+    		return list;
+    	
+    	Vector<Extension> less = new Vector<Extension>();
+    	Vector<Extension> greater = new Vector<Extension>();
+    	
+    	// partition
+    	int pivot = list.size()/2;
+    	for (int i = 0; i < list.size(); i++) {
+    		if (list.get(i).getCount() <= list.get(pivot).getCount())
+    			less.add(list.get(i));
+    		else
+    			greater.add(list.get(i));
+    	}
+    	greater.add(list.get(pivot));
+    	greater.addAll(less);
+    	return (greater);
+    	
+    	
+    	/*int index = 1;
     	while (true) {
     		try {
 	    		if (list.get(index-1) == null) {
@@ -270,7 +289,7 @@ public class Main {
     			break;
     		}
     	}
-    	return list;
+    	return list; */
     }
     
     private static void parseExtensions(String filelist) {

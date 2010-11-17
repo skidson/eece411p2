@@ -1,118 +1,795 @@
-Address: 142.104.21.245
-Port: 7005
+Address: 137.82.84.242
+Port: 5627
 Status: CONNECTED
-Hostname: pl1.planetlab.uvic.ca
+Hostname: reala.ece.ubc.ca
 Agent: LimeWire
 
 
-Address: 87.236.232.174
-Port: 7005
+Address: 68.33.22.42
+Port: 2594
+Status: TIMEOUT
+
+
+Address: 77.38.1.93
+Port: 13975
+Status: REFUSED
+
+
+Address: 70.71.175.5
+Port: 9118
+Status: TIMEOUT
+
+
+Address: 24.147.5.74
+Port: 15430
+Status: TIMEOUT
+
+
+Address: 99.191.131.46
+Port: 23215
+Status: TIMEOUT
+
+
+Address: 198.53.10.58
+Port: 47398
+Status: TIMEOUT
+
+
+Address: 69.155.31.23
+Port: 34180
 Status: CONNECTED
-Hostname: 87.236.232.174
+Hostname: adsl-69-155-31-23.dsl.stlsmo.swbell.net
 Agent: LimeWire
 
 
-Address: 138.96.116.20
-Port: 7005
+Address: 174.61.17.35
+Port: 26756
+Status: TIMEOUT
+
+
+Address: 71.234.79.211
+Port: 35448
+Status: TIMEOUT
+
+
+Address: 220.215.34.213
+Port: 41319
+Status: TIMEOUT
+
+
+Address: 187.38.11.250
+Port: 1284
+Status: TIMEOUT
+
+
+Address: 24.185.111.73
+Port: 39703
+Status: TIMEOUT
+
+
+Address: 76.199.6.253
+Port: 31053
+Status: TIMEOUT
+
+
+Address: 212.200.168.155
+Port: 47866
+Status: TIMEOUT
+
+
+Address: 98.81.12.134
+Port: 59115
+Status: TIMEOUT
+
+
+Address: 189.18.74.92
+Port: 51611
+Status: TIMEOUT
+
+
+Address: 84.24.183.177
+Port: 4377
+Status: TIMEOUT
+
+
+Address: 75.86.161.158
+Port: 8823
+Status: TIMEOUT
+
+
+Address: 82.7.247.55
+Port: 24898
+Status: TIMEOUT
+
+
+Address: 189.125.212.166
+Port: 24455
+Status: REFUSED
+
+
+Address: 24.179.36.210
+Port: 13623
+Status: TIMEOUT
+
+
+Address: 187.43.125.191
+Port: 51853
+Status: TIMEOUT
+
+
+Address: 187.105.0.158
+Port: 55679
+Status: TIMEOUT
+
+
+Address: 72.130.47.126
+Port: 28096
+Status: TIMEOUT
+
+
+Address: 187.39.35.63
+Port: 21832
+Status: TIMEOUT
+
+
+Address: 189.82.143.90
+Port: 50255
+Status: REFUSED
+
+
+Address: 189.216.80.225
+Port: 49944
+Status: TIMEOUT
+
+
+Address: 79.46.174.200
+Port: 20659
+Status: TIMEOUT
+
+
+Address: 69.68.182.126
+Port: 41670
+Status: TIMEOUT
+
+
+Address: 86.171.199.239
+Port: 15833
+Status: TIMEOUT
+
+
+Address: 65.28.237.76
+Port: 11614
 Status: CONNECTED
-Hostname: emoi.pl.sophia.inria.fr
+Hostname: cpe-65-28-237-76.woh.res.rr.com
 Agent: LimeWire
 
 
-Address: 131.114.59.243
-Port: 7005
+Address: 94.187.26.145
+Port: 44414
+Status: TIMEOUT
+
+
+Address: 68.112.66.6
+Port: 47749
+Status: TIMEOUT
+
+
+Address: 72.168.196.136
+Port: 40129
+Status: TIMEOUT
+
+
+Address: 70.51.229.239
+Port: 19897
+Status: TIMEOUT
+
+
+Address: 99.99.240.139
+Port: 9890
+Status: TIMEOUT
+
+
+Address: 24.7.203.215
+Port: 40254
+Status: REFUSED
+
+
+Address: 61.44.65.7
+Port: 47013
+Status: TIMEOUT
+
+
+Address: 74.214.241.104
+Port: 6346
+Status: TIMEOUT
+
+
+Address: 217.44.219.210
+Port: 36806
+Status: TIMEOUT
+
+
+Address: 78.179.201.16
+Port: 8293
+Status: TIMEOUT
+
+
+Address: 71.175.208.254
+Port: 12000
+Status: TIMEOUT
+
+
+Address: 156.34.218.106
+Port: 46057
+Status: TIMEOUT
+
+
+Address: 82.169.242.246
+Port: 23508
+Status: TIMEOUT
+
+
+Address: 68.18.210.93
+Port: 38586
+Status: TIMEOUT
+
+
+Address: 67.183.131.236
+Port: 32516
 Status: CONNECTED
-Hostname: onelab7.iet.unipi.it
+Hostname: c-67-183-131-236.hsd1.wa.comcast.net
+Agent: Frosty
+
+
+Address: 68.97.197.199
+Port: 37916
+Status: CONNECTED
+Hostname: ip68-97-197-199.ok.ok.cox.net
+Agent: Frosty
+
+
+Address: 71.182.108.50
+Port: 18424
+Status: CONNECTED
+Hostname: pool-71-182-108-50.syrcny.east.verizon.net
 Agent: LimeWire
 
 
-Address: 128.112.139.18
-Port: 7005
+Address: 67.234.67.244
+Port: 44534
+Status: TIMEOUT
+
+
+Address: 203.84.170.50
+Port: 24445
+Status: TIMEOUT
+
+
+Address: 99.195.59.61
+Port: 37024
+Status: TIMEOUT
+
+
+Address: 222.154.168.210
+Port: 11550
+Status: TIMEOUT
+
+
+Address: 93.179.23.77
+Port: 22006
+Status: TIMEOUT
+
+
+Address: 80.56.13.156
+Port: 37558
+Status: TIMEOUT
+
+
+Address: 82.0.91.15
+Port: 41848
+Status: TIMEOUT
+
+
+Address: 86.195.58.244
+Port: 46038
+Status: TIMEOUT
+
+
+Address: 72.84.178.207
+Port: 13379
+Status: TIMEOUT
+
+
+Address: 71.232.251.109
+Port: 12492
 Status: CONNECTED
-Hostname: planetlab-01.CS.Princeton.EDU
+Hostname: c-71-232-251-109.hsd1.nh.comcast.net
 Agent: LimeWire
 
 
-Address: 158.130.6.254
-Port: 7005
+Address: 77.249.108.158
+Port: 18301
+Status: TIMEOUT
+
+
+Address: 74.199.127.76
+Port: 44449
 Status: CONNECTED
-Hostname: planetlab1.CIS.upenn.edu
+Hostname: d199-74-76-127.clv.wideopenwest.com
 Agent: LimeWire
 
 
-Address: 128.83.122.179
-Port: 7005
+Address: 74.138.4.24
+Port: 16510
+Status: TIMEOUT
+
+
+Address: 99.108.117.166
+Port: 6515
+Status: TIMEOUT
+
+
+Address: 221.190.119.249
+Port: 24199
 Status: CONNECTED
-Hostname: planetlab1.csres.utexas.edu
+Hostname: p4249-ipad101fukuokachu.fukuoka.ocn.ne.jp
 Agent: LimeWire
 
 
-Address: 165.91.83.22
-Port: 7005
+Address: 24.4.76.108
+Port: 18269
 Status: CONNECTED
-Hostname: planetlab1.tamu.edu
+Hostname: c-24-4-76-108.hsd1.ca.comcast.net
 Agent: LimeWire
 
 
-Address: 193.63.75.19
-Port: 7005
+Address: 78.152.231.221
+Port: 21646
+Status: TIMEOUT
+
+
+Address: 71.48.31.23
+Port: 45745
+Status: TIMEOUT
+
+
+Address: 220.253.15.106
+Port: 6346
 Status: CONNECTED
-Hostname: planetlab-2.ic.ac.uk
+Hostname: 220-253-15-106.VIC.netspace.net.au
+Agent: Frosty
+
+
+Address: 174.98.102.187
+Port: 36015
+Status: CONNECTED
+Hostname: cpe-174-098-102-187.triad.res.rr.com
 Agent: LimeWire
 
 
-Address: 196.219.200.165
-Port: 7005
+Address: 72.130.60.11
+Port: 21574
 Status: CONNECTED
-Hostname: 196.219.200.165
+Hostname: cpe-72-130-60-11.socal.res.rr.com
 Agent: LimeWire
 
 
-Address: 128.31.1.13
-Port: 7005
+Address: 216.46.156.90
+Port: 13059
+Status: TIMEOUT
+
+
+Address: 112.138.11.216
+Port: 8615
+Status: TIMEOUT
+
+
+Address: 71.194.107.209
+Port: 31262
+Status: TIMEOUT
+
+
+Address: 98.93.60.99
+Port: 33609
+Status: TIMEOUT
+
+
+Address: 69.134.41.111
+Port: 28765
+Status: TIMEOUT
+
+
+Address: 24.222.152.33
+Port: 34759
+Status: TIMEOUT
+
+
+Address: 96.250.75.238
+Port: 44149
+Status: TIMEOUT
+
+
+Address: 67.162.118.153
+Port: 12292
+Status: TIMEOUT
+
+
+Address: 203.105.74.155
+Port: 28852
+Status: TIMEOUT
+
+
+Address: 72.27.61.176
+Port: 26919
+Status: TIMEOUT
+
+
+Address: 96.247.145.39
+Port: 48583
+Status: TIMEOUT
+
+
+Address: 76.180.129.172
+Port: 9604
+Status: TIMEOUT
+
+
+Address: 96.23.116.55
+Port: 36572
+Status: TIMEOUT
+
+
+Address: 71.7.219.153
+Port: 34280
 Status: CONNECTED
-Hostname: planetlab3.csail.mit.edu
+Hostname: blk-7-219-153.eastlink.ca
 Agent: LimeWire
 
 
-Address: 128.10.19.52
-Port: 7005
+Address: 67.233.104.121
+Port: 3383
+Status: TIMEOUT
+
+
+Address: 174.116.116.29
+Port: 39182
+Status: TIMEOUT
+
+
+Address: 72.241.100.17
+Port: 23204
+Status: TIMEOUT
+
+
+Address: 62.194.128.208
+Port: 39018
+Status: REFUSED
+
+
+Address: 88.219.67.61
+Port: 6346
+Status: TIMEOUT
+
+
+Address: 99.101.30.41
+Port: 34081
+Status: TIMEOUT
+
+
+Address: 65.34.43.244
+Port: 34934
+Status: TIMEOUT
+
+
+Address: 68.189.234.101
+Port: 23121
+Status: TIMEOUT
+
+
+Address: 24.142.31.183
+Port: 50868
 Status: CONNECTED
-Hostname: planetlab1.cs.purdue.edu
+Hostname: blk-142-31-183.eastlink.ca
 Agent: LimeWire
 
 
-Address: 169.229.50.5
-Port: 7005
+Address: 58.179.75.160
+Port: 45781
+Status: TIMEOUT
+
+
+Address: 71.135.104.242
+Port: 39020
+Status: TIMEOUT
+
+
+Address: 188.51.127.177
+Port: 1893
+Status: TIMEOUT
+
+
+Address: 24.190.43.159
+Port: 51068
+Status: TIMEOUT
+
+
+Address: 76.66.158.59
+Port: 33954
+Status: TIMEOUT
+
+
+Address: 98.64.113.202
+Port: 15212
+Status: REFUSED
+
+
+Address: 50.9.179.76
+Port: 46123
+Status: TIMEOUT
+
+
+Address: 75.138.106.86
+Port: 7785
+Status: TIMEOUT
+
+
+Address: 98.114.78.169
+Port: 10798
+Status: TIMEOUT
+
+
+Address: 69.155.140.7
+Port: 5154
+Status: TIMEOUT
+
+
+Address: 70.249.144.213
+Port: 45264
+Status: TIMEOUT
+
+
+Address: 131.118.188.1
+Port: 36964
+Status: TIMEOUT
+
+
+Address: 98.141.36.88
+Port: 2434
 Status: CONNECTED
-Hostname: planetlab3.Millennium.Berkeley.EDU
+Hostname: static-98-141-36-88.dsl.cavtel.net
 Agent: LimeWire
 
 
-Address: 142.150.238.12
-Port: 7005
+Address: 75.80.244.252
+Port: 3071
 Status: CONNECTED
-Hostname: pl1.csl.utoronto.ca
+Hostname: cpe-75-80-244-252.dc.res.rr.com
 Agent: LimeWire
 
 
-Address: 143.107.111.235
-Port: 7005
+Address: 68.102.128.170
+Port: 15125
+Status: TIMEOUT
+
+
+Address: 184.39.44.171
+Port: 32649
+Status: TIMEOUT
+
+
+Address: 76.107.202.212
+Port: 5170
 Status: CONNECTED
-Hostname: plab2.larc.usp.br
+Hostname: c-76-107-202-212.hsd1.ms.comcast.net
+Agent: LimeWire
+
+
+Address: 60.230.183.74
+Port: 4728
+Status: TIMEOUT
+
+
+Address: 189.102.41.164
+Port: 36624
+Status: TIMEOUT
+
+
+Address: 90.3.100.25
+Port: 32532
+Status: TIMEOUT
+
+
+Address: 92.98.184.98
+Port: 46113
+Status: TIMEOUT
+
+
+Address: 69.154.187.70
+Port: 38854
+Status: REFUSED
+
+
+Address: 68.150.151.233
+Port: 42142
+Status: TIMEOUT
+
+
+Address: 38.107.161.242
+Port: 48926
+Status: TIMEOUT
+
+
+Address: 38.107.161.167
+Port: 58199
+Status: TIMEOUT
+
+
+Address: 38.107.161.165
+Port: 45453
+Status: REFUSED
+
+
+Address: 38.107.160.163
+Port: 49984
+Status: REFUSED
+
+
+Address: 38.107.161.59
+Port: 20130
+Status: REFUSED
+
+
+Address: 38.107.161.104
+Port: 18715
+Status: TIMEOUT
+
+
+Address: 38.107.162.39
+Port: 49672
+Status: TIMEOUT
+
+
+Address: 198.99.190.238
+Port: 35167
+Status: REFUSED
+
+
+Address: 188.24.139.237
+Port: 7386
+Status: TIMEOUT
+
+
+Address: 89.211.72.113
+Port: 47349
+Status: TIMEOUT
+
+
+Address: 90.191.232.65
+Port: 24067
+Status: TIMEOUT
+
+
+Address: 96.23.54.244
+Port: 24917
+Status: CONNECTED
+Hostname: modemcable244.54-23-96.mc.videotron.ca
+Agent: LimeWire
+
+
+Address: 97.117.206.89
+Port: 14348
+Status: TIMEOUT
+
+
+Address: 68.80.16.67
+Port: 39733
+Status: TIMEOUT
+
+
+Address: 201.82.209.176
+Port: 40193
+Status: TIMEOUT
+
+
+Address: 76.188.29.191
+Port: 34130
+Status: TIMEOUT
+
+
+Address: 151.80.85.31
+Port: 44985
+Status: TIMEOUT
+
+
+Address: 69.85.144.36
+Port: 40699
+Status: CONNECTED
+Hostname: 69-85-144-36.socal.dialup.o1.com
+Agent: LimeWire
+
+
+Address: 82.238.169.251
+Port: 42110
+Status: CONNECTED
+Hostname: gar78-1-82-238-169-251.fbx.proxad.net
+Agent: LimeWire
+
+
+Address: 74.131.157.139
+Port: 15489
+Status: TIMEOUT
+
+
+Address: 207.98.230.214
+Port: 13192
+Status: CONNECTED
+Hostname: 207.98.230.214
+Agent: Frosty
+
+
+Address: 114.48.11.8
+Port: 25369
+Status: TIMEOUT
+
+
+Address: 70.65.177.21
+Port: 14176
+Status: TIMEOUT
+
+
+Address: 67.234.82.17
+Port: 4056
+Status: TIMEOUT
+
+
+Address: 99.233.17.243
+Port: 49461
+Status: CONNECTED
+Hostname: CPE001676a1569c-CM001bd713406a.cpe.net.cable.rogers.com
 Agent: LimeWire
 
 
 
-Number of Nodes Discovered : 15
+Number of Nodes Discovered : 305
 
-Number of Nodes Discovered : 15
-Nodes Discovered per Second : 0.06
-Number of Successful Crawls : 15
-Number of Timeouts : 0
-Number of Refused Connections : 0
+Number of Nodes Discovered : 305
+Nodes Discovered per Second : 0.34
+Number of Successful Crawls : 23
+Number of Timeouts : 107
+Number of Refused Connections : 11
 Number of Shielded nodes: 0
 Number of Internal Errors : 0
 Number of Unable to Send Request Errors : 0
 Number of Failed to Receieve Reply Errors : 0
-Number of Discovered Nodes but have not visited yet : 0
+Number of Discovered Nodes but have not visited yet : 164
+
+
+Maximum Files on a node was : 1251
+Average Files on all nodes was 167.04
+Smallest File found : 19B
+Largest File found : 1878194340B
+Average File size was : 39376439B
+
+File Extension 	Number of Occurences
+.mp3			3275
+.jpg			175
+.avi			174
+.torrent		63
+.mp4			33
+.txt			31
+.m4a			27
+.mpg			16
+.srt			14
+.zip			6
+.exe			6
+.wma			5
+.rar			5
+.iso			4
+.Saved		1
+.wav			1
+.sub			1
+.png			1
+.bin			1
+.qt			1
+.nds			1
+.7z			1

@@ -1,3 +1,14 @@
+/*	Name: CrawlResult.java
+ * 		- storage object for node information
+ * 
+ * 	Authors:	Stephen Kidson - #15345077
+ * 				David Lo - #20123071
+ * 				Jeffrey Payan - #18618074
+ * 				(original by Samer Al-Kiswany)
+ * 				
+ * 	Last updated: November 17, 2010
+ */
+
 package ca.ubc.ece.crawler;
 
 import ca.ubc.ece.crawler.Crawler.Status;

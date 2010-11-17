@@ -17,7 +17,7 @@ import java.util.Vector;
 public class TestDriver {
 
 	public static void main(String[] args) {
-		final int RANGE = 2000000;
+		final int RANGE = 2;
 		long t0, t1;
 		Vector<Extension> unsorted = new Vector<Extension>();
 		Vector<Extension> sorted = new Vector<Extension>();
@@ -68,22 +68,21 @@ public class TestDriver {
 	}
 	
 	public static Vector<Extension> jeffisAwesomeSort(Vector<Extension> ext) {
-		    int firstOutOfOrder, location;
-		    Extension temp;
-		    for(firstOutOfOrder = 1; firstOutOfOrder < ext.size(); firstOutOfOrder++) { 
-		        if(ext.get(firstOutOfOrder).getCount() > ext.get(firstOutOfOrder - 1).getCount()) {
-		            temp = ext.get(firstOutOfOrder);
-		            location = firstOutOfOrder;
-		            do {
-		            	ext.setElementAt(ext.get(location-1), location);
-		                location--;
-		            }
-		            while (location > 0 && ext.get(location-1).getCount() < temp.getCount());
-		            ext.setElementAt(temp, location);
-		        }
-		    }
-		    return ext;
-		} 
+	    int firstOutOfOrder, location;
+	    Extension temp;
+	    for(firstOutOfOrder = 1; firstOutOfOrder < ext.size(); firstOutOfOrder++) { 
+	        if(ext.get(firstOutOfOrder).getCount() > ext.get(firstOutOfOrder - 1).getCount()) {
+	            temp = ext.get(firstOutOfOrder);
+	            location = firstOutOfOrder;
+	            do {
+	            	ext.setElementAt(ext.get(location-1), location);
+	                location--;
+	            } while (location > 0 && ext.get(location-1).getCount() < temp.getCount());
+	            ext.setElementAt(temp, location);
+	        }
+	    }
+	    return ext;
+	}
 	
 	private static Vector<Extension> steveSort(Vector<Extension> list) {
 		// SHITSORT

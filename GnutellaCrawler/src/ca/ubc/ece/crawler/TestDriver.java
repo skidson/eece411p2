@@ -1,12 +1,14 @@
 package ca.ubc.ece.crawler;
 
+import java.util.Collections;
 import java.util.Random;
 import java.util.Vector;
 
 public class TestDriver {
 
 	public static void main(String[] args) {
-		final int RANGE = 20;
+		final int RANGE = 2000;
+		long time;
 		Vector<Extension> sortMe = new Vector<Extension>();
 		for (int i = 0; i < RANGE; i++) {
 			Extension ext = new Extension(generateExt());
@@ -15,38 +17,50 @@ public class TestDriver {
 		}
 		
 		System.out.println("\n********************* BEFORE *********************");
+		time = System.nanoTime();
 		print(sortMe);
+		System.out.println("Execution time: " + (System.nanoTime() - time) + "ms");
 		
-		System.out.println("\n********************* AFTER ********************s*");
-		print(quicksort(sortMe));
+		System.out.println("\n********************* STEVESORT *********************");
+		time = System.nanoTime();
+		print(steveSort(sortMe));
+		System.out.println("Execution time: " + (System.nanoTime() - time) + "ns");
+		
+		System.out.println("\n********************* JEFFSORT *********************");
+		time = System.nanoTime();
+		print(jeffisAwesomeSort(sortMe));
+		System.out.println("Execution time: " + (System.nanoTime() - time) + "ns");
 	}
 	
-	private static Vector<Extension> quicksort(Vector<Extension> list) {
-			if (list.size() > 2)
-				return list;
-		
-			Vector<Extension> less = new Vector<Extension>();
-			Vector<Extension> greater = new Vector<Extension>();
-			
-			int pivot = list.size()/2;
-			
-			for (int i = 0; i < list.size(); i++) {
-				if (list.get(i).getCount() <= list.get(pivot).getCount())
-					less.add(list.get(i));
-				else
-					greater.add(list.get(i));
+	private static Vector<Extension> jeffisAwesomeSort(Vector<Extension> ext){
+		for(int i = 0; i < ext.size(); i++){
+			for(int j = 0; j < ext.size(); j++){
+				if(ext.get(0).getCount() > ext.get(j).getCount())
+					Collections.swap(ext, i, j);
 			}
-			
-			greater = quicksort(greater);
-			less = quicksort(less);
-			greater.add(list.get(pivot));
-			greater.addAll(less);
-			
-			return(greater);
+		}
+		return ext;
+	}
+	
+	private static Vector<Extension> steveSort(Vector<Extension> list) {
+		int index = 1;
+		while(true) {
+			if (index == 0) {
+				index++;
+			} else if (list.get(index).getCount() > list.get(index-1).getCount()) {
+				Collections.swap(list, index, index-1);
+				index--;
+			} else if (index == list.size() - 1) {
+				break;
+			} else {
+				index++;
+			}
+		}
+		return(list);
 	}
 	
 	private static String generateExt() {
-		String[] extensions = { "lol", "wtf", "nou", "fag", "ass", "slt", "cnt", "bch"};
+		String[] extensions = {"lol", "wtf", "nou", "fag", "ass", "slt", "cnt", "bch", "pro", "nub", "hoe"};
 		return(extensions[(new Random()).nextInt(extensions.length)]);
 	}
 	

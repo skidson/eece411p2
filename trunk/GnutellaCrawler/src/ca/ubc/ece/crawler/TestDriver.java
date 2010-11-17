@@ -5,11 +5,9 @@ import java.util.Random;
 import java.util.Vector;
 
 public class TestDriver {
-	private static int complexity;
 
 	public static void main(String[] args) {
 		final int RANGE = 2000;
-		complexity = 0;
 		long t0, t1;
 		Vector<Extension> unsorted = new Vector<Extension>();
 		Vector<Extension> sorted = new Vector<Extension>();

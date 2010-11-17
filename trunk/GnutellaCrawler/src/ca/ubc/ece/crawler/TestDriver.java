@@ -7,7 +7,7 @@ import java.util.Vector;
 public class TestDriver {
 
 	public static void main(String[] args) {
-		final int RANGE = 2000;
+		final int RANGE = 2000000;
 		long t0, t1;
 		Vector<Extension> unsorted = new Vector<Extension>();
 		Vector<Extension> sorted = new Vector<Extension>();
@@ -49,7 +49,7 @@ public class TestDriver {
 			}
 			if (scores.get(i).time > slowest || slowest == -1) {
 				slowest = scores.get(i).time;
-				loser = scores.get(i).player;
+				loser = scores.get(i).player;	
 			}
 		}
 		System.out.println("Winner is " + winner + "!");
@@ -57,15 +57,23 @@ public class TestDriver {
 		System.out.println(winner + " is " + slowest/fastest + " times better than " + loser);
 	}
 	
-	private static Vector<Extension> jeffisAwesomeSort(Vector<Extension> ext){
-		for(int i = 0; i < ext.size(); i++){
-			for(int j = 0; j < ext.size(); j++){
-				if(ext.get(i).getCount() > ext.get(j).getCount())
-					Collections.swap(ext, i, j);
-			}
-		}
-		return ext;
-	}
+	public static Vector<Extension> jeffisAwesomeSort(Vector<Extension> ext) {
+		    int firstOutOfOrder, location;
+		    Extension temp;
+		    for(firstOutOfOrder = 1; firstOutOfOrder < ext.size(); firstOutOfOrder++) { 
+		        if(ext.get(firstOutOfOrder).getCount() > ext.get(firstOutOfOrder - 1).getCount()) {
+		            temp = ext.get(firstOutOfOrder);
+		            location = firstOutOfOrder;
+		            do {
+		            	ext.setElementAt(ext.get(location-1), location);
+		                location--;
+		            }
+		            while (location > 0 && ext.get(location-1).getCount() < temp.getCount());
+		            ext.setElementAt(temp, location);
+		        }
+		    }
+		    return ext;
+		} 
 	
 	private static Vector<Extension> steveSort(Vector<Extension> list) {
 		// SHITSORT
@@ -123,7 +131,7 @@ public class TestDriver {
 	}
 	
 	private static String generateExt() {
-		String[] extensions = {"lol", "wtf", "nou", "fag", "ass", "slt", "cnt", "bch", "pro", "nub", "hoe"};
+		String[] extensions = {"lol", "wtf", "nou", "fag", "ass", "slt", "cnt", "bch", "pro", "nub", "hoe", "pwn", "sknk", "jew", "hat", "bllz", "nig", "azn"};
 		return(extensions[(new Random()).nextInt(extensions.length)]);
 	}
 	

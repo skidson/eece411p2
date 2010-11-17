@@ -67,31 +67,1175 @@ Hostname: 173-20-121-211.client.mchsi.com
 Agent: LimeWire
 
 
+Address: 99.69.145.69
+Port: 3901
+Status: TIMEOUT
 
-Number of Nodes Discovered : 14
 
-Number of Nodes Discovered : 14
-Nodes Discovered per Second : 0.23
-Number of Successful Crawls : 2
-Number of Timeouts : 8
-Number of Refused Connections : 3
+Address: 69.156.5.15
+Port: 35001
+Status: TIMEOUT
+
+
+Address: 62.24.127.10
+Port: 39830
+Status: TIMEOUT
+
+
+Address: 198.53.10.58
+Port: 47398
+Status: TIMEOUT
+
+
+Address: 79.97.54.233
+Port: 24175
+Status: TIMEOUT
+
+
+Address: 69.155.31.23
+Port: 34180
+Status: CONNECTED
+Hostname: adsl-69-155-31-23.dsl.stlsmo.swbell.net
+Agent: LimeWire
+
+
+Address: 70.28.11.169
+Port: 3741
+Status: REFUSED
+
+
+Address: 124.181.155.115
+Port: 49737
+Status: TIMEOUT
+
+
+Address: 70.48.107.98
+Port: 4348
+Status: TIMEOUT
+
+
+Address: 76.184.160.83
+Port: 5350
+Status: CONNECTED
+Hostname: cpe-76-184-160-83.tx.res.rr.com
+Agent: LimeWire
+
+
+Address: 114.142.213.195
+Port: 28454
+Status: REFUSED
+
+
+Address: 84.24.183.177
+Port: 23341
+Status: TIMEOUT
+
+
+Address: 86.218.85.46
+Port: 44102
+Status: TIMEOUT
+
+
+Address: 83.87.249.9
+Port: 61535
+Status: TIMEOUT
+
+
+Address: 189.125.212.166
+Port: 1263
+Status: REFUSED
+
+
+Address: 78.173.248.239
+Port: 19745
+Status: CONNECTED
+Hostname: 78.173.248.239
+Agent: LimeWire
+
+
+Address: 95.239.220.217
+Port: 19432
+Status: TIMEOUT
+
+
+Address: 187.119.119.174
+Port: 1642
+Status: TIMEOUT
+
+
+Address: 66.176.156.137
+Port: 16777
+Status: CONNECTED
+Hostname: c-66-176-156-137.hsd1.fl.comcast.net
+Agent: LimeWire
+
+
+Address: 173.77.154.95
+Port: 59345
+Status: TIMEOUT
+
+
+Address: 72.72.109.148
+Port: 51637
+Status: TIMEOUT
+
+
+Address: 71.204.251.12
+Port: 6346
+Status: TIMEOUT
+
+
+Address: 62.150.141.218
+Port: 27816
+Status: CONNECTED
+Hostname: 62.150.141.218
+Agent: LimeWire
+
+
+Address: 112.207.104.248
+Port: 49794
+Status: CONNECTED
+Hostname: 112.207.104.248
+Agent: Frosty
+
+
+Address: 173.69.188.203
+Port: 20798
+Status: CONNECTED
+Hostname: 173.69.188.203
+Agent: LimeWire
+
+
+Address: 24.35.56.165
+Port: 10625
+Status: TIMEOUT
+
+
+Address: 119.152.144.47
+Port: 45261
+Status: CONNECTED
+Hostname: 119.152.144.47
+Agent: LimeWire
+
+
+Address: 68.188.160.196
+Port: 45351
+Status: TIMEOUT
+
+
+Address: 88.164.109.224
+Port: 39996
+Status: TIMEOUT
+
+
+Address: 99.231.240.67
+Port: 17404
+Status: TIMEOUT
+
+
+Address: 24.131.88.2
+Port: 15197
+Status: CONNECTED
+Hostname: c-24-131-88-2.hsd1.pa.comcast.net
+Agent: Frosty
+
+
+Address: 77.169.85.140
+Port: 30897
+Status: REFUSED
+
+
+Address: 24.46.24.100
+Port: 44233
+Status: CONNECTED
+Hostname: ool-182e1864.dyn.optonline.net
+Agent: LimeWire
+
+
+Address: 68.118.42.47
+Port: 21934
+Status: CONNECTED
+Hostname: 68-118-42-47.dhcp.mdfd.or.charter.com
+Agent: Frosty
+
+
+Address: 112.198.78.84
+Port: 23150
+Status: TIMEOUT
+
+
+Address: 71.149.245.153
+Port: 46775
+Status: REFUSED
+
+
+Address: 123.211.107.236
+Port: 39444
+Status: CONNECTED
+Hostname: CPE-123-211-107-236.lnse4.cha.bigpond.net.au
+Agent: LimeWire
+
+
+Address: 121.222.184.157
+Port: 8210
+Status: CONNECTED
+Hostname: CPE-121-222-184-157.lnse1.woo.bigpond.net.au
+Agent: LimeWire
+
+
+Address: 60.228.211.188
+Port: 39143
+Status: REFUSED
+
+
+Address: 211.30.1.59
+Port: 44025
+Status: CONNECTED
+Hostname: c211-30-1-59.rivrw2.nsw.optusnet.com.au
+Agent: Frosty
+
+
+Address: 174.17.168.63
+Port: 7279
+Status: REFUSED
+
+
+Address: 119.93.65.12
+Port: 31843
+Status: CONNECTED
+Hostname: 119.93.65.12
+Agent: LimeWire
+
+
+Address: 121.54.59.6
+Port: 4264
+Status: TIMEOUT
+
+
+Address: 208.102.33.40
+Port: 9468
+Status: TIMEOUT
+
+
+Address: 68.81.228.205
+Port: 40114
+Status: TIMEOUT
+
+
+Address: 68.50.164.170
+Port: 7442
+Status: TIMEOUT
+
+
+Address: 24.148.74.150
+Port: 39148
+Status: CONNECTED
+Hostname: 24-148-74-150.mcm-bsr1.chi-mcm.il.cable.rcn.com
+Agent: LimeWire
+
+
+Address: 76.255.75.74
+Port: 21365
+Status: REFUSED
+
+
+Address: 75.20.155.43
+Port: 30902
+Status: TIMEOUT
+
+
+Address: 68.60.48.240
+Port: 10704
+Status: CONNECTED
+Hostname: c-68-60-48-240.hsd1.mi.comcast.net
+Agent: Frosty
+
+
+Address: 142.162.167.24
+Port: 32303
+Status: CONNECTED
+Hostname: stjhnf0112w-142162167024.pppoe-dynamic.High-Speed.nl.bellaliant.net
+Agent: LimeWire
+
+
+Address: 38.107.161.166
+Port: 39961
+Status: REFUSED
+
+
+Address: 38.107.161.58
+Port: 53621
+Status: REFUSED
+
+
+Address: 38.107.161.233
+Port: 38928
+Status: REFUSED
+
+
+Address: 66.210.30.227
+Port: 35119
+Status: TIMEOUT
+
+
+Address: 96.246.146.190
+Port: 54824
+Status: TIMEOUT
+
+
+Address: 91.179.144.56
+Port: 29144
+Status: REFUSED
+
+
+Address: 143.238.0.226
+Port: 4645
+Status: TIMEOUT
+
+
+Address: 142.59.164.165
+Port: 10893
+Status: TIMEOUT
+
+
+Address: 67.204.250.126
+Port: 9950
+Status: TIMEOUT
+
+
+Address: 108.17.78.206
+Port: 28597
+Status: CONNECTED
+Hostname: pool-108-17-78-206.pitbpa.fios.verizon.net
+Agent: LimeWire
+
+
+Address: 90.5.75.191
+Port: 8548
+Status: CONNECTED
+Hostname: ABordeaux-156-1-92-191.w90-5.abo.wanadoo.fr
+Agent: LimeWire
+
+
+Address: 112.202.124.97
+Port: 37297
+Status: TIMEOUT
+
+
+Address: 65.87.233.158
+Port: 30126
+Status: CONNECTED
+Hostname: static65-87-233-158.r.rev.accesscomm.ca
+Agent: LimeWire
+
+
+Address: 79.80.226.12
+Port: 46420
+Status: TIMEOUT
+
+
+Address: 90.33.36.48
+Port: 9679
+Status: TIMEOUT
+
+
+Address: 76.29.35.178
+Port: 43089
+Status: CONNECTED
+Hostname: c-76-29-35-178.hsd1.il.comcast.net
+Agent: LimeWire
+
+
+Address: 71.52.149.201
+Port: 35699
+Status: CONNECTED
+Hostname: nc-71-52-149-201.dhcp.embarqhsd.net
+Agent: LimeWire
+
+
+Address: 92.10.201.142
+Port: 45757
+Status: TIMEOUT
+
+
+Address: 180.190.221.229
+Port: 20707
+Status: TIMEOUT
+
+
+Address: 38.107.160.249
+Port: 40637
+Status: REFUSED
+
+
+Address: 120.28.241.155
+Port: 19085
+Status: TIMEOUT
+
+
+Address: 81.214.204.122
+Port: 45648
+Status: TIMEOUT
+
+
+Address: 94.98.178.213
+Port: 20440
+Status: TIMEOUT
+
+
+Address: 91.178.64.58
+Port: 21792
+Status: TIMEOUT
+
+
+Address: 88.226.84.78
+Port: 25625
+Status: TIMEOUT
+
+
+Address: 68.108.216.183
+Port: 28693
+Status: CONNECTED
+Hostname: ip68-108-216-183.ph.ph.cox.net
+Agent: LimeWire
+
+
+Address: 58.105.215.254
+Port: 30267
+Status: TIMEOUT
+
+
+Address: 75.191.164.193
+Port: 35266
+Status: CONNECTED
+Hostname: cpe-075-191-164-193.nc.res.rr.com
+Agent: Frosty
+
+
+Address: 75.41.223.35
+Port: 46200
+Status: CONNECTED
+Hostname: adsl-75-41-223-35.dsl.irvnca.sbcglobal.net
+Agent: Frosty
+
+
+Address: 68.185.67.179
+Port: 36151
+Status: CONNECTED
+Hostname: 68-185-67-179.dhcp.trlk.ca.charter.com
+Agent: Frosty
+
+
+Address: 66.231.166.81
+Port: 40430
+Status: TIMEOUT
+
+
+Address: 66.209.128.202
+Port: 8667
+Status: TIMEOUT
+
+
+Address: 75.67.55.216
+Port: 13622
+Status: TIMEOUT
+
+
+Address: 174.103.147.235
+Port: 23281
+Status: TIMEOUT
+
+
+Address: 122.57.38.104
+Port: 28930
+Status: TIMEOUT
+
+
+Address: 98.242.14.132
+Port: 7031
+Status: TIMEOUT
+
+
+Address: 115.176.71.220
+Port: 22623
+Status: TIMEOUT
+
+
+Address: 88.251.172.232
+Port: 16903
+Status: CONNECTED
+Hostname: 88.251.172.232
+Agent: LimeWire
+
+
+Address: 96.54.251.57
+Port: 22915
+Status: CONNECTED
+Hostname: S0106002719cb2a27.no.shawcable.net
+Agent: LimeWire
+
+
+Address: 124.186.175.62
+Port: 12123
+Status: TIMEOUT
+
+
+Address: 111.125.75.187
+Port: 2522
+Status: CONNECTED
+Hostname: 111.125.75.187
+Agent: LimeWire
+
+
+Address: 174.24.188.183
+Port: 51941
+Status: REFUSED
+
+
+Address: 222.127.49.106
+Port: 16236
+Status: TIMEOUT
+
+
+Address: 72.47.169.235
+Port: 51649
+Status: TIMEOUT
+
+
+Address: 68.226.172.168
+Port: 43826
+Status: TIMEOUT
+
+
+Address: 74.195.220.41
+Port: 45322
+Status: TIMEOUT
+
+
+Address: 196.22.57.132
+Port: 39982
+Status: TIMEOUT
+
+
+Address: 112.207.7.201
+Port: 38075
+Status: CONNECTED
+Hostname: 112.207.7.201
+Agent: LimeWire
+
+
+Address: 75.179.5.219
+Port: 10808
+Status: TIMEOUT
+
+
+Address: 108.104.3.145
+Port: 6346
+Status: CONNECTED
+Hostname: 108.104.3.145
+Agent:  LimeWire/4.13.1
+
+
+Address: 71.192.64.21
+Port: 28283
+Status: CONNECTED
+Hostname: c-71-192-64-21.hsd1.ma.comcast.net
+Agent: LimeWire
+
+
+Address: 72.89.63.130
+Port: 40245
+Status: TIMEOUT
+
+
+Address: 220.237.109.223
+Port: 47380
+Status: CONNECTED
+Hostname: c220-237-109-223.fernt3.vic.optusnet.com.au
+Agent: LimeWire
+
+
+Address: 173.233.247.137
+Port: 39657
+Status: TIMEOUT
+
+
+Address: 79.167.47.44
+Port: 20550
+Status: TIMEOUT
+
+
+Address: 76.251.182.24
+Port: 6346
+Status: CONNECTED
+Hostname: 76.251.182.24
+Agent: LimeWire
+
+
+Address: 58.3.83.149
+Port: 6346
+Status: CONNECTED
+Hostname: 58-3-83-149.ppp.bbiq.jp
+Agent: LimeWire
+
+
+Address: 68.57.34.14
+Port: 10100
+Status: CONNECTED
+Hostname: c-68-57-34-14.hsd1.va.comcast.net
+Agent: LimeWire
+
+
+Address: 75.207.209.65
+Port: 41987
+Status: REFUSED
+
+
+Address: 80.192.68.63
+Port: 8148
+Status: TIMEOUT
+
+
+Address: 173.52.84.225
+Port: 5280
+Status: CONNECTED
+Hostname: pool-173-52-84-225.nycmny.fios.verizon.net
+Agent: Frosty
+
+
+Address: 218.186.108.52
+Port: 49296
+Status: CONNECTED
+Hostname: cm52.omega108.maxonline.com.sg
+Agent: Frosty
+
+
+Address: 90.207.186.69
+Port: 39314
+Status: TIMEOUT
+
+
+Address: 76.66.154.123
+Port: 16803
+Status: TIMEOUT
+
+
+Address: 124.171.12.178
+Port: 26206
+Status: REFUSED
+
+
+Address: 217.164.45.214
+Port: 23620
+Status: TIMEOUT
+
+
+Address: 87.0.54.143
+Port: 40982
+Status: CONNECTED
+Hostname: host143-54-dynamic.0-87-r.retail.telecomitalia.it
+Agent: LimeWire
+
+
+Address: 98.67.141.232
+Port: 14335
+Status: TIMEOUT
+
+
+Address: 93.137.59.252
+Port: 44803
+Status: TIMEOUT
+
+
+Address: 88.249.99.46
+Port: 15465
+Status: REFUSED
+
+
+Address: 69.73.255.27
+Port: 2098
+Status: TIMEOUT
+
+
+Address: 220.96.81.138
+Port: 38586
+Status: TIMEOUT
+
+
+Address: 99.147.166.209
+Port: 11537
+Status: REFUSED
+
+
+Address: 82.171.188.218
+Port: 43809
+Status: TIMEOUT
+
+
+Address: 74.215.109.22
+Port: 44617
+Status: TIMEOUT
+
+
+Address: 219.90.158.153
+Port: 14628
+Status: TIMEOUT
+
+
+Address: 65.25.89.182
+Port: 34225
+Status: CONNECTED
+Hostname: cpe-65-25-89-182.neo.res.rr.com
+Agent: Frosty
+
+
+Address: 61.68.128.189
+Port: 48805
+Status: TIMEOUT
+
+
+Address: 173.21.84.111
+Port: 34994
+Status: TIMEOUT
+
+
+Address: 95.103.60.142
+Port: 19494
+Status: TIMEOUT
+
+
+Address: 74.234.180.156
+Port: 13496
+Status: TIMEOUT
+
+
+Address: 72.128.73.146
+Port: 41236
+Status: CONNECTED
+Hostname: CPE-72-128-73-146.wi.res.rr.com
+Agent: LimeWire
+
+
+Address: 173.58.128.50
+Port: 4229
+Status: CONNECTED
+Hostname: pool-173-58-128-50.lsanca.fios.verizon.net
+Agent: LimeWire
+
+
+Address: 85.74.228.155
+Port: 19107
+Status: TIMEOUT
+
+
+Address: 85.108.165.173
+Port: 6854
+Status: TIMEOUT
+
+
+Address: 188.81.157.99
+Port: 45970
+Status: TIMEOUT
+
+
+Address: 107.10.74.169
+Port: 6346
+Status: CONNECTED
+Hostname: cpe-107-10-74-169.new.res.rr.com
+Agent: LimeWire
+
+
+Address: 69.138.213.173
+Port: 37015
+Status: CONNECTED
+Hostname: c-69-138-213-173.hsd1.md.comcast.net
+Agent: LimeWire
+
+
+Address: 68.63.111.239
+Port: 26659
+Status: TIMEOUT
+
+
+Address: 174.3.70.146
+Port: 23619
+Status: TIMEOUT
+
+
+Address: 2.121.64.102
+Port: 42543
+Status: TIMEOUT
+
+
+Address: 60.48.72.175
+Port: 30078
+Status: TIMEOUT
+
+
+Address: 99.72.19.38
+Port: 13328
+Status: REFUSED
+
+
+Address: 209.251.133.98
+Port: 4007
+Status: REFUSED
+
+
+Address: 173.49.27.117
+Port: 35900
+Status: TIMEOUT
+
+
+Address: 69.250.42.33
+Port: 4673
+Status: TIMEOUT
+
+
+Address: 72.234.157.225
+Port: 3083
+Status: TIMEOUT
+
+
+Address: 222.153.137.41
+Port: 4943
+Status: TIMEOUT
+
+
+Address: 38.107.162.35
+Port: 44699
+Status: REFUSED
+
+
+Address: 76.77.191.60
+Port: 23439
+Status: TIMEOUT
+
+
+Address: 180.131.248.159
+Port: 24295
+Status: CONNECTED
+Hostname: 180.131.248.159
+Agent: Frosty
+
+
+Address: 76.174.28.154
+Port: 26537
+Status: TIMEOUT
+
+
+Address: 24.226.116.226
+Port: 37304
+Status: TIMEOUT
+
+
+Address: 118.101.18.187
+Port: 30963
+Status: TIMEOUT
+
+
+Address: 88.244.45.252
+Port: 43047
+Status: TIMEOUT
+
+
+Address: 124.187.46.98
+Port: 42685
+Status: TIMEOUT
+
+
+Address: 84.61.143.66
+Port: 33966
+Status: CONNECTED
+Hostname: dslb-084-061-143-066.pools.arcor-ip.net
+Agent: Frosty
+
+
+Address: 209.196.236.178
+Port: 17976
+Status: CONNECTED
+Hostname: HS196-236-178.nt.net
+Agent: LimeWire
+
+
+Address: 69.144.101.216
+Port: 18090
+Status: TIMEOUT
+
+
+Address: 173.22.183.179
+Port: 5569
+Status: TIMEOUT
+
+
+Address: 206.53.179.55
+Port: 5202
+Status: TIMEOUT
+
+
+Address: 95.15.28.153
+Port: 44778
+Status: TIMEOUT
+
+
+Address: 124.180.160.95
+Port: 26304
+Status: TIMEOUT
+
+
+Address: 67.83.104.127
+Port: 31175
+Status: CONNECTED
+Hostname: ool-4353687f.dyn.optonline.net
+Agent: LimeWire
+
+
+Address: 69.171.160.239
+Port: 30079
+Status: TIMEOUT
+
+
+Address: 24.91.147.17
+Port: 11995
+Status: TIMEOUT
+
+
+Address: 174.124.249.44
+Port: 50191
+Status: CONNECTED
+Hostname: 174.124.249.44
+Agent: Frosty
+
+
+Address: 67.82.138.100
+Port: 15062
+Status: TIMEOUT
+
+
+Address: 99.38.59.79
+Port: 26700
+Status: REFUSED
+
+
+Address: 85.110.65.11
+Port: 9491
+Status: CONNECTED
+Hostname: 85.110.65.11
+Agent: LimeWire
+
+
+Address: 98.148.122.65
+Port: 8592
+Status: CONNECTED
+Hostname: cpe-98-148-122-65.socal.res.rr.com
+Agent: Frosty
+
+
+Address: 62.45.242.168
+Port: 5115
+Status: CONNECTED
+Hostname: 168-242-045-062.dynamic.caiway.nl
+Agent: LimeWire
+
+
+Address: 85.5.213.186
+Port: 37673
+Status: CONNECTED
+Hostname: 186-213.5-85.cust.bluewin.ch
+Agent: Frosty
+
+
+Address: 83.200.138.222
+Port: 8020
+Status: TIMEOUT
+
+
+Address: 24.26.157.217
+Port: 46071
+Status: CONNECTED
+Hostname: cpe-24-26-157-217.columbus.res.rr.com
+Agent: Frosty
+
+
+Address: 78.165.222.188
+Port: 25586
+Status: TIMEOUT
+
+
+Address: 174.98.102.187
+Port: 36015
+Status: CONNECTED
+Hostname: cpe-174-098-102-187.triad.res.rr.com
+Agent: LimeWire
+
+
+Address: 76.67.201.11
+Port: 20468
+Status: TIMEOUT
+
+
+Address: 72.130.60.11
+Port: 21574
+Status: CONNECTED
+Hostname: cpe-72-130-60-11.socal.res.rr.com
+Agent: LimeWire
+
+
+Address: 216.46.156.90
+Port: 13059
+Status: TIMEOUT
+
+
+Address: 112.138.11.216
+Port: 8615
+Status: TIMEOUT
+
+
+Address: 71.194.107.209
+Port: 31262
+Status: TIMEOUT
+
+
+Address: 98.93.60.99
+Port: 33609
+Status: TIMEOUT
+
+
+Address: 69.134.41.111
+Port: 28765
+Status: TIMEOUT
+
+
+Address: 24.222.152.33
+Port: 34759
+Status: TIMEOUT
+
+
+Address: 60.240.104.75
+Port: 2845
+Status: REFUSED
+
+
+Address: 96.250.75.238
+Port: 44149
+Status: TIMEOUT
+
+
+Address: 121.220.102.117
+Port: 27412
+Status: TIMEOUT
+
+
+Address: 174.109.197.167
+Port: 30892
+Status: TIMEOUT
+
+
+Address: 67.8.215.63
+Port: 23887
+Status: TIMEOUT
+
+
+Address: 71.255.89.26
+Port: 7838
+Status: TIMEOUT
+
+
+Address: 68.33.42.117
+Port: 21686
+Status: CONNECTED
+Hostname: c-68-33-42-117.hsd1.md.comcast.net
+Agent: LimeWire
+
+
+Address: 71.120.166.67
+Port: 6346
+Status: CONNECTED
+Hostname: pool-71-120-166-67.aubnin.dsl-w.verizon.net
+Agent: Frosty
+
+
+Address: 70.160.164.244
+Port: 10089
+Status: REFUSED
+
+
+Address: 85.195.141.68
+Port: 49951
+Status: REFUSED
+
+
+Address: 124.183.140.42
+Port: 25235
+Status: TIMEOUT
+
+
+Address: 92.97.217.182
+Port: 31276
+Status: REFUSED
+
+
+Address: 86.99.142.16
+Port: 14862
+Status: REFUSED
+
+
+Address: 60.240.31.90
+Port: 30015
+Status: TIMEOUT
+
+
+Address: 98.155.147.21
+Port: 10367
+Status: TIMEOUT
+
+
+Address: 95.10.166.167
+Port: 38052
+Status: TIMEOUT
+
+
+
+Number of Nodes Discovered : 529
+
+Number of Nodes Discovered : 529
+Nodes Discovered per Second : 0.59
+Number of Successful Crawls : 61
+Number of Timeouts : 124
+Number of Refused Connections : 30
 Number of Shielded nodes: 0
 Number of Internal Errors : 0
 Number of Unable to Send Request Errors : 0
 Number of Failed to Receieve Reply Errors : 0
-Number of Discovered Nodes but have not visited yet : 1
+Number of Discovered Nodes but have not visited yet : 314
 
-Maximum Files on a node was : 259
-Average Files on all nodes was 129.5
-Smallest File found : 2864B
-Largest File found : 14260904B
-Average File size was : 5230890B
+
+Maximum Files on a node was : 3231
+Average Files on all nodes was 215.84
+Smallest File found : 8B
+Largest File found : 1490776986B
+Average File size was : 12740923B
 
 File Extension 	Number of Occurences
-.mp3			245
-.mov			8
-.m4a			2
-.mp4			1
+.mp3			12399
+.m4a			210
+.jar			144
+.avi			123
+.jpg			68
+.torrent		52
+.wma			45
+.mpg			41
+.mp4			25
+.mov			15
+.wav			12
+.txt			11
+.exe			7
+.rar			4
+.xml			2
+.mpeg			2
 .nfo			1
-.wav			1
-.torrent		1
+.snd			1
+.Saved			1
+.zip			1
+.lwtp			1
+.qt			1

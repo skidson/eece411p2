@@ -24,7 +24,7 @@ public class TestDriver {
 		
 		System.out.println("\n********************* STEVESORT *********************");
 		t0 = System.nanoTime();
-		sorted = steveSort(unsorted);
+		sorted = steveSort((Vector<Extension>)unsorted.clone());
 		t1 = System.nanoTime();
 		print(sorted);
 		System.out.println("Execution time: " + (t1-t0) + "ns");
@@ -32,7 +32,7 @@ public class TestDriver {
 		
 		System.out.println("\n********************* JEFFSORT *********************");
 		t0 = System.nanoTime();
-		sorted = jeffisAwesomeSort(unsorted);
+		sorted = jeffisAwesomeSort((Vector<Extension>)unsorted.clone());
 		t1 = System.nanoTime();
 		print(sorted);
 		System.out.println("Execution time: " + (t1-t0) + "ns");
@@ -68,7 +68,43 @@ public class TestDriver {
 	}
 	
 	private static Vector<Extension> steveSort(Vector<Extension> list) {
-		int index = 1;
+		// SHITSORT
+		/*Vector<Extension> temp = new Vector<Extension>();
+		if (list.size() < 2) return list;
+		int index = 0;
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).getCount() > list.get(index).getCount())
+				index = i;
+		}
+		temp.add(list.get(index));
+		list.removeElementAt(index);
+		temp.addAll(steveSort(list));
+		return(temp);*/
+		
+		// DIRTYSORT
+		Vector<Extension> temp = new Vector<Extension>();
+		int cacheIndex = 0;
+		int max = 0, num = 0;
+		int maxIndex;
+		
+		while(!list.isEmpty()) {
+			maxIndex = 0;
+			max = 0;
+			for(int i = (cacheIndex%list.size()); i < list.size(); i++) {
+				num = list.get(i).getCount();
+				if (num > max) {
+					max = num;
+					cacheIndex = maxIndex;
+					maxIndex = i;
+				}
+			}
+			temp.add(list.get(maxIndex));
+			list.removeElementAt(maxIndex);
+		}
+		return(temp);
+		
+		// OLDSORT
+		/*int index = 1;
 		while(true) {
 			if (index == 0)
 				index++;
@@ -82,7 +118,8 @@ public class TestDriver {
 				index++;
 			}
 		}
-		return(list);
+		return(list);*/
+		
 	}
 	
 	private static String generateExt() {

@@ -268,7 +268,7 @@ public class Main {
 				"Largest File found : " + largestFile + "B\r\n" +
 				"Average File size was : " + totalFileSize/totalNumOfFiles + "B\r\n" +
 				"\r\nFile Extension \tNumber of Occurences\r\n";
-    		extensions = steveSort(extensions);
+    		extensions = jeffisAwesomeSort(extensions);
     		for (int i = 0; i < extensions.size(); i++) {
 				if (extensions.get(i).getName().length() < 5)
 					output += "." + extensions.get(i).getName() + "\t\t\t" + extensions.get(i).getCount()+ "\r\n";
@@ -282,27 +282,21 @@ public class Main {
     	System.exit(0);
     }
     
-    private static Vector<Extension> steveSort(Vector<Extension> list) {
-		Vector<Extension> temp = new Vector<Extension>();
-		int cacheIndex = 0;
-		int max = 0, num = 0;
-		int maxIndex;
-		
-		while(!list.isEmpty()) {
-			maxIndex = 0;
-			max = 0;
-			for(int i = (cacheIndex%list.size()); i < list.size(); i++) {
-				num = list.get(i).getCount();
-				if (num > max) {
-					max = num;
-					cacheIndex = maxIndex;
-					maxIndex = i;
-				}
-			}
-			temp.add(list.get(maxIndex));
-			list.removeElementAt(maxIndex);
-		}
-		return(temp);
+    public static Vector<Extension> jeffisAwesomeSort(Vector<Extension> ext) {
+	    int firstOutOfOrder, location;
+	    Extension temp;
+	    for(firstOutOfOrder = 1; firstOutOfOrder < ext.size(); firstOutOfOrder++) { 
+	        if(ext.get(firstOutOfOrder).getCount() > ext.get(firstOutOfOrder - 1).getCount()) {
+	            temp = ext.get(firstOutOfOrder);
+	            location = firstOutOfOrder;
+	            do {
+	            	ext.setElementAt(ext.get(location-1), location);
+	                location--;
+	            } while (location > 0 && ext.get(location-1).getCount() < temp.getCount());
+	            ext.setElementAt(temp, location);
+	        }
+	    }
+	    return ext;
 	}
     
     private static void parseExtensions(String filelist) {

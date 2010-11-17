@@ -1,0 +1,97 @@
+Address: 137.82.84.242
+Port: 5627
+Status: CONNECTED
+Hostname: reala.ece.ubc.ca
+Agent: LimeWire
+
+
+Address: 67.246.98.86
+Port: 44616
+Status: TIMEOUT
+
+
+Address: 71.114.58.191
+Port: 39281
+Status: REFUSED
+
+
+Address: 68.33.22.42
+Port: 2594
+Status: TIMEOUT
+
+
+Address: 68.126.124.189
+Port: 18630
+Status: REFUSED
+
+
+Address: 77.38.1.93
+Port: 13975
+Status: REFUSED
+
+
+Address: 99.240.167.39
+Port: 21961
+Status: TIMEOUT
+
+
+Address: 70.71.175.5
+Port: 9118
+Status: TIMEOUT
+
+
+Address: 24.147.5.74
+Port: 15430
+Status: TIMEOUT
+
+
+Address: 72.168.196.202
+Port: 21687
+Status: TIMEOUT
+
+
+Address: 99.191.131.46
+Port: 23215
+Status: TIMEOUT
+
+
+Address: 189.83.136.110
+Port: 4230
+Status: TIMEOUT
+
+
+Address: 173.20.121.211
+Port: 49291
+Status: CONNECTED
+Hostname: 173-20-121-211.client.mchsi.com
+Agent: LimeWire
+
+
+
+Number of Nodes Discovered : 14
+
+Number of Nodes Discovered : 14
+Nodes Discovered per Second : 0.23
+Number of Successful Crawls : 2
+Number of Timeouts : 8
+Number of Refused Connections : 3
+Number of Shielded nodes: 0
+Number of Internal Errors : 0
+Number of Unable to Send Request Errors : 0
+Number of Failed to Receieve Reply Errors : 0
+Number of Discovered Nodes but have not visited yet : 1
+
+Maximum Files on a node was : 259
+Average Files on all nodes was 129.5
+Smallest File found : 2864B
+Largest File found : 14260904B
+Average File size was : 5230890B
+
+File Extension 	Number of Occurences
+.mp3			245
+.mov			8
+.m4a			2
+.mp4			1
+.nfo			1
+.wav			1
+.torrent		1

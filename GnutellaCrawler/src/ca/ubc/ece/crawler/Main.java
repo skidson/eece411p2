@@ -222,11 +222,11 @@ public class Main {
     	}
     	
     	for(int i = 0; i < visited.size(); i++){
-    		output += visited.get(i).toString() + "\n";
+    		output += visited.get(i).toString() + "\r\n\n";
     	}
-    	output += "\nNumber of Nodes Discovered : " + (visited.size() + unvisited.size()) + "\n" +
-    		"\nNumber of Nodes Discovered : " + (visited.size() + unvisited.size()) + "\n" +
-    		"Nodes Discovered per Second : " + Round(((visited.size() + unvisited.size())/formattedTime), 2) + "\n" +
+    	output += "\nNumber of Nodes Discovered : " + (visited.size() + unvisited.size()) + "\r\n" +
+    		"\nNumber of Nodes Discovered : " + (visited.size() + unvisited.size()) + "\r\n" +
+    		"Nodes Discovered per Second : " + Round(((visited.size() + unvisited.size())/formattedTime), 2) + "\r\n" +
     		"Number of Successful Crawls : " + num_success + "\r\n" +
 			"Number of Timeouts : " + num_timeout + "\r\n" +
 			"Number of Refused Connections : " + num_refused + "\r\n" +
@@ -234,33 +234,26 @@ public class Main {
 			"Number of Internal Errors : " + num_internal + "\r\n" +
 			"Number of Unable to Send Request Errors : " + num_mute + "\r\n" +
 			"Number of Failed to Receieve Reply Errors : " + num_noreply + "\r\n" +
-			"Number of Discovered Nodes but have not visited yet : " + unvisited.size() + "\r\n\n";
+			"Number of Discovered Nodes but have not visited yet : " + unvisited.size() + "\r\n";
     	
     	if (full && totalNumOfFiles != 0) {
-    		output += "Maximum Files on a node was : " + maxNumOfFiles + "\r\n" + 
+    		output += "\n\nMaximum Files on a node was : " + maxNumOfFiles + "\r\n" + 
 				"Average Files on all nodes was " + Round((float)totalNumOfFiles/(float)num_success,2) + "\r\n" + 
 				"Smallest File found : " + smallestFile + "B\r\n" +
 				"Largest File found : " + largestFile + "B\r\n" +
 				"Average File size was : " + totalFileSize/totalNumOfFiles + "B\r\n" +
-				"\nFile Extension \tNumber of Occurences\n";
+				"\r\nFile Extension \tNumber of Occurences\r\n";
     		extensions = steveSort(extensions);
     		for (int i = 0; i < extensions.size(); i++) {
-    			try {
-    				if (extensions.get(i).getName().length() < 5)
-    					output += "." + extensions.get(i).getName() + "\t\t\t" + extensions.get(i).getCount()+ "\n";
-    				else
-    					output += "." + extensions.get(i).getName() + "\t\t" + extensions.get(i).getCount() + "\n";
-    			} catch (Exception e) {
-    				//break;
-    			}
+				if (extensions.get(i).getName().length() < 5)
+					output += "." + extensions.get(i).getName() + "\t\t\t" + extensions.get(i).getCount()+ "\r\n";
+				else
+					output += "." + extensions.get(i).getName() + "\t\t" + extensions.get(i).getCount() + "\r\n";
     		}
     	}
+    	out.write(output);
+    	out.close();
     	System.out.println(output);
-    	try {
-    		out.print(output);
-    	} catch (NullPointerException e) {
-    		// do not print to file
-    	}
     	System.exit(0);
     	
     }

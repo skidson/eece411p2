@@ -14,14 +14,11 @@ package ca.ubc.ece.crawler;
 import java.io.*;
 import java.net.*;
 
-public class Crawler {
+public class NonBlockingCrawler {
     private static CrawlResult cResult;
-    
-    public enum Status { CONNECTED, UNROUTABLE, REFUSED, INTERNAL, TIMEOUT, MUTE, NOREPLY, SHIELDED };
 
     public static CrawlResult crawl(Node node, int timeout, boolean full){
     	cResult = new CrawlResult();
-        System.out.println("Crawling " + node.getAddress() + ":" + node.getPortNum() + "...");
         String nodePeers = crawlPeers(node.getAddress(), node.getPortNum(), timeout);
         
         if(nodePeers == null){
@@ -264,7 +261,6 @@ public class Crawler {
         
         header = header.substring(0,strBegin);
         cResult.setAgent(header);
-           
     }
 
     private static void processQueryHit(byte[] qhit){

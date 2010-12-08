@@ -88,13 +88,13 @@ public class Main {
         	if(checkTime())
         		print(visited, unvisited);
         	
-        	info = Crawler.crawl(unvisited.get(FRONT), timeout, full);
+        	info = BlockingCrawler.crawl(unvisited.get(FRONT), timeout, full);
         	
         	if (verbose) 
         		System.out.println("Inside ultrapeer " + unvisited.get(FRONT).getAddress() + ":");
         	
 		    visited.add(unvisited.get(FRONT));
-		    unvisited.get(FRONT).setInfo(info);
+//		    unvisited.get(FRONT).setInfo(info);
 		    unvisited.removeElementAt(FRONT);
 		    
 		    update(info);
@@ -102,7 +102,7 @@ public class Main {
 		    /* ******************** START OF LEAF CHECKING ******************** */
 		    /* Get info from each leaf node but do not traverse its nodes yet */
 		    String leaves = info.getLeaves();
-    		if(info.getStatus() != Crawler.Status.CONNECTED)
+    		if(info.getStatus() != Status.CONNECTED)
     			continue;
 		    
 		    StringTokenizer tokens = new StringTokenizer(leaves, DELIM);
@@ -122,12 +122,12 @@ public class Main {
 			    }
 			    
 			    visited.add(leaf);
-		    	CrawlResult leafInfo = Crawler.crawl(leaf, timeout, full);
+		    	CrawlResult leafInfo = BlockingCrawler.crawl(leaf, timeout, full);
 		    	update(leafInfo);
-		    	leaf.setInfo(leafInfo);
+//		    	leaf.setInfo(leafInfo);
 		    	
 		    	String leafPeers = leafInfo.getUltrapeers();
-	    		if(leaf.getInfo().getStatus() != Crawler.Status.CONNECTED)
+	    		if(leaf.getStatus() != Status.CONNECTED)
 	    			continue;
 
 		    	StringTokenizer leafTokens = new StringTokenizer(leafPeers, DELIM);
@@ -202,7 +202,7 @@ public class Main {
 	    		break;
 	    	}
 	    	
-	    	if (full && info.getStatus() == Crawler.Status.CONNECTED) {
+	    	if (full && info.getStatus() == Status.CONNECTED) {
 	    		if (info.getNumOfFiles() > 0)
 		    		parseExtensions(info.getFilesList());
 		    	if(info.getNumOfFiles() > maxNumOfFiles)

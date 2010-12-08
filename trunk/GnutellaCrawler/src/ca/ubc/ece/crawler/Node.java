@@ -5,23 +5,24 @@
  * 				David Lo - #20123071
  * 				Jeffrey Payan - #18618074
  * 
- * 	Last updated: November 17, 2010
+ * 	Last updated: December 17, 2010
  */
 
 package ca.ubc.ece.crawler;
 
+import java.io.Serializable;
 import java.util.Vector;
 
-public class Node {
+public class Node implements Serializable {
 	private String address;
+	private String hostname;
+	private String agent;
 	private int portNum;
-	
-	private CrawlResult info;
+	private Status status;
 	
 	public Node(String address, int portNum) {
 		this.address = address;
 		this.portNum = portNum;
-		this.info = null;
 	}
 	
 	public boolean equals(Node other) {
@@ -31,40 +32,37 @@ public class Node {
 	}
 	
 	public int getPortNum() {
-		return(portNum);
+		return portNum;
 	}
 	
 	public String getAddress() {
-		return(address);
+		return address;
 	}
 	
-	public void setInfo(CrawlResult info) {
-		this.info = info;
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 	
-	public CrawlResult getInfo() {
-		return info;
+	public Status getStatus() {
+		return this.status;
 	}
 	
 	public boolean containedIn(Vector<Node> list) {
 		for (Node other : list) {
-			if (this.equals(other))	{
+			if (this.equals(other))
 				return true;
-			}
 		}
 		return false;
 	}
 	
 	public String toString() {
 		String ret = "Address: " + this.address + "\n" +
-		
-		"Port: " + this.portNum + "\r\n" + 
-		"Status: " + this.info.getStatus() + "\r\n";
-		if (this.info.getStatus() == Crawler.Status.CONNECTED) {
-			ret += "Hostname: " + this.info.getHostname() + "\r\n" +
-				"Agent: " + this.info.getAgent() + "\r\n";
+			"Port: " + this.portNum + "\r\n" + 
+			"Status: " + this.status + "\r\n";
+		if (this.status == Status.CONNECTED) {
+			ret += "Hostname: " + this.hostname + "\r\n" +
+				"Agent: " + this.agent + "\r\n";
 		}
-		
 		return ret;
 	}
 

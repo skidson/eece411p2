@@ -11,8 +11,6 @@
 
 package ca.ubc.ece.crawler;
 
-import ca.ubc.ece.crawler.Crawler.Status;
-
 public class CrawlResult {
     private String ultrapeers;
     private String leaves;
@@ -80,7 +78,7 @@ public class CrawlResult {
     	totalFileSize += fileSize;
     }
     
-    public Crawler.Status getStatus() {
+    public Status getStatus() {
     	return status;
     }
     

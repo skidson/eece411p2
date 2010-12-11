@@ -3,6 +3,7 @@ package ca.ubc.ece.crawler;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -12,17 +13,22 @@ public class Master implements Runnable {
 	public static final String DEFAULT_HOSTNAME = "localhost";
 	public static final String DEFAULT_OUTPUT = "results.txt";
 	public static final int DEFAULT_PORTNUM = 1337;
+	public static final int WHISPER_PORT = 1338;
+	
+	public static final int NUM_FELLOWSHIPS = 10;
+	public static final int RING_SIZE  = 10;
+	
 	public static final int MS_TO_SEC = 1000;
 	
 	private InetAddress hostName;
 	private int portNum;
 	
-	private int dumpCount = 0;
-	
 	private static int timeout = 20;
 	private static int duration = 30; 
 	private static boolean verbose = false;
 	private static boolean full = false;
+	
+	private String[][] fellowships;
 	
 	private Vector<Node> nodeList;
 	private Vector<ResultHandler> workerList;
@@ -80,30 +86,33 @@ public class Master implements Runnable {
 		this.timeout = timeout;
 		this.duration = duration;
 		this.workerList = new Vector<ResultHandler>();
+		this.fellowships = new String[NUM_FELLOWSHIPS][RING_SIZE];
 	}
 	
 	/* Loops forever, accepting connections and dispatching to workers */
 	public void run() {
-		new Thread(new Timer()).start();
-		while (true) {
+		ObjectInputStream ois;
+		Socket socket = new Socket();
+		
+		new Thread(new Timer(new TerminateAction(), duration*MS_TO_SEC)).start();
+		try {
+			server = new ServerSocket(WHISPER_PORT);
+		} catch (IOException e) {
+			System.err.println("Error: Could not listen on port. Terminating...");
+			System.exit(1);
+		}
+		System.out.println("Internode communication server established.");
+		while(true) {
 			try {
-				server = new ServerSocket();
-				while(true) {
-					// Blocks until connection established
-					Socket client = server.accept();
-					ResultHandler worker;
-					try {
-						 worker = new ResultHandler(client);
-					} catch (Exception e) {
-						// Memory limit reached, delegate to already existing worker
-						worker = workerList.get(dumpCount % workerList.size());
-					}
-					workerList.add(worker);
-					new Thread(worker).start();
-				}
+				socket = server.accept();
+				ois = new ObjectInputStream(socket.getInputStream());
+				int fellowshipID = (Integer)ois.readObject();
+				fellowships[fellowshipID] = (String[])ois.readObject();
+				while(ois.available() > 0)
+					nodeList.add((Node)ois.readObject());
 			} catch (IOException e) {
-				System.err.println("Error: Could not listen on port");
-			}
+			} catch (ClassNotFoundException e) {
+			} catch (ClassCastException e) {}
 		}
 	}
 	
@@ -119,24 +128,20 @@ public class Master implements Runnable {
 		private Vector<Socket> queue = new Vector<Socket>();
 		ObjectInputStream ois;
 		
-		public ResultHandler(Socket client) {
-			this.process(client);
-		}
-
 		public void run() {
-			while(this.getLoadCount() > 0) {
-				try {
-					ois = new ObjectInputStream(queue.remove(0).getInputStream());
-					while (ois.available() > 0) {
-						Node node = (Node) ois.readObject();
-						// TODO check if node already in list
-						nodeList.add(node);
-					}
-				} catch (IOException e) { continue;
-				} catch (ClassNotFoundException e) { continue; }
-			}
-			// No work left to do, terminate this worker
-			workerList.remove(this);
+//			while(this.getLoadCount() > 0) {
+//				try {
+//					ois = new ObjectInputStream(queue.remove(0).getInputStream());
+//					while (ois.available() > 0) {
+//						Node node = (Node) ois.readObject();
+//						// TODO check if node already in list
+//						nodeList.add(node);
+//					}
+//				} catch (IOException e) { continue;
+//				} catch (ClassNotFoundException e) { continue; }
+//			}
+//			// No work left to do, terminate this worker
+//			workerList.remove(this);
 		}
 		
 		public void process(Socket client) {
@@ -150,17 +155,42 @@ public class Master implements Runnable {
 	}
 	
 	public class Timer implements Runnable {
+		private Action action;
+		private int delay;
+		
+		public Timer(Action action, int delay) {
+			this.action = action;
+			this.delay = delay;
+		}
+		
 		public void run() {
 			try {
-				Thread.sleep(duration*MS_TO_SEC);
-			} catch (InterruptedException e) {
-				// Forcibly quit
-			}
-			System.out.println("Timer has expired, terminating...");
-			
-			//Need to kill all crawlers
+				Thread.sleep(duration);
+			} catch (InterruptedException e) { /* Forcibly quit */ }
+			action.execute();
+		}
+	}
+	
+	private interface Action {
+		public void execute();
+	}
+	
+	private class TerminateAction implements Action {
+		public void execute() {
 			print();
 			System.exit(0);
+		}
+	}
+	
+	private class FellowshipAWOLAction implements Action {
+		int fellowshipID;
+		
+		public FellowshipAWOLAction(int fellowshipID) {
+			this.fellowshipID = fellowshipID;
+		}
+		
+		public void execute() {
+			// TODO fellowship timer has expired, request dump
 		}
 	}
 }

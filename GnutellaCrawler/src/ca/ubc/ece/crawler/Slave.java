@@ -85,6 +85,9 @@ public class Slave implements Runnable {
     		}
         }
 		new Thread(new Slave(full, timeout, duration)).start();
+		
+		// TODO have slaves idle until woken by master
+		
 	}
 	
 	public Slave(boolean full, int timeout, int duration) {
@@ -134,7 +137,7 @@ public class Slave implements Runnable {
 		while(true) {
 			try {
 				synchronized (this.changeRequests) {
-					Iterator changes = this.changeRequests.iterator();
+					Iterator<ChangeRequest> changes = this.changeRequests.iterator();
 					while (changes.hasNext()) {
 						ChangeRequest change = (ChangeRequest) changes.next();
 						switch (change.type) {
@@ -354,8 +357,6 @@ public class Slave implements Runnable {
 		private void parseData(byte[] data){
 			//TODO put shit from Node here, check against cachestuff, if not in, add to ultralist/leaflist appropriately.. add to dumpList
 			// and cache it
-			String tempLeaves;
-			String tempPeers;
 			String[] tempArray;
 			String[] tempArray2;
 			String[] readArray;

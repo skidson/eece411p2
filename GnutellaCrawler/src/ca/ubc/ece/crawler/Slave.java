@@ -197,7 +197,11 @@ public class Slave implements Runnable {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
 		System.err.println("READING");
 		this.readBuffer.clear();
-		
+		String tempLeaves;
+		String tempPeers;
+		String[] tempArray;
+		String[] readArray;
+		String ipPort;
 		int numRead;
 		try {
 			numRead = socketChannel.read(this.readBuffer);
@@ -219,9 +223,35 @@ public class Slave implements Runnable {
 		byte[] data = new byte[numRead];
 		System.arraycopy(this.readBuffer.array(), 0, data, 0, numRead);		
 		node.setData(data);
+		node.parseData(data);
 		synchronized(workList){
+			
+			
 			workList.add(node);
 		}
+		
+		for (int i = 0; i < workList.size();i++){
+			Node tempNode = workList.elementAt(i);
+			tempLeaves = tempNode.getLeaves();
+			tempPeers = tempNode.getPeers();
+		
+			tempArray = tempPeers.split(",");
+				for (int j = 0; j < tempArray.length; j++) {
+					ipPort = tempArray[j];
+					readArray = ipPort.split(":");
+					Node tempnode = new Node(readArray[0], Integer.parseInt(readArray[1]));
+					ultraList.add(tempnode);
+				}
+				tempArray = tempLeaves.split(",");
+				for (int j = 0; j < tempArray.length; j++) {
+					ipPort = tempArray[j];
+					readArray = ipPort.split(":");
+					Node tempnode = new Node(readArray[0], Integer.parseInt(readArray[1]));
+					leafList.add(tempnode);
+				}
+		
+		}
+		
 		if(at.getID() == (Integer)syncA){
 			synchronized(syncA){
 				syncA.notifyAll();

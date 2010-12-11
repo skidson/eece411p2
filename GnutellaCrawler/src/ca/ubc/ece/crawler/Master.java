@@ -17,8 +17,10 @@ public class Master implements Runnable {
 	
 	public static final int NUM_FELLOWSHIPS = 10;
 	public static final int RING_SIZE  = 10;
+	public static final int AWOL_TIMER = 60;
 	
 	public static final int MS_TO_SEC = 1000;
+	public static final int FRONT = 0;
 	
 	private InetAddress hostName;
 	private int portNum;
@@ -31,7 +33,7 @@ public class Master implements Runnable {
 	private String[][] fellowships;
 	
 	private Vector<Node> nodeList;
-	private Vector<ResultHandler> workerList;
+	private Vector<Logger> workerList;
 	private ServerSocket server;
 	
 	/* ************ INITIALIZATION ************ */
@@ -45,32 +47,34 @@ public class Master implements Runnable {
             System.out.println("Usage:\n\tMain <-full | -minimal> timeout=XX <address:port> <timetorun>");
             return;
         } else {
-        	for (int i = 0; i < args.length; i++) {
-        		if (args[i].equals("-full")) {
+        	
+        	for (String arg : args) {
+        		if (arg.equals("-full")) {
         			full = true;
-        		} else if (args[i].equals("-minimal")) {
+        		} else if (arg.equals("-minimal")) {
         			full = false;
-        		} else if (args[i].equals("-v")) {
+        		} else if (arg.equals("-v")) {
         			verbose = true;
-        		} else if (args[i].startsWith("timeout=")) {
-        			String[] arg = args[i].split("=");
-        			timeout = Integer.parseInt(arg[1])*MS_TO_SEC;
-        		} else if (args[i].indexOf(":") != -1) {
-        			String[] arg = args[i].split(":");
-        			hostName = arg[0];
-        			portNum = Integer.parseInt(arg[1]);
+        		} else if (arg.startsWith("timeout=")) {
+        			String[] temp = arg.split("=");
+        			timeout = Integer.parseInt(temp[1])*MS_TO_SEC;
+        		} else if (arg.indexOf(":") != -1) {
+        			String[] temp = arg.split(":");
+        			hostName = temp[0];
+        			portNum = Integer.parseInt(temp[1]);
         		} else {
-        			duration = Integer.parseInt(args[i]);
+        			duration = Integer.parseInt(arg);
         		}
-        		if (full)
-        			System.out.println("Output mode: full");
-        		else
-        			System.out.println("Output mode: minimal");
-        		System.out.println("Verbose mode: set");
-        		System.out.println("Connection timeout: " + timeout/MS_TO_SEC + " second(s)");
-        		System.out.println("Execution time: " + duration + " minute(s)\n");
-        	}
-        }
+            }
+
+    		if (full)
+    			System.out.println("Output mode: full");
+    		else
+    			System.out.println("Output mode: minimal");
+    		System.out.println("Verbose mode: set");
+    		System.out.println("Connection timeout: " + timeout/MS_TO_SEC + " second(s)");
+    		System.out.println("Execution time: " + duration + " minute(s)\n");
+    	}
 		try {
 			new Thread(new Master(InetAddress.getByName(hostName), portNum, full, verbose, timeout, duration)).start();
 		} catch (UnknownHostException e) {
@@ -85,7 +89,7 @@ public class Master implements Runnable {
 		this.verbose = verbose;
 		this.timeout = timeout;
 		this.duration = duration;
-		this.workerList = new Vector<ResultHandler>();
+		this.workerList = new Vector<Logger>();
 		this.fellowships = new String[NUM_FELLOWSHIPS][RING_SIZE];
 	}
 	
@@ -102,14 +106,19 @@ public class Master implements Runnable {
 			System.exit(1);
 		}
 		System.out.println("Internode communication server established.");
+		
+		// TODO wake up fellowships
+		
 		while(true) {
 			try {
 				socket = server.accept();
 				ois = new ObjectInputStream(socket.getInputStream());
 				int fellowshipID = (Integer)ois.readObject();
 				fellowships[fellowshipID] = (String[])ois.readObject();
-				while(ois.available() > 0)
+				while(ois.available() > 0) {
 					nodeList.add((Node)ois.readObject());
+					nodeList.notify();
+				}
 			} catch (IOException e) {
 			} catch (ClassNotFoundException e) {
 			} catch (ClassCastException e) {}
@@ -123,35 +132,23 @@ public class Master implements Runnable {
 			System.out.println(node.toString());
 	}
 	
+	public void wakeFellowship() {
+		
+	}
+	
 	/* ************ EMBEDDED THREADS ************ */
-	public class ResultHandler implements Runnable {
-		private Vector<Socket> queue = new Vector<Socket>();
-		ObjectInputStream ois;
-		
+	public class Logger implements Runnable {
 		public void run() {
-//			while(this.getLoadCount() > 0) {
-//				try {
-//					ois = new ObjectInputStream(queue.remove(0).getInputStream());
-//					while (ois.available() > 0) {
-//						Node node = (Node) ois.readObject();
-//						// TODO check if node already in list
-//						nodeList.add(node);
-//					}
-//				} catch (IOException e) { continue;
-//				} catch (ClassNotFoundException e) { continue; }
-//			}
-//			// No work left to do, terminate this worker
-//			workerList.remove(this);
+			while(true) {
+				if (nodeList.isEmpty()) {
+					try {
+						nodeList.wait();
+					} catch (InterruptedException e) { continue; }
+				}
+				// TODO log info
+				System.out.println(nodeList.remove(FRONT).toString());
+			}
 		}
-		
-		public void process(Socket client) {
-			queue.add(client);
-		}
-		
-		public int getLoadCount() {
-			return(queue.size());
-		}
-		
 	}
 	
 	public class Timer implements Runnable {

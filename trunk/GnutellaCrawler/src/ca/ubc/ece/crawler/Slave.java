@@ -95,8 +95,10 @@ public class Slave implements Runnable {
 		
 		Node test = new Node("137.82.84.242", 5627);
 		Node test1 = new Node("99.233.17.243", 49461);
+		Node test2 = new Node("67.183.131.236", 32516);
 		ultraList.add(test);
 		ultraList.add(test1);
+		ultraList.add(test2);
 		try {
 			this.hostName = InetAddress.getLocalHost().getHostName();
 			this.portNum = 9090;
@@ -209,11 +211,6 @@ public class Slave implements Runnable {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
 		System.err.println("READING");
 		this.readBuffer.clear();
-		String tempLeaves;
-		String tempPeers;
-		String[] tempArray;
-		String[] readArray;
-		String ipPort;
 		int numRead;
 		try {
 			numRead = socketChannel.read(this.readBuffer);
@@ -236,9 +233,7 @@ public class Slave implements Runnable {
 		System.arraycopy(this.readBuffer.array(), 0, data, 0, numRead);		
 		node.setData(data);
 		
-		synchronized(workList){
-			
-			
+		synchronized(workList){			
 			workList.add(node);
 		}
 
@@ -254,28 +249,7 @@ public class Slave implements Runnable {
 		}
 			
 		// TODO noturmom
-		node.parseData(data);
-		for (int i = 0; i < workList.size();i++){
-			Node tempNode = workList.elementAt(i);
-			tempLeaves = tempNode.getLeaves();
-			tempPeers = tempNode.getPeers();
 		
-			tempArray = tempPeers.split(",");
-				for (int j = 0; j < tempArray.length; j++) {
-					ipPort = tempArray[j];
-					readArray = ipPort.split(":");
-					Node tempnode = new Node(readArray[0], Integer.parseInt(readArray[1]));
-					ultraList.add(tempnode);
-				}
-				tempArray = tempLeaves.split(",");
-				for (int j = 0; j < tempArray.length; j++) {
-					ipPort = tempArray[j];
-					readArray = ipPort.split(":");
-					Node tempnode = new Node(readArray[0], Integer.parseInt(readArray[1]));
-					leafList.add(tempnode);
-				}
-		
-		}
 	}
 	
 	private void write(SelectionKey key) throws IOException {
@@ -364,6 +338,11 @@ public class Slave implements Runnable {
 	
 	/* Worker thread to parse collected byte arrays into Strings */
 	public class Worker implements Runnable {
+		private String tempLeaves;
+		private String tempPeers;
+		private String[] tempArray;
+		private String[] readArray;
+		private String ipPort;
 		
 		public void run() {
 			while(true) {
@@ -371,9 +350,14 @@ public class Slave implements Runnable {
 					try {
 						Thread.sleep(REFRESH_RATE);
 					} catch (InterruptedException e) {}
-				}
-				// TODO parse infoz
+				}				
+				//TODO get data from each node in workList, call parseData on it
 			}
+		}
+		
+		private void parseData(byte[] data){
+			//TODO put shit from Node here, check against cachestuff, if not in, add to ultralist/leaflist appropriately.. add to dumpList
+			// and cache it
 		}
 	}
 	
@@ -395,7 +379,7 @@ public class Slave implements Runnable {
 						synchronized(ultraList) {
 							try {
 								System.out.println("crawler : " + (Integer)id + " waiting");
-								id.wait();
+								ultraList.wait();
 							} catch (InterruptedException e) {
 								
 							}
@@ -419,7 +403,7 @@ public class Slave implements Runnable {
 				}
 				System.out.println("Attempting to write  " + id);
 				sendRequest(socketChannel, attachment);
-				
+
 				//wait for this connection to be closed so we can open another
 				synchronized(id) {
 					try {
@@ -429,6 +413,7 @@ public class Slave implements Runnable {
 						
 					}
 				}
+				System.out.println(new String(node.getData()));
 			}	
 		}
 		

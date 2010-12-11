@@ -17,13 +17,15 @@ public class IPCache {
 	public void cache(String address) {
 		IPAddress ip = new IPAddress(address);
 		if (!isCached(ip))
-		this.cache.add(ip);
+			this.cache.add(ip);
 	}
 	
 	/* ************ HELPER METHODS ************ */
 	
 	public boolean isCached(String address) {
 		IPAddress target = new IPAddress(address);
+		if (cache.isEmpty())
+			return false;
 		for (IPAddress ip : cache) {
 			if (ip.equals(target))
 				return true;
@@ -32,6 +34,8 @@ public class IPCache {
 	}
 	
 	public boolean isCached(IPAddress address) {
+		if (cache.isEmpty())
+			return false;
 		for (IPAddress ip : cache) {
 			if (ip.equals(address))
 				return true;

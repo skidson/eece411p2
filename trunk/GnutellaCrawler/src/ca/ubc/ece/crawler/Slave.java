@@ -433,7 +433,7 @@ public class Slave implements Runnable {
 				try {
 					socketChannel = createConnection(node.getAddress(), node.getPortNum(), attachment);
 				} catch (IOException e) {
-					// TODO your fucked
+					// TODO you're fucked
 				}
 				
 				// Wait for connection to finish before writing	

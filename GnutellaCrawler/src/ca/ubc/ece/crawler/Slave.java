@@ -1,6 +1,7 @@
 package ca.ubc.ece.crawler;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
@@ -12,6 +13,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.Vector;
 public class Slave implements Runnable {
 	public static final int MS_TO_SEC = 1000;
 	public static final int FRONT = 0;
+	public static final String REQUEST = "GNUTELLA CONNECT/0.6\r\n" + "User-Agent: UBCECE (crawl)\r\n" + "Query-Routing: 0.2\r\n" + "X-Ultrapeer: False\r\n" + "Crawler: 0.1\r\n" + "\r\n";
 	public static final int DUMP_THRESHOLD = 10;
 	public static final int WHISPER_PORT = 1338;
 	
@@ -39,15 +42,16 @@ public class Slave implements Runnable {
 	
 	private Worker worker;
 	
-	private Vector<Node> ultraList;
-	private Vector<Node> leafList;
 	private Vector<Node> workList;
 	private Vector<Node> dumpList;
 	private String[] ringList;
 	
 	private List<ChangeRequest> changeRequests = new Vector();
-	
+	private Vector<Node> ultraList = new Vector<Node>();
+	private Vector<Node> leafList = new Vector<Node>();
 	private Map pendingData = new HashMap();
+	private Object syncA = new Integer(1);
+	private Object syncB = new Integer(2);
 	
 	public static void main(String[] args) {
 		String crawlAddress = "localhost";
@@ -78,9 +82,16 @@ public class Slave implements Runnable {
 	
 	public Slave(boolean full, int timeout, int duration) {
 		Node test = new Node("137.82.84.242", 5627);
-		Node test1 = new Node("69.155.31.23", 34180);
+		Node test1 = new Node("99.233.17.243", 49461);
 		ultraList.add(test);
 		ultraList.add(test1);
+		try {
+			this.hostName = InetAddress.getLocalHost().getHostName();
+			this.portNum = 9090;
+			this.selector = initSelector();
+		} catch (IOException e) {
+
+		}
 		// TODO
 	}
 	
@@ -96,28 +107,32 @@ public class Slave implements Runnable {
 	}
 	
 	public void run() {
-		Crawler crawlerA = new Crawler();
-		new Thread(crawlerA).start();
-		Crawler crawlerB = new Crawler();
-		new Thread(crawlerB).start();
 		new Thread(new Worker()).start();
+		new Thread(new Crawler((Integer)syncA)).start();
+		new Thread(new Crawler((Integer)syncB)).start();
 		
 		while(true) {
 			try {
-				Iterator<ChangeRequest> changes = this.changeRequests.iterator();
+				Iterator changes = this.changeRequests.iterator();
 				while (changes.hasNext()) {
+					System.out.println("changeLOOPS");
 					ChangeRequest change = (ChangeRequest) changes.next();
-					switch (change.getType()) {
+					switch (change.type) {
 					case ChangeRequest.CHANGEOPS:
+						System.out.println("CHANGIN TO WRITE");
 						SelectionKey key = change.socket.keyFor(this.selector);
-						key.interestOps(change.getOps());
+						key.interestOps(change.ops);
+						break;
+					case ChangeRequest.REGISTER:
+						change.socket.register(this.selector, change.ops, change.ID);
+						break;
 					}
-					this.changeRequests.clear();
+					
 				}
 				
+				this.changeRequests.clear();
 				// Blocks until an event arrives at a channel
 				this.selector.select();
-				
 				Iterator selectedKeys = this.selector.selectedKeys().iterator();
 				while (selectedKeys.hasNext()) {
 					SelectionKey key = (SelectionKey) selectedKeys.next();
@@ -147,11 +162,11 @@ public class Slave implements Runnable {
 		
 	private void finishConnection(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
-	
 		// Finish the connection. If the connection operation failed
 		// this will raise an IOException.
 		try {
 			socketChannel.finishConnect();
+			System.out.println("Connected");
 		} catch (IOException e) {
 			// Cancel the channel's registration with our selector
 			System.out.println(e);
@@ -159,13 +174,21 @@ public class Slave implements Runnable {
 			return;
 		}
 	
-		// Register an interest in writing on this channel
-		key.interestOps(SelectionKey.OP_WRITE);
+		if(key.attachment() == syncA){
+			synchronized(syncA){
+				syncA.notifyAll();
+			}
+		}
+		else{
+			synchronized(syncB){
+				syncB.notifyAll();
+			}
+		}
 	}
 	
 	private void read(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
-		
+		System.err.println("READING");
 		this.readBuffer.clear();
 		
 		int numRead;
@@ -184,6 +207,7 @@ public class Slave implements Runnable {
 		}
 		byte[] dataCopy = new byte[numRead];
 		System.arraycopy(this.readBuffer.array(), 0, dataCopy, 0, numRead);
+		System.out.println(new String(dataCopy));
 		worker.process(dataCopy);
 		
 	}
@@ -214,7 +238,7 @@ public class Slave implements Runnable {
 		synchronized (this.pendingData){
 			List queue = (List) this.pendingData.get(socket);
 			if (queue == null) {
-				queue = new Vector();
+				queue = new ArrayList();
 				this.pendingData.put(socket, queue);
 			}
 			queue.add(ByteBuffer.wrap(data));
@@ -223,7 +247,27 @@ public class Slave implements Runnable {
 		this.selector.wakeup();
 	}
 	
+
+	private SocketChannel createConnection(String address, int port) throws IOException{
+		SocketChannel socketChannel = SocketChannel.open();
+	    socketChannel.configureBlocking(false);
+	  
+	    // Kick off connection establishment
+	    socketChannel.connect(new InetSocketAddress(address, port));
+	  
+	    // Queue a channel registration since the caller is not the 
+	    // selecting thread. As part of the registration we'll register
+	    // an interest in connection events. These are raised when a channel
+	    // is ready to complete connection establishment.
+	    changeRequests.add(new ChangeRequest(socketChannel, ChangeRequest.REGISTER, SelectionKey.OP_CONNECT));
+	    System.out.println("created");
+	    selector.wakeup();
+	    return socketChannel;
+	}
+	
+
 	// Dumps node information to master
+
 	public void dump() {
 		Socket socket = new Socket();
 		ObjectOutputStream oos;
@@ -266,20 +310,23 @@ public class Slave implements Runnable {
 		} catch (IOException e) { /* Abort */ }
 	}
 	
+
 	/* Worker thread to parse collected byte arrays into Strings */
 	public class Worker implements Runnable {
 		Vector<byte[]> queue = new Vector<byte[]>();
 		
 		public void run() {
 			while(true) {
-				while(queue.isEmpty()) {
-					try {
-						queue.wait();
-					} catch (InterruptedException e) {}
-				}
+				synchronized(queue) {
+					while(queue.isEmpty()) {
+						try {
+							queue.wait();
+						} catch (InterruptedException e) {
+						}
+					}
 				
 				String results = new String(queue.get(FRONT));
-				
+				}
 			}
 		}
 		
@@ -290,31 +337,46 @@ public class Slave implements Runnable {
 	
 	public class Crawler implements Runnable {
 		private Node node;
-		public void run() {
-			node = ultraList.remove(FRONT);
-			try {
-				createConnection(node.getAddress(), node.getPortNum());
-			} catch (IOException e) {
-				// TODO NEED TO SORT OUT TYPES OF FAILURES
-			}
-			
+		SocketChannel sc;
+		private Object id; //Used to determine which crawler needs to handle stuff
+		
+		public Crawler(Object ID){
+			this.id = ID;
+		}
+		public void run(){
+			while(true){
+					if(ultraList.size() > 0)
+						node = ultraList.remove(FRONT);
+					else if(leafList.size() > 0)
+						node = leafList.remove(FRONT);
+					else
+						System.out.println("outta nodes");
+					try {
+						sc = createConnection(node.getAddress(), node.getPortNum());
+					} catch (IOException e) {
+						//do stuff
+					}
+				synchronized(id){
+					try {
+						System.out.println("crawler : " + (Integer)id + " waiting");
+						id.wait();
+					} catch (InterruptedException e) {
+						
+					}
+				}
+				System.out.println("Attempting to write");
+				sendRequest(sc);
+			}	
 		}
 		
-		private void createConnection(String address, int port) throws IOException{
-			SocketChannel socketChannel = SocketChannel.open();
-		    socketChannel.configureBlocking(false);
-		  
-		    // Kick off connection establishment
-		    socketChannel.connect(new InetSocketAddress(address, port));
-		  
-		    // Queue a channel registration since the caller is not the 
-		    // selecting thread. As part of the registration we'll register
-		    // an interest in connection events. These are raised when a channel
-		    // is ready to complete connection establishment.
-		    changeRequests.add(new ChangeRequest(socketChannel, ChangeRequest.REGISTER, SelectionKey.OP_CONNECT));
+		public void sendRequest(SocketChannel sc){
+			 StringBuffer request = new StringBuffer();
+		     request.append(REQUEST);
+		     byte[] bytes = request.toString().getBytes();
+		     send(sc, bytes);
 		}
 	}
-	
+
 	public class Whisper implements Runnable {
 		ServerSocket server;
 		Socket socket;
@@ -381,6 +443,7 @@ public class Slave implements Runnable {
 		private SocketChannel socket;
 		private int type;
 		private int ops;
+		private int ID;
 		
 		public ChangeRequest(SocketChannel socket, int type, int ops) {
 			this.socket = socket;
@@ -398,6 +461,10 @@ public class Slave implements Runnable {
 		
 		public int getOps() {
 			return (ops);
+		}
+		
+		public int getID() {
+			return (ID);
 		}
 		
 	}

@@ -18,10 +18,14 @@ public class Node implements Serializable {
 	private String address;
 	private String hostName;
 	private String agent;
+	private String Peers;
+	private String Leaves;
+	
+	
 	
 	private Status status;
 	private byte[] data;
-	
+
 	public Node(String address, int portNum) {
 		this.address = address;
 		this.portNum = portNum;
@@ -54,6 +58,10 @@ public class Node implements Serializable {
 	
 	public String getAgent() throws NotParsedException { return agent; }
 	
+	public String getPeers() {return Peers; }
+	
+	public String getLeaves() { return Leaves; }
+	
 	/* ************** SETTERS ************** */
 	public void setAddress(String address) {
 		this.address = address;
@@ -78,6 +86,13 @@ public class Node implements Serializable {
 	public void setData(byte[] data) {
 		this.data = data;
 	}
+	public void setLeaves(String leaves){
+		this.Leaves = leaves;
+	}
+	public void setPeers(String peers){
+		this.Peers = peers;
+	}
+		
 	
 	public String toString() {
 		String ret = "Address: " + this.address + "\n" +
@@ -89,5 +104,32 @@ public class Node implements Serializable {
 		}
 		return ret;
 	}
+	public void parseData(byte[] data) {
+		String property = new String(data);
+		int startIndex;
+        int endIndex;        
+        String Peers = new String();
+        String Agent = new String();
+        String Status = new String();
+        String Leaves = new String();
+        
+        startIndex = property.indexOf("Peers: ");
+        endIndex = property.indexOf("\n", startIndex);
+        Peers = property.substring(startIndex+7, endIndex);
+        
+        startIndex = property.indexOf("User-Agent: ");
+        endIndex = property.indexOf("\n",startIndex);
+        Agent = property.substring(startIndex+12,endIndex);
 
+        startIndex = property.indexOf("Leaves: ");
+        endIndex = property.indexOf("\n",startIndex);
+        Leaves = property.substring(startIndex+7,endIndex);
+        
+        
+        
+        this.setLeaves(Leaves);
+        this.setPeers(Peers);
+        this.setAgent(Agent);
+        
+	}
 }

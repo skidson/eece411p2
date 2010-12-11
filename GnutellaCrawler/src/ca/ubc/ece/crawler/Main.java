@@ -42,7 +42,9 @@ public class Main {
     public static void main(String[] args) {
         Vector<Node> visited = new Vector<Node>();
         Vector<Node> unvisited = new Vector<Node>();
-        
+        Runtime rt = Runtime.getRuntime();
+        System.out.println(rt.freeMemory());
+
         /* Parse command-line bootstrap parameters */
         if (args.length < 2){
             System.out.println("Usage:\n\tMain <-full | -minimal> timeout=XX <address:port> <timetorun>");

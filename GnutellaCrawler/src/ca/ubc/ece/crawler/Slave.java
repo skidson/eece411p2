@@ -223,13 +223,26 @@ public class Slave implements Runnable {
 		byte[] data = new byte[numRead];
 		System.arraycopy(this.readBuffer.array(), 0, data, 0, numRead);		
 		node.setData(data);
-		node.parseData(data);
+		
 		synchronized(workList){
 			
 			
 			workList.add(node);
 		}
+
 		
+		if(at.getID() == (Integer)syncA){
+			synchronized(syncA){
+				syncA.notifyAll();
+			}
+		}else{
+			synchronized(syncB){
+				syncB.notifyAll();
+			}
+		}
+			
+		// TODO noturmom
+		node.parseData(data);
 		for (int i = 0; i < workList.size();i++){
 			Node tempNode = workList.elementAt(i);
 			tempLeaves = tempNode.getLeaves();
@@ -251,18 +264,6 @@ public class Slave implements Runnable {
 				}
 		
 		}
-		
-		if(at.getID() == (Integer)syncA){
-			synchronized(syncA){
-				syncA.notifyAll();
-			}
-		}else{
-			synchronized(syncB){
-				syncB.notifyAll();
-			}
-		}
-			
-		// TODO ensure readBuffer contains a full entry and add it to workList
 	}
 	
 	private void write(SelectionKey key) throws IOException {

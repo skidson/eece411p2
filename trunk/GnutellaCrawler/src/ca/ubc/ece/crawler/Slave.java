@@ -44,17 +44,21 @@ public class Slave implements Runnable {
 	
 	private Worker worker;
 	
+	private IPCache ipCache;
+	
 	private Vector<Node> ultraList;
 	private Vector<Node> leafList;
 	private Vector<Node> workList = new Vector<Node>();
 	private Vector<Node> dumpList = new Vector<Node>();
 	private String[] ringList;
 	
-	private List<ChangeRequest> changeRequests = new Vector();
+	private List<ChangeRequest> changeRequests = new Vector<ChangeRequest>();
 	
 	private Map pendingData = new HashMap();
 	private Object syncA = new Integer(1);
 	private Object syncB = new Integer(2);
+	
+	/* ************ INITIALIZATION ************ */
 	
 	public static void main(String[] args) {
 		String crawlAddress = "localhost";
@@ -98,6 +102,14 @@ public class Slave implements Runnable {
 			this.portNum = 9090;
 			this.selector = initSelector();
 		} catch (IOException e) {}
+		
+		/* Crawled nodes are stored in the IPCache
+		 * Given an IP of a.b.c.d
+		 * The first dimension is indexed by a, and stores the value of b
+		 * The second dimension is indexed by c and stores the value of d
+		 */
+		this.ipCache = new IPCache();
+		
 		// TODO populate ringlist
 	}
 	
@@ -301,7 +313,6 @@ public class Slave implements Runnable {
 		this.selector.wakeup();
 	}
 	
-
 	private SocketChannel createConnection(String address, int port, Attachment attachment) throws IOException{
 		SocketChannel socketChannel = SocketChannel.open();
 	    socketChannel.configureBlocking(false);
@@ -321,7 +332,6 @@ public class Slave implements Runnable {
 	
 
 	// Dumps node information to master
-
 	public void dump() {
         try {
 			dump(master);
@@ -349,6 +359,8 @@ public class Slave implements Runnable {
 		oos.writeObject(ringList);
 		socket.close();
 	}
+	
+	/* ************ EMBEDDED THREADS ************ */
 	
 	/* Worker thread to parse collected byte arrays into Strings */
 	public class Worker implements Runnable {

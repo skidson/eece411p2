@@ -85,7 +85,6 @@ public class IPCache {
 		
 		public IPAddress(String address) {
 			bytes = IPCache.toDomains(address);
-			System.err.println(this.toString());
 		}
 		
 		protected byte[] getBytes() {

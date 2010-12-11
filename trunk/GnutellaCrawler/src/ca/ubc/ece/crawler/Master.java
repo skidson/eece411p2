@@ -151,27 +151,6 @@ public class Master implements Runnable {
 		}
 	}
 	
-	public class Timer implements Runnable {
-		private Action action;
-		private int delay;
-		
-		public Timer(Action action, int delay) {
-			this.action = action;
-			this.delay = delay;
-		}
-		
-		public void run() {
-			try {
-				Thread.sleep(duration);
-			} catch (InterruptedException e) { /* Forcibly quit */ }
-			action.execute();
-		}
-	}
-	
-	private interface Action {
-		public void execute();
-	}
-	
 	private class TerminateAction implements Action {
 		public void execute() {
 			print();

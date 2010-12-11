@@ -1,7 +1,11 @@
 package ca.ubc.ece.crawler;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -17,6 +21,8 @@ import java.util.Vector;
 public class Slave implements Runnable {
 	public static final int MS_TO_SEC = 1000;
 	public static final int FRONT = 0;
+	public static final int DUMP_THRESHOLD = 10;
+	public static final int WHISPER_PORT = 1338;
 	
 	private String hostName;
 	private int portNum;
@@ -24,14 +30,20 @@ public class Slave implements Runnable {
 	private int timeout;
 	private boolean full;
 	
+	private InetSocketAddress master;
+	private InetSocketAddress backup;
+	
 	private Selector selector;
 	private ServerSocketChannel serverChannel;
 	private ByteBuffer readBuffer = ByteBuffer.allocate(8192);
 	
 	private Worker worker;
 	
-	private Vector<Node> nodeList;
+	private Vector<Node> ultraList;
+	private Vector<Node> leafList;
 	private Vector<Node> workList;
+	private Vector<Node> dumpList;
+	private Vector<Node> ringList;
 	
 	private List<ChangeRequest> changeRequests = new Vector();
 	
@@ -67,8 +79,8 @@ public class Slave implements Runnable {
 	public Slave(boolean full, int timeout, int duration) {
 		Node test = new Node("137.82.84.242", 5627);
 		Node test1 = new Node("69.155.31.23", 34180);
-		nodeList.add(test);
-		nodeList.add(test1);
+		ultraList.add(test);
+		ultraList.add(test1);
 		// TODO
 	}
 	
@@ -195,7 +207,6 @@ public class Slave implements Runnable {
 				key.interestOps(SelectionKey.OP_READ);
 		}
 	}
-	
 
 	private void send(SocketChannel socket, byte[] data) {
 		this.changeRequests.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
@@ -212,8 +223,45 @@ public class Slave implements Runnable {
 		this.selector.wakeup();
 	}
 	
+	// Dumps node information to master
 	public void dump() {
-		// TODO dumps node information to master
+		Socket socket = new Socket();
+		ObjectOutputStream oos;
+        try {
+			socket.connect(master, timeout);
+		} catch (Exception e) {
+			// Master node has failed, revert to backup
+			try {
+				socket.connect(backup, timeout);
+			} catch (IOException e1) { 
+				// This node likely has a poor connection to masters, abort
+				return;
+			}
+		}
+		try {
+			oos = new ObjectOutputStream(socket.getOutputStream());
+			for (Node node : dumpList)
+				oos.writeObject(node);
+			dumpList.clear();
+		} catch (IOException e) {
+			// Abort
+			return;
+		}
+	}
+	
+	// Dumps node information to target
+	public void dump(InetSocketAddress target) {
+		Socket socket = new Socket();
+		ObjectOutputStream oos;
+        try {
+        	socket.bind(target);
+			oos = new ObjectOutputStream(socket.getOutputStream());
+			for (Node node : dumpList)
+				oos.writeObject(node);
+			dumpList.clear();
+			// TODO send ringlist
+			socket.close();
+		} catch (IOException e) { /* Abort */ }
 	}
 	
 	/* Worker thread to parse collected byte arrays into Strings */
@@ -241,11 +289,11 @@ public class Slave implements Runnable {
 	public class Crawler implements Runnable {
 		private Node node;
 		public void run() {
-			node = nodeList.remove(FRONT);
+			node = ultraList.remove(FRONT);
 			try {
 				createConnection(node.getAddress(), node.getPortNum());
 			} catch (IOException e) {
-				//NEED TO SORT OUT TYPES OF FAILURES
+				// TODO NEED TO SORT OUT TYPES OF FAILURES
 			}
 			
 		}
@@ -265,10 +313,47 @@ public class Slave implements Runnable {
 		}
 	}
 	
-	
 	public class Whisper implements Runnable {
+		ServerSocket server;
+		Socket socket;
+		ObjectInputStream ois;
+		ObjectOutputStream oos;
+		
 		public void run() {
+			try {
+				server = new ServerSocket(WHISPER_PORT);
+			} catch (IOException e) {
+				// TODO your fucked
+			}
 			
+			while(true) {
+				try {
+					// Block until a connection is received on this port
+					socket = server.accept();
+					ois = new ObjectInputStream(socket.getInputStream());
+					while(ois.available() > 0) {
+						try {
+							dumpList.add((Node)ois.readObject());
+						} catch (ClassNotFoundException e) { continue; }
+					}
+					// TODO update ringlist
+					socket.close();
+					String nextHostName = null;
+					int nextPortNum = 0;
+					for (int i = 0; i < ringList.size(); i++) {
+						if (ringList.get(i).getAddress().equals(hostName)) { // TODO hostName here must be this node's address
+							int index;
+							if (i == ringList.size() -1)
+								index = 0;
+							else
+								index = i + 1;
+							
+							nextHostName = ringList.get(index).getAddress();
+						}
+					}
+					dump(new InetSocketAddress(nextHostName, nextPortNum));
+				} catch (IOException e) { continue; }
+			}
 		}
 	}
 	

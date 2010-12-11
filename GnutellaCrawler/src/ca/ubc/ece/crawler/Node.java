@@ -16,7 +16,7 @@ import java.util.Vector;
 public class Node implements Serializable {
 	private int portNum;
 	private String address;
-	private String hostname;
+	private String hostName;
 	private String agent;
 	
 	private Status status;
@@ -44,7 +44,7 @@ public class Node implements Serializable {
 	/* ************** GETTERS ************** */
 	public String getAddress() { return address; }
 	
-	public String getHostname() { return hostname; }
+	public String getHostName() { return hostName; }
 
 	public int getPortNum() { return portNum; }
 	
@@ -63,8 +63,8 @@ public class Node implements Serializable {
 		this.agent = agent;
 	}
 
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
+	public void setHostName(String hostName) {
+		this.hostName = hostName;
 	}
 
 	public void setPortNum(int portNum) {
@@ -84,7 +84,7 @@ public class Node implements Serializable {
 			"Port: " + this.portNum + "\r\n" + 
 			"Status: " + this.status + "\r\n";
 		if (this.status == Status.CONNECTED) {
-			ret += "Hostname: " + this.hostname + "\r\n" +
+			ret += "Hostname: " + this.hostName + "\r\n" +
 				"Agent: " + this.agent + "\r\n";
 		}
 		return ret;

@@ -248,7 +248,7 @@ public class Slave implements Runnable {
 			}
 		}
 			
-		// TODO noturmom
+		// TODO 
 		
 	}
 	
@@ -338,11 +338,7 @@ public class Slave implements Runnable {
 	
 	/* Worker thread to parse collected byte arrays into Strings */
 	public class Worker implements Runnable {
-		private String tempLeaves;
-		private String tempPeers;
-		private String[] tempArray;
-		private String[] readArray;
-		private String ipPort;
+
 		
 		public void run() {
 			while(true) {
@@ -352,12 +348,63 @@ public class Slave implements Runnable {
 					} catch (InterruptedException e) {}
 				}				
 				//TODO get data from each node in workList, call parseData on it
+				for (int i = 0; i < workList.size();i++){
+					Node tempNode = workList.elementAt(i);
+					parseData(workList.elementAt(i).getData());
+				}
 			}
 		}
 		
 		private void parseData(byte[] data){
 			//TODO put shit from Node here, check against cachestuff, if not in, add to ultralist/leaflist appropriately.. add to dumpList
 			// and cache it
+			String tempLeaves;
+			String tempPeers;
+			String[] tempArray;
+			String[] tempArray2;
+			String[] readArray;
+			String ipPort;
+			String dataS = new String(data);
+	        String Peers = new String();
+	        String Leaves = new String();
+			int startIndex;
+	        int endIndex;        
+
+	        
+	        startIndex = dataS.indexOf("Peers: ");
+	        endIndex = dataS.indexOf("\n", startIndex);
+	        Peers = dataS.substring(startIndex+7, endIndex);
+
+	        startIndex = dataS.indexOf("Leaves: ");
+	        endIndex = dataS.indexOf("\n",startIndex);
+	        Leaves = dataS.substring(startIndex+8,endIndex);
+			
+				tempArray = Peers.split(",");
+					for (int j = 0; j < tempArray.length; j++) {
+						ipPort = tempArray[j];
+						readArray = ipPort.split(":");
+						if (!(ipCache.isCached(readArray[0].toString()))) {
+						Node tempnode = new Node(readArray[0], Integer.parseInt(readArray[1]));
+						ultraList.add(tempnode);
+						ipCache.cache(readArray[0]);
+						dumpList.add(tempnode);
+						
+						}	
+						}
+					tempArray2 = Leaves.split(",");
+					for (int k = 0; k< tempArray2.length; k++) {
+						ipPort = tempArray2[k];
+						readArray = ipPort.split(":");
+						if (!(ipCache.isCached(readArray[0].toString()))) {
+						Node tempnode = new Node(readArray[0], Integer.parseInt(readArray[1]));
+						leafList.add(tempnode);
+						ipCache.cache(readArray[0]);
+						dumpList.add(tempnode);
+						}
+					}
+					
+					
+	        
 		}
 	}
 	

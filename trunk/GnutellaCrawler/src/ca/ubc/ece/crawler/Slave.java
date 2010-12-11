@@ -26,6 +26,7 @@ public class Slave implements Runnable {
 	public static final String REQUEST = "GNUTELLA CONNECT/0.6\r\n" + "User-Agent: UBCECE (crawl)\r\n" + "Query-Routing: 0.2\r\n" + "X-Ultrapeer: False\r\n" + "Crawler: 0.1\r\n" + "\r\n";
 	public static final int DUMP_THRESHOLD = 10;
 	public static final int WHISPER_PORT = 1338;
+	public static final int REFRESH_RATE = 1000;
 	
 	private String hostName;
 	private int portNum;
@@ -42,13 +43,14 @@ public class Slave implements Runnable {
 	
 	private Worker worker;
 	
+	private Vector<Node> ultraList = new Vector<Node>();
+	private Vector<Node> leafList = new Vector<Node>();
 	private Vector<Node> workList;
 	private Vector<Node> dumpList;
 	private String[] ringList;
 	
 	private List<ChangeRequest> changeRequests = new Vector();
-	private Vector<Node> ultraList = new Vector<Node>();
-	private Vector<Node> leafList = new Vector<Node>();
+	
 	private Map pendingData = new HashMap();
 	private Object syncA = new Integer(1);
 	private Object syncB = new Integer(2);
@@ -89,10 +91,8 @@ public class Slave implements Runnable {
 			this.hostName = InetAddress.getLocalHost().getHostName();
 			this.portNum = 9090;
 			this.selector = initSelector();
-		} catch (IOException e) {
-
-		}
-		// TODO
+		} catch (IOException e) {}
+		// TODO populate ringlist
 	}
 	
 	private Selector initSelector() throws IOException {
@@ -127,7 +127,6 @@ public class Slave implements Runnable {
 						change.socket.register(this.selector, change.ops, change.ID);
 						break;
 					}
-					
 				}
 				
 				this.changeRequests.clear();
@@ -205,11 +204,7 @@ public class Slave implements Runnable {
 			socketChannel.close();
 			return;
 		}
-		byte[] dataCopy = new byte[numRead];
-		System.arraycopy(this.readBuffer.array(), 0, dataCopy, 0, numRead);
-		System.out.println(new String(dataCopy));
-		worker.process(dataCopy);
-		
+		// TODO ensure readBuffer contains a full entry and add it to workList
 	}
 	
 	private void write(SelectionKey key) throws IOException {
@@ -302,10 +297,12 @@ public class Slave implements Runnable {
         try {
         	socket.bind(target);
 			oos = new ObjectOutputStream(socket.getOutputStream());
-			for (Node node : dumpList)
-				oos.writeObject(node);
-			dumpList.clear();
-			// TODO send ringlist
+			synchronized(dumpList) {
+				for (Node node : dumpList)
+					oos.writeObject(node);
+				dumpList.clear();
+			}
+			oos.writeObject(ringList);
 			socket.close();
 		} catch (IOException e) { /* Abort */ }
 	}
@@ -313,25 +310,16 @@ public class Slave implements Runnable {
 
 	/* Worker thread to parse collected byte arrays into Strings */
 	public class Worker implements Runnable {
-		Vector<byte[]> queue = new Vector<byte[]>();
 		
 		public void run() {
 			while(true) {
-				synchronized(queue) {
-					while(queue.isEmpty()) {
-						try {
-							queue.wait();
-						} catch (InterruptedException e) {
-						}
-					}
-				
-				String results = new String(queue.get(FRONT));
+				while(workList.isEmpty()) {
+					try {
+						Thread.sleep(REFRESH_RATE);
+					} catch (InterruptedException e) {}
 				}
+				// TODO parse infoz
 			}
-		}
-		
-		public void process(byte[] data) {
-			queue.add(data);
 		}
 	}
 	
@@ -356,7 +344,7 @@ public class Slave implements Runnable {
 					} catch (IOException e) {
 						//do stuff
 					}
-				synchronized(id){
+				synchronized(id) {
 					try {
 						System.out.println("crawler : " + (Integer)id + " waiting");
 						id.wait();
@@ -387,7 +375,8 @@ public class Slave implements Runnable {
 			try {
 				server = new ServerSocket(WHISPER_PORT);
 			} catch (IOException e) {
-				// TODO your fucked
+				System.err.println("Error: Could not establish internode communication port");
+				// This node will timeout of ring requests and thus be ignored
 			}
 			
 			while(true) {
@@ -398,22 +387,21 @@ public class Slave implements Runnable {
 					while(ois.available() > 0) {
 						try {
 							dumpList.add((Node)ois.readObject());
-						} catch (ClassNotFoundException e) { continue; }
+						} catch (ClassNotFoundException e) { continue;
+						} catch (ClassCastException e) {
+							// Read object is not a Node, must be the ringList
+							try {
+								ringList = (String[]) ois.readObject();
+							} catch (ClassNotFoundException e1) { continue; }
+						}
 					}
-					// TODO update ringlist
 					socket.close();
 					
 					String[] address = null;
 					for (int i = 0; i < ringList.length; i++) {
 						address = ringList[i].split(":");
 						if (address[0].equals(hostName)) { // TODO hostName here must be this node's address
-							int index;
-							if (i == ringList.length -1)
-								index = 0;
-							else
-								index = i + 1;
-							
-							address = ringList[index].split(":");
+							address = ringList[(i+1)%(ringList.length)].split(":");
 							break;
 						}
 					}
@@ -427,9 +415,7 @@ public class Slave implements Runnable {
 		public void run() {
 			try {
 				Thread.sleep(duration*MS_TO_SEC);
-			} catch (InterruptedException e) {
-				// Forcibly quit
-			}
+			} catch (InterruptedException e) { /* Forcibly quit */ }
 			System.out.println("Timer has expired, terminating...");
 			dump();
 			System.exit(0);
@@ -451,21 +437,13 @@ public class Slave implements Runnable {
 			this.ops = ops;
 		}
 		
-		public SocketChannel getSocketChannel() {
-			return (socket);
-		}
+		public SocketChannel getSocketChannel() { return (socket); }
 		
-		public int getType() {
-			return (type);
-		}
+		public int getType() { return (type); }
 		
-		public int getOps() {
-			return (ops);
-		}
+		public int getOps() { return (ops); }
 		
-		public int getID() {
-			return (ID);
-		}
+		public int getID() { return (ID); }
 		
 	}
 }

@@ -25,7 +25,7 @@ public class Master implements Runnable {
 	private static boolean full = false;
 	
 	private Vector<Node> nodeList;
-	private Vector<Worker> workerList;
+	private Vector<ResultHandler> workerList;
 	private ServerSocket listener;
 	
 	/* ************ INITIALIZATION ************ */
@@ -79,7 +79,7 @@ public class Master implements Runnable {
 		this.verbose = verbose;
 		this.timeout = timeout;
 		this.duration = duration;
-		this.workerList = new Vector<Worker>();
+		this.workerList = new Vector<ResultHandler>();
 	}
 	
 	/* Loops forever, accepting connections and dispatching to workers */
@@ -91,9 +91,9 @@ public class Master implements Runnable {
 				while(true) {
 					// Blocks until connection established
 					Socket client = listener.accept();
-					Worker worker;
+					ResultHandler worker;
 					try {
-						 worker = new Worker(client);
+						 worker = new ResultHandler(client);
 					} catch (Exception e) {
 						// Memory limit reached, delegate to already existing worker
 						worker = workerList.get(dumpCount % workerList.size());
@@ -115,11 +115,11 @@ public class Master implements Runnable {
 	}
 	
 	/* ************ EMBEDDED THREADS ************ */
-	public class Worker implements Runnable {
+	public class ResultHandler implements Runnable {
 		private Vector<Socket> queue = new Vector<Socket>();
 		ObjectInputStream ois;
 		
-		public Worker(Socket client) {
+		public ResultHandler(Socket client) {
 			this.process(client);
 		}
 

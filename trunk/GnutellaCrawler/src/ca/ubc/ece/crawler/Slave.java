@@ -1,10 +1,7 @@
 package ca.ubc.ece.crawler;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -13,7 +10,6 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -34,8 +30,11 @@ public class Slave implements Runnable {
 	
 	private Worker worker;
 	
-	private List<ChangeRequest> changeRequests = new Vector();
 	private Vector<Node> nodeList;
+	private Vector<Node> workList;
+	
+	private List<ChangeRequest> changeRequests = new Vector();
+	
 	private Map pendingData = new HashMap();
 	
 	public static void main(String[] args) {
@@ -239,7 +238,7 @@ public class Slave implements Runnable {
 		}
 	}
 	
-	public class Crawler implements Runnable{
+	public class Crawler implements Runnable {
 		private Node node;
 		public void run() {
 			node = nodeList.remove(FRONT);
@@ -266,6 +265,12 @@ public class Slave implements Runnable {
 		}
 	}
 	
+	
+	public class Whisper implements Runnable {
+		public void run() {
+			
+		}
+	}
 	
 	public class Timer implements Runnable {
 		public void run() {

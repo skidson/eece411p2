@@ -92,7 +92,7 @@ public class Node implements Serializable {
 	public void setPeers(String peers){
 		this.Peers = peers;
 	}
-		
+	
 	
 	public String toString() {
 		String ret = "Address: " + this.address + "\n" +
@@ -124,8 +124,6 @@ public class Node implements Serializable {
         startIndex = property.indexOf("Leaves: ");
         endIndex = property.indexOf("\n",startIndex);
         Leaves = property.substring(startIndex+7,endIndex);
-        
-        
         
         this.setLeaves(Leaves);
         this.setPeers(Peers);

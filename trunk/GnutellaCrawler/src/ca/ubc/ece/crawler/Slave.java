@@ -32,6 +32,7 @@ public class Slave implements Runnable {
 	private int portNum;
 	private int duration;
 	private int timeout;
+	private int fellowshipID;
 	private boolean full;
 	
 	private InetSocketAddress master;
@@ -43,8 +44,8 @@ public class Slave implements Runnable {
 	
 	private Worker worker;
 	
-	private Vector<Node> ultraList = new Vector<Node>();
-	private Vector<Node> leafList = new Vector<Node>();
+	private Vector<Node> ultraList;
+	private Vector<Node> leafList;
 	private Vector<Node> workList = new Vector<Node>();
 	private Vector<Node> dumpList = new Vector<Node>();
 	private String[] ringList;
@@ -83,6 +84,11 @@ public class Slave implements Runnable {
 	}
 	
 	public Slave(boolean full, int timeout, int duration) {
+		ultraList = new Vector<Node>();
+		leafList = new Vector<Node>();
+		workList = new Vector<Node>();
+		dumpList = new Vector<Node>();
+		
 		Node test = new Node("137.82.84.242", 5627);
 		Node test1 = new Node("99.233.17.243", 49461);
 		ultraList.add(test);
@@ -268,50 +274,33 @@ public class Slave implements Runnable {
 	// Dumps node information to master
 
 	public void dump() {
-		Socket socket = new Socket();
-		ObjectOutputStream oos;
         try {
-			socket.connect(master, timeout);
-		} catch (Exception e) {
+			dump(master);
+		} catch (IOException e) {
 			// Master node has failed, revert to backup
 			try {
-				socket.connect(backup, timeout);
-			} catch (IOException e1) { 
-				// This node likely has a poor connection to masters, abort
-				return;
-			}
-		}
-		try {
-			oos = new ObjectOutputStream(socket.getOutputStream());
-			synchronized(dumpList) {
-				for (Node node : dumpList)
-					oos.writeObject(node);
-				dumpList.clear();
-			}
-		} catch (IOException e) {
-			// Abort
-			return;
+				dump(backup);
+			} catch (IOException e1) {}
 		}
 	}
 	
 	// Dumps node information to target
-	public void dump(InetSocketAddress target) {
+	public void dump(InetSocketAddress target) throws IOException {
 		Socket socket = new Socket();
 		ObjectOutputStream oos;
-        try {
-        	socket.bind(target);
-			oos = new ObjectOutputStream(socket.getOutputStream());
-			synchronized(dumpList) {
-				for (Node node : dumpList)
-					oos.writeObject(node);
-				dumpList.clear();
-			}
-			oos.writeObject(ringList);
-			socket.close();
-		} catch (IOException e) { /* Abort */ }
+    	socket.bind(target);
+		oos = new ObjectOutputStream(socket.getOutputStream());
+		oos.writeObject(fellowshipID);
+		oos.writeObject(ringList);
+		synchronized(dumpList) {
+			for (Node node : dumpList)
+				oos.writeObject(node);
+			dumpList.clear();
+		}
+		oos.writeObject(ringList);
+		socket.close();
 	}
 	
-
 	/* Worker thread to parse collected byte arrays into Strings */
 	public class Worker implements Runnable {
 		
@@ -410,16 +399,15 @@ public class Slave implements Runnable {
 					// Block until a connection is received on this port
 					socket = server.accept();
 					ois = new ObjectInputStream(socket.getInputStream());
+					if (fellowshipID == (Integer)ois.readObject())
+						ringList = (String[])ois.readObject();
+					else
+						// Discard the incoming ringList
+						ois.readObject();
 					while(ois.available() > 0) {
 						try {
 							dumpList.add((Node)ois.readObject());
-						} catch (ClassNotFoundException e) { continue;
-						} catch (ClassCastException e) {
-							// Read object is not a Node, must be the ringList
-							try {
-								ringList = (String[]) ois.readObject();
-							} catch (ClassNotFoundException e1) { continue; }
-						}
+						} catch (ClassNotFoundException e) { continue; }
 					}
 					socket.close();
 					
@@ -432,7 +420,7 @@ public class Slave implements Runnable {
 						}
 					}
 					dump(new InetSocketAddress(address[0], Integer.parseInt(address[1])));
-				} catch (IOException e) { continue; }
+				} catch (Exception e) { continue; }
 			}
 		}
 	}
@@ -467,9 +455,7 @@ public class Slave implements Runnable {
 		public SocketChannel getSocketChannel() { return (socket); }
 		
 		public int getType() { return (type); }
-		
 		public int getOps() { return (ops); }
-		
 		public int getID() { return (ID); }
 		
 	}

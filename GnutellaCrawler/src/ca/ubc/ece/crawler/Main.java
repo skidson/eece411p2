@@ -129,8 +129,10 @@ public class Main {
 //		    	leaf.setInfo(leafInfo);
 		    	
 		    	String leafPeers = leafInfo.getUltrapeers();
-	    		if(leaf.getStatus() != Status.CONNECTED)
-	    			continue;
+	    		try {
+					if(leaf.getStatus() != Status.CONNECTED)
+						continue;
+				} catch (NotParsedException e) {}
 
 		    	StringTokenizer leafTokens = new StringTokenizer(leafPeers, DELIM);
 		    	

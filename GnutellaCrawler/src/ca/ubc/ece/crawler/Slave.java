@@ -39,14 +39,14 @@ public class Slave implements Runnable {
 	
 	private Selector selector;
 	private ServerSocketChannel serverChannel;
-	private ByteBuffer readBuffer = ByteBuffer.allocate(8192);
+	private ByteBuffer readBuffer = ByteBuffer.allocate(50000);
 	
 	private Worker worker;
 	
 	private Vector<Node> ultraList = new Vector<Node>();
 	private Vector<Node> leafList = new Vector<Node>();
-	private Vector<Node> workList;
-	private Vector<Node> dumpList;
+	private Vector<Node> workList = new Vector<Node>();
+	private Vector<Node> dumpList = new Vector<Node>();
 	private String[] ringList;
 	
 	private List<ChangeRequest> changeRequests = new Vector();
@@ -113,23 +113,22 @@ public class Slave implements Runnable {
 		
 		while(true) {
 			try {
-				Iterator changes = this.changeRequests.iterator();
-				while (changes.hasNext()) {
-					System.out.println("changeLOOPS");
-					ChangeRequest change = (ChangeRequest) changes.next();
-					switch (change.type) {
-					case ChangeRequest.CHANGEOPS:
-						System.out.println("CHANGIN TO WRITE");
-						SelectionKey key = change.socket.keyFor(this.selector);
-						key.interestOps(change.ops);
-						break;
-					case ChangeRequest.REGISTER:
-						change.socket.register(this.selector, change.ops, change.ID);
-						break;
+				synchronized (this.changeRequests) {
+					Iterator changes = this.changeRequests.iterator();
+					while (changes.hasNext()) {
+						ChangeRequest change = (ChangeRequest) changes.next();
+						switch (change.type) {
+						case ChangeRequest.CHANGEOPS:
+							SelectionKey key = change.socket.keyFor(this.selector);
+							key.interestOps(change.ops);
+							break;
+						case ChangeRequest.REGISTER:
+							change.socket.register(this.selector, change.ops, new Integer(change.ID));
+							break;
+						}
 					}
+					this.changeRequests.clear();
 				}
-				
-				this.changeRequests.clear();
 				// Blocks until an event arrives at a channel
 				this.selector.select();
 				Iterator selectedKeys = this.selector.selectedKeys().iterator();
@@ -173,7 +172,7 @@ public class Slave implements Runnable {
 			return;
 		}
 	
-		if(key.attachment() == syncA){
+		if(key.attachment().equals(syncA)){
 			synchronized(syncA){
 				syncA.notifyAll();
 			}
@@ -204,6 +203,11 @@ public class Slave implements Runnable {
 			socketChannel.close();
 			return;
 		}
+		System.out.println(key.channel().toString());
+		key.channel().close();
+		byte[] data = new byte[numRead];
+		System.arraycopy(this.readBuffer.array(), 0, data, 0, numRead);
+		System.out.println(new String(data));
 		// TODO ensure readBuffer contains a full entry and add it to workList
 	}
 	
@@ -227,8 +231,8 @@ public class Slave implements Runnable {
 		}
 	}
 
-	private void send(SocketChannel socket, byte[] data) {
-		this.changeRequests.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
+	private void send(SocketChannel socket, byte[] data, int ID) {
+		this.changeRequests.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE, ID));
 		
 		synchronized (this.pendingData){
 			List queue = (List) this.pendingData.get(socket);
@@ -243,7 +247,7 @@ public class Slave implements Runnable {
 	}
 	
 
-	private SocketChannel createConnection(String address, int port) throws IOException{
+	private SocketChannel createConnection(String address, int port, int ID) throws IOException{
 		SocketChannel socketChannel = SocketChannel.open();
 	    socketChannel.configureBlocking(false);
 	  
@@ -254,7 +258,7 @@ public class Slave implements Runnable {
 	    // selecting thread. As part of the registration we'll register
 	    // an interest in connection events. These are raised when a channel
 	    // is ready to complete connection establishment.
-	    changeRequests.add(new ChangeRequest(socketChannel, ChangeRequest.REGISTER, SelectionKey.OP_CONNECT));
+	    changeRequests.add(new ChangeRequest(socketChannel, ChangeRequest.REGISTER, SelectionKey.OP_CONNECT, ID));
 	    System.out.println("created");
 	    selector.wakeup();
 	    return socketChannel;
@@ -337,13 +341,25 @@ public class Slave implements Runnable {
 						node = ultraList.remove(FRONT);
 					else if(leafList.size() > 0)
 						node = leafList.remove(FRONT);
-					else
+					else{
 						System.out.println("outta nodes");
+						synchronized(id) {
+							try {
+								System.out.println("crawler : " + (Integer)id + " waiting");
+								id.wait();
+							} catch (InterruptedException e) {
+								
+							}
+						}
+					}
+						
 					try {
-						sc = createConnection(node.getAddress(), node.getPortNum());
+						sc = createConnection(node.getAddress(), node.getPortNum(), (Integer)id);
 					} catch (IOException e) {
 						//do stuff
 					}
+				
+				//wait for connection to finish before writing	
 				synchronized(id) {
 					try {
 						System.out.println("crawler : " + (Integer)id + " waiting");
@@ -354,6 +370,16 @@ public class Slave implements Runnable {
 				}
 				System.out.println("Attempting to write");
 				sendRequest(sc);
+				
+				//wait for this connection to be closed so we can open another
+				synchronized(id) {
+					try {
+						System.out.println("crawler : " + (Integer)id + " waiting");
+						id.wait();
+					} catch (InterruptedException e) {
+						
+					}
+				}
 			}	
 		}
 		
@@ -361,7 +387,7 @@ public class Slave implements Runnable {
 			 StringBuffer request = new StringBuffer();
 		     request.append(REQUEST);
 		     byte[] bytes = request.toString().getBytes();
-		     send(sc, bytes);
+		     send(sc, bytes, (Integer)id);
 		}
 	}
 
@@ -431,10 +457,11 @@ public class Slave implements Runnable {
 		private int ops;
 		private int ID;
 		
-		public ChangeRequest(SocketChannel socket, int type, int ops) {
+		public ChangeRequest(SocketChannel socket, int type, int ops, int ID) {
 			this.socket = socket;
 			this.type = type;
 			this.ops = ops;
+			this.ID = ID;
 		}
 		
 		public SocketChannel getSocketChannel() { return (socket); }

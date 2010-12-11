@@ -349,7 +349,7 @@ public class Slave implements Runnable {
 				}				
 				//TODO get data from each node in workList, call parseData on it
 				for (int i = 0; i < workList.size();i++){
-					Node tempNode = workList.elementAt(i);
+					//System.out.println(workList.size());
 					parseData(workList.elementAt(i).getData());
 				}
 			}
@@ -391,20 +391,22 @@ public class Slave implements Runnable {
 						
 						}	
 						}
+					
 					tempArray2 = Leaves.split(",");
+					if (!(tempArray2.length < 2)) {
 					for (int k = 0; k< tempArray2.length; k++) {
 						ipPort = tempArray2[k];
 						readArray = ipPort.split(":");
 						if (!(ipCache.isCached(readArray[0].toString()))) {
+							//System.out.println(!(ipCache.isCached(readArray[0].toString())));
 						Node tempnode = new Node(readArray[0], Integer.parseInt(readArray[1]));
 						leafList.add(tempnode);
+						//System.out.println(readArray[0]);
 						ipCache.cache(readArray[0]);
 						dumpList.add(tempnode);
 						}
 					}
-					
-					
-	        
+					}
 		}
 	}
 	

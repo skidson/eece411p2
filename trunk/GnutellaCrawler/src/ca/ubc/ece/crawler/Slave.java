@@ -225,6 +225,7 @@ public class Slave implements Runnable {
 			socketChannel.close();
 			return;
 		}
+		
 		Attachment at = (Attachment) key.attachment();
 		Node node = at.getNode();
 		key.channel().close();
@@ -232,17 +233,14 @@ public class Slave implements Runnable {
 		byte[] data = new byte[numRead];
 		System.arraycopy(this.readBuffer.array(), 0, data, 0, numRead);		
 		node.setData(data);
-		
-		synchronized(workList){			
-			workList.add(node);
-		}
+				
+		workList.add(node);
 
-		
 		if(at.getID() == (Integer)syncA){
 			synchronized(syncA){
 				syncA.notifyAll();
 			}
-		}else{
+		} else {
 			synchronized(syncB){
 				syncB.notifyAll();
 			}
@@ -283,7 +281,6 @@ public class Slave implements Runnable {
 			}
 			queue.add(ByteBuffer.wrap(data));
 		}
-		
 		this.selector.wakeup();
 	}
 	
@@ -339,7 +336,6 @@ public class Slave implements Runnable {
 	/* Worker thread to parse collected byte arrays into Strings */
 	public class Worker implements Runnable {
 
-		
 		public void run() {
 			while(true) {
 				while(workList.isEmpty()) {
@@ -369,7 +365,6 @@ public class Slave implements Runnable {
 	        String Leaves = new String();
 			int startIndex;
 	        int endIndex;        
-
 	        
 	        startIndex = dataS.indexOf("Peers: ");
 	        endIndex = dataS.indexOf("\n", startIndex);
@@ -379,34 +374,33 @@ public class Slave implements Runnable {
 	        endIndex = dataS.indexOf("\n",startIndex);
 	        Leaves = dataS.substring(startIndex+8,endIndex);
 			
-				tempArray = Peers.split(",");
-					for (int j = 0; j < tempArray.length; j++) {
-						ipPort = tempArray[j];
-						readArray = ipPort.split(":");
-						if (!(ipCache.isCached(readArray[0].toString()))) {
-						Node tempnode = new Node(readArray[0], Integer.parseInt(readArray[1]));
-						ultraList.add(tempnode);
-						ipCache.cache(readArray[0]);
-						dumpList.add(tempnode);
-						
-						}	
-						}
-					
-					tempArray2 = Leaves.split(",");
-					if (!(tempArray2.length < 2)) {
-					for (int k = 0; k< tempArray2.length; k++) {
-						ipPort = tempArray2[k];
-						readArray = ipPort.split(":");
-						if (!(ipCache.isCached(readArray[0].toString()))) {
-							//System.out.println(!(ipCache.isCached(readArray[0].toString())));
+			tempArray = Peers.split(",");
+			for (int j = 0; j < tempArray.length; j++) {
+				ipPort = tempArray[j];
+				readArray = ipPort.split(":");
+				if (!(ipCache.isCached(readArray[0].toString()))) {
+					Node tempnode = new Node(readArray[0], Integer.parseInt(readArray[1]));
+					ultraList.add(tempnode);
+					ipCache.cache(readArray[0]);
+					dumpList.add(tempnode);
+				}	
+			}
+			
+			tempArray2 = Leaves.split(",");
+			if (!(tempArray2.length < 2)) {
+				for (int k = 0; k< tempArray2.length; k++) {
+					ipPort = tempArray2[k];
+					readArray = ipPort.split(":");
+					if (!(ipCache.isCached(readArray[0].toString()))) {
+						//System.out.println(!(ipCache.isCached(readArray[0].toString())));
 						Node tempnode = new Node(readArray[0], Integer.parseInt(readArray[1]));
 						leafList.add(tempnode);
 						//System.out.println(readArray[0]);
 						ipCache.cache(readArray[0]);
 						dumpList.add(tempnode);
-						}
 					}
-					}
+				}
+			}
 		}
 	}
 	
@@ -414,53 +408,49 @@ public class Slave implements Runnable {
 		private Node node;
 		SocketChannel socketChannel;
 		private Object id; //Used to determine which crawler needs to handle stuff
+		
 		public Crawler(Object ID){
 			this.id = ID;
 		}
+		
 		public void run(){
 			while(true){
-					if(ultraList.size() > 0)
-						node = ultraList.remove(FRONT);
-					else if(leafList.size() > 0)
-						node = leafList.remove(FRONT);
-					else{
-						//wait for more nodes
-						synchronized(ultraList) {
-							try {
-								System.out.println("crawler : " + (Integer)id + " waiting");
-								ultraList.wait();
-							} catch (InterruptedException e) {
-								
-							}
-						}
+				if(ultraList.size() > 0)
+					node = ultraList.remove(FRONT);
+				else if(leafList.size() > 0)
+					node = leafList.remove(FRONT);
+				else{
+					// Wait for more nodes
+					synchronized(ultraList) {
+						try {
+							System.out.println("crawler : " + (Integer)id + " waiting");
+							ultraList.wait();
+						} catch (InterruptedException e) {}
 					}
-					Attachment attachment = new Attachment((Integer)id, node);	
-					try {
-						socketChannel = createConnection(node.getAddress(), node.getPortNum(), attachment);
-					} catch (IOException e) {
-						//do stuff
-					}
+				}
+				Attachment attachment = new Attachment((Integer)id, node);	
+				try {
+					socketChannel = createConnection(node.getAddress(), node.getPortNum(), attachment);
+				} catch (IOException e) {
+					// TODO your fucked
+				}
 				
-				//wait for connection to finish before writing	
+				// Wait for connection to finish before writing	
 				synchronized(id) {
 					try {
 						System.out.println("crawler : " + (Integer)id + " waiting");
 						id.wait();
-					} catch (InterruptedException e) {
-						
-					}
+					} catch (InterruptedException e) {}
 				}
 				System.out.println("Attempting to write  " + id);
 				sendRequest(socketChannel, attachment);
 
-				//wait for this connection to be closed so we can open another
+				// Wait for this connection to be closed so we can open another
 				synchronized(id) {
 					try {
 						System.out.println("Crawler : " + (Integer)id + " waiting");
 						id.wait();
-					} catch (InterruptedException e) {
-						
-					}
+					} catch (InterruptedException e) {}
 				}
 				System.out.println(new String(node.getData()));
 			}	
@@ -519,17 +509,6 @@ public class Slave implements Runnable {
 		}
 	}
 	
-	public class Timer implements Runnable {
-		public void run() {
-			try {
-				Thread.sleep(duration*MS_TO_SEC);
-			} catch (InterruptedException e) { /* Forcibly quit */ }
-			System.out.println("Timer has expired, terminating...");
-			dump();
-			System.exit(0);
-		}
-	}
-	
 	protected class ChangeRequest {
 		public static final int REGISTER = 1;
 		public static final int CHANGEOPS = 2;
@@ -551,9 +530,7 @@ public class Slave implements Runnable {
 		public int getType() { return (type); }
 		public int getOps() { return (ops); }
 		public Attachment getAttachment() { return (attachment); }
-		
 	}
-	
 	
 	public class Attachment{
 		int ID;
@@ -563,12 +540,7 @@ public class Slave implements Runnable {
 			this.node = node;
 		}
 		
-		public int getID(){
-			return ID;
-		}
-		
-		public Node getNode(){
-			return node;
-		}
+		public int getID(){ return ID; }
+		public Node getNode(){ return node; }
 	}
 }

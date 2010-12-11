@@ -160,6 +160,8 @@ public class Master implements Runnable {
 				// Forcibly quit
 			}
 			System.out.println("Timer has expired, terminating...");
+			
+			//Need to kill all crawlers
 			print();
 			System.exit(0);
 		}

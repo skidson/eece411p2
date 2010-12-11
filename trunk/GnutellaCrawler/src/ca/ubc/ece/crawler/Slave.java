@@ -20,6 +20,7 @@ import java.util.Vector;
 
 public class Slave implements Runnable {
 	public static final int MS_TO_SEC = 1000;
+	public static final int FRONT = 0;
 	
 	private String hostName;
 	private int portNum;
@@ -61,11 +62,14 @@ public class Slave implements Runnable {
     			duration = Integer.parseInt(arg);
     		}
         }
-		new Thread(new Slave(crawlAddress, crawlPort, full, timeout, duration)).start();
+		new Thread(new Slave(full, timeout, duration)).start();
 	}
 	
-	public Slave(String crawlAddress, int crawlPort, boolean full, int timeout, int duration) {
-		Node node = new Node(crawlAddress, crawlPort);
+	public Slave(boolean full, int timeout, int duration) {
+		Node test = new Node("137.82.84.242", 5627);
+		Node test1 = new Node("69.155.31.23", 34180);
+		nodeList.add(test);
+		nodeList.add(test1);
 		// TODO
 	}
 	
@@ -81,8 +85,11 @@ public class Slave implements Runnable {
 	}
 	
 	public void run() {
-		worker = new Worker();
-		new Thread(worker).start();
+		Crawler crawlerA = new Crawler();
+		new Thread(crawlerA).start();
+		Crawler crawlerB = new Crawler();
+		new Thread(crawlerB).start();
+		new Thread(new Worker()).start();
 		
 		while(true) {
 			try {
@@ -104,23 +111,20 @@ public class Slave implements Runnable {
 				while (selectedKeys.hasNext()) {
 					SelectionKey key = (SelectionKey) selectedKeys.next();
 					selectedKeys.remove();
-					
-					if (!key.isValid())
-						continue;
-					else if (key.isReadable()) 
-						this.read(key);
-					else if (key.isWritable())
-						this.write(key);
-					else if (key.isAcceptable())
-						this.accept(key);
+					if (key.isConnectable()) {
+			            this.finishConnection(key);
+			          } else if (key.isReadable()) {
+			            this.read(key);
+			          } else if (key.isWritable()) {
+			            this.write(key);
+			          }
 				}
 			} catch (IOException e) {}
 		}
 	}
 		
 	/* ************ HELPER METHODS ************ */
-	
-	private void accept(SelectionKey key) throws IOException {
+	/*private void accept(SelectionKey key) throws IOException {
 		ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
 		
 		SocketChannel socketChannel = serverSocketChannel.accept();
@@ -128,8 +132,26 @@ public class Slave implements Runnable {
 		
 		// Register this new channel with selector to notify when readable
 		socketChannel.register(this.selector, SelectionKey.OP_READ);
-	}
+	}*/
 		
+	private void finishConnection(SelectionKey key) throws IOException {
+		SocketChannel socketChannel = (SocketChannel) key.channel();
+	
+		// Finish the connection. If the connection operation failed
+		// this will raise an IOException.
+		try {
+			socketChannel.finishConnect();
+		} catch (IOException e) {
+			// Cancel the channel's registration with our selector
+			System.out.println(e);
+			key.cancel();
+			return;
+		}
+	
+		// Register an interest in writing on this channel
+		key.interestOps(SelectionKey.OP_WRITE);
+	}
+	
 	private void read(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
 		
@@ -140,7 +162,7 @@ public class Slave implements Runnable {
 			numRead = socketChannel.read(this.readBuffer);
 		} catch (IOException e) {
 			key.cancel();
-			socketChannel.close();
+			socketChannel.close();	
 			return;
 		}
 		
@@ -175,6 +197,7 @@ public class Slave implements Runnable {
 		}
 	}
 	
+
 	private void send(SocketChannel socket, byte[] data) {
 		this.changeRequests.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
 		
@@ -194,7 +217,7 @@ public class Slave implements Runnable {
 		// TODO dumps node information to master
 	}
 	
-	/* Worker thread to parse collected byte arrays into Node objects */
+	/* Worker thread to parse collected byte arrays into Strings */
 	public class Worker implements Runnable {
 		Vector<byte[]> queue = new Vector<byte[]>();
 		
@@ -205,7 +228,8 @@ public class Slave implements Runnable {
 						queue.wait();
 					} catch (InterruptedException e) {}
 				}
-				// Parse data into Node object
+				
+				String results = new String(queue.get(FRONT));
 				
 			}
 		}
@@ -214,6 +238,34 @@ public class Slave implements Runnable {
 			queue.add(data);
 		}
 	}
+	
+	public class Crawler implements Runnable{
+		private Node node;
+		public void run() {
+			node = nodeList.remove(FRONT);
+			try {
+				createConnection(node.getAddress(), node.getPortNum());
+			} catch (IOException e) {
+				//NEED TO SORT OUT TYPES OF FAILURES
+			}
+			
+		}
+		
+		private void createConnection(String address, int port) throws IOException{
+			SocketChannel socketChannel = SocketChannel.open();
+		    socketChannel.configureBlocking(false);
+		  
+		    // Kick off connection establishment
+		    socketChannel.connect(new InetSocketAddress(address, port));
+		  
+		    // Queue a channel registration since the caller is not the 
+		    // selecting thread. As part of the registration we'll register
+		    // an interest in connection events. These are raised when a channel
+		    // is ready to complete connection establishment.
+		    changeRequests.add(new ChangeRequest(socketChannel, ChangeRequest.REGISTER, SelectionKey.OP_CONNECT));
+		}
+	}
+	
 	
 	public class Timer implements Runnable {
 		public void run() {

@@ -34,7 +34,7 @@ public class NonBlockingCrawler {
             return cResult;
         }        
         
-        if(full == true)
+        if(full)
         	listFiles(node.getAddress(), node.getPortNum(), timeout);
         
         return cResult;

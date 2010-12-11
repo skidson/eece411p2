@@ -26,7 +26,7 @@ public class Master implements Runnable {
 	
 	private Vector<Node> nodeList;
 	private Vector<ResultHandler> workerList;
-	private ServerSocket listener;
+	private ServerSocket server;
 	
 	/* ************ INITIALIZATION ************ */
 	
@@ -87,10 +87,10 @@ public class Master implements Runnable {
 		new Thread(new Timer()).start();
 		while (true) {
 			try {
-				listener = new ServerSocket();
+				server = new ServerSocket();
 				while(true) {
 					// Blocks until connection established
-					Socket client = listener.accept();
+					Socket client = server.accept();
 					ResultHandler worker;
 					try {
 						 worker = new ResultHandler(client);
@@ -132,11 +132,8 @@ public class Master implements Runnable {
 						// TODO check if node already in list
 						nodeList.add(node);
 					}
-				} catch (IOException e) { 
-					continue;
-				} catch (ClassNotFoundException e) {
-					continue;
-				}
+				} catch (IOException e) { continue;
+				} catch (ClassNotFoundException e) { continue; }
 			}
 			// No work left to do, terminate this worker
 			workerList.remove(this);

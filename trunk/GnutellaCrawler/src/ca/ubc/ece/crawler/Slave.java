@@ -43,7 +43,7 @@ public class Slave implements Runnable {
 	private Vector<Node> leafList;
 	private Vector<Node> workList;
 	private Vector<Node> dumpList;
-	private Vector<Node> ringList;
+	private String[] ringList;
 	
 	private List<ChangeRequest> changeRequests = new Vector();
 	
@@ -240,9 +240,11 @@ public class Slave implements Runnable {
 		}
 		try {
 			oos = new ObjectOutputStream(socket.getOutputStream());
-			for (Node node : dumpList)
-				oos.writeObject(node);
-			dumpList.clear();
+			synchronized(dumpList) {
+				for (Node node : dumpList)
+					oos.writeObject(node);
+				dumpList.clear();
+			}
 		} catch (IOException e) {
 			// Abort
 			return;
@@ -338,20 +340,22 @@ public class Slave implements Runnable {
 					}
 					// TODO update ringlist
 					socket.close();
-					String nextHostName = null;
-					int nextPortNum = 0;
-					for (int i = 0; i < ringList.size(); i++) {
-						if (ringList.get(i).getAddress().equals(hostName)) { // TODO hostName here must be this node's address
+					
+					String[] address = null;
+					for (int i = 0; i < ringList.length; i++) {
+						address = ringList[i].split(":");
+						if (address[0].equals(hostName)) { // TODO hostName here must be this node's address
 							int index;
-							if (i == ringList.size() -1)
+							if (i == ringList.length -1)
 								index = 0;
 							else
 								index = i + 1;
 							
-							nextHostName = ringList.get(index).getAddress();
+							address = ringList[index].split(":");
+							break;
 						}
 					}
-					dump(new InetSocketAddress(nextHostName, nextPortNum));
+					dump(new InetSocketAddress(address[0], Integer.parseInt(address[1])));
 				} catch (IOException e) { continue; }
 			}
 		}

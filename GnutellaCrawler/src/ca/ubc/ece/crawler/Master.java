@@ -91,6 +91,7 @@ public class Master implements Runnable {
 		this.duration = duration;
 		this.workerList = new Vector<Logger>();
 		this.fellowships = new String[NUM_FELLOWSHIPS][RING_SIZE];
+		// TODO populate
 	}
 	
 	/* Loops forever, accepting connections and dispatching to workers */

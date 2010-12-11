@@ -44,7 +44,7 @@ public class IPCache {
 	}
 	
 	public static byte[] toDomains(String address) {
-		String[] stringDomains = address.split(".");
+		String[] stringDomains = address.split("\\.");
 		byte[] domains = new byte[4];
 		
 		// Encode unsigned value for use with signed bytes
@@ -84,21 +84,15 @@ public class IPCache {
 		byte[] bytes;
 		
 		public IPAddress(String address) {
-			String[] stringDomains = address.split(".");
-			
-			// Encode unsigned value for use with signed bytes
-			int i = 0;
-			for(String domain : stringDomains) {
-				Integer temp = Integer.parseInt(domain);
-				if (temp > 127)
-					temp -= 256;
-				bytes[i] = (byte)temp.intValue();
-				i++;
-			}
+			bytes = IPCache.toDomains(address);
+			System.err.println(this.toString());
 		}
 		
 		protected byte[] getBytes() {
-			return bytes;
+			byte[] temp = new byte[4];
+			for (int i = 0; i < bytes.length; i++)
+				temp[i] = bytes[i];
+			return temp;
 		}
 		
 		public boolean equals(IPAddress other) {
@@ -111,8 +105,18 @@ public class IPCache {
 		}
 		
 		public String toString() {
-			return (bytes[0] + "." + bytes[1] + "." + bytes[2] + "." + bytes[3]);
+			String out = "";
+			for (int i = 0; i < bytes.length; i++) {
+				if (bytes[i] < 0)
+					out += (bytes[i] + 256);
+				else
+					out += bytes[i];
+				if (i != bytes.length - 1)
+					out += ".";
+			}
+			return out;	
 		}
+		
 	}
 	
 }

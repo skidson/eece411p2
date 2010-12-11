@@ -129,7 +129,8 @@ public class Slave implements Runnable {
 							key.interestOps(change.ops);
 							break;
 						case ChangeRequest.REGISTER:
-							change.socket.register(this.selector, change.ops, new Integer(change.ID));
+							System.out.println(change.attachment.ID);
+							change.socket.register(this.selector, change.ops, change.attachment);
 							break;
 						}
 					}
@@ -168,6 +169,7 @@ public class Slave implements Runnable {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
 		// Finish the connection. If the connection operation failed
 		// this will raise an IOException.
+		System.out.println("IN FINISH");
 		try {
 			socketChannel.finishConnect();
 			System.out.println("Connected");
@@ -177,8 +179,9 @@ public class Slave implements Runnable {
 			key.cancel();
 			return;
 		}
-	
-		if(key.attachment().equals(syncA)){
+		Attachment at = (Attachment) key.attachment();
+		System.out.println("Battach = " + at.ID + " sync iisssss" + (Integer)syncA);
+		if(at.ID == (Integer)syncA){
 			synchronized(syncA){
 				syncA.notifyAll();
 			}
@@ -209,11 +212,26 @@ public class Slave implements Runnable {
 			socketChannel.close();
 			return;
 		}
-		System.out.println(key.channel().toString());
+		Attachment at = (Attachment) key.attachment();
+		Node node = at.getNode();
 		key.channel().close();
+		
 		byte[] data = new byte[numRead];
-		System.arraycopy(this.readBuffer.array(), 0, data, 0, numRead);
-		System.out.println(new String(data));
+		System.arraycopy(this.readBuffer.array(), 0, data, 0, numRead);		
+		node.setData(data);
+		synchronized(workList){
+			workList.add(node);
+		}
+		if(at.getID() == (Integer)syncA){
+			synchronized(syncA){
+				syncA.notifyAll();
+			}
+		}else{
+			synchronized(syncB){
+				syncB.notifyAll();
+			}
+		}
+			
 		// TODO ensure readBuffer contains a full entry and add it to workList
 	}
 	
@@ -237,8 +255,8 @@ public class Slave implements Runnable {
 		}
 	}
 
-	private void send(SocketChannel socket, byte[] data, int ID) {
-		this.changeRequests.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE, ID));
+	private void send(SocketChannel socket, byte[] data, Attachment attachment) {
+		this.changeRequests.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE, attachment));
 		
 		synchronized (this.pendingData){
 			List queue = (List) this.pendingData.get(socket);
@@ -253,7 +271,7 @@ public class Slave implements Runnable {
 	}
 	
 
-	private SocketChannel createConnection(String address, int port, int ID) throws IOException{
+	private SocketChannel createConnection(String address, int port, Attachment attachment) throws IOException{
 		SocketChannel socketChannel = SocketChannel.open();
 	    socketChannel.configureBlocking(false);
 	  
@@ -264,7 +282,7 @@ public class Slave implements Runnable {
 	    // selecting thread. As part of the registration we'll register
 	    // an interest in connection events. These are raised when a channel
 	    // is ready to complete connection establishment.
-	    changeRequests.add(new ChangeRequest(socketChannel, ChangeRequest.REGISTER, SelectionKey.OP_CONNECT, ID));
+	    changeRequests.add(new ChangeRequest(socketChannel, ChangeRequest.REGISTER, SelectionKey.OP_CONNECT, attachment));
 	    System.out.println("created");
 	    selector.wakeup();
 	    return socketChannel;
@@ -318,9 +336,8 @@ public class Slave implements Runnable {
 	
 	public class Crawler implements Runnable {
 		private Node node;
-		SocketChannel sc;
+		SocketChannel socketChannel;
 		private Object id; //Used to determine which crawler needs to handle stuff
-		
 		public Crawler(Object ID){
 			this.id = ID;
 		}
@@ -331,8 +348,8 @@ public class Slave implements Runnable {
 					else if(leafList.size() > 0)
 						node = leafList.remove(FRONT);
 					else{
-						System.out.println("outta nodes");
-						synchronized(id) {
+						//wait for more nodes
+						synchronized(ultraList) {
 							try {
 								System.out.println("crawler : " + (Integer)id + " waiting");
 								id.wait();
@@ -341,9 +358,9 @@ public class Slave implements Runnable {
 							}
 						}
 					}
-						
+					Attachment attachment = new Attachment((Integer)id, node);	
 					try {
-						sc = createConnection(node.getAddress(), node.getPortNum(), (Integer)id);
+						socketChannel = createConnection(node.getAddress(), node.getPortNum(), attachment);
 					} catch (IOException e) {
 						//do stuff
 					}
@@ -357,13 +374,13 @@ public class Slave implements Runnable {
 						
 					}
 				}
-				System.out.println("Attempting to write");
-				sendRequest(sc);
+				System.out.println("Attempting to write  " + id);
+				sendRequest(socketChannel, attachment);
 				
 				//wait for this connection to be closed so we can open another
 				synchronized(id) {
 					try {
-						System.out.println("crawler : " + (Integer)id + " waiting");
+						System.out.println("Crawler : " + (Integer)id + " waiting");
 						id.wait();
 					} catch (InterruptedException e) {
 						
@@ -372,11 +389,11 @@ public class Slave implements Runnable {
 			}	
 		}
 		
-		public void sendRequest(SocketChannel sc){
+		public void sendRequest(SocketChannel sc, Attachment attachment){
 			 StringBuffer request = new StringBuffer();
 		     request.append(REQUEST);
 		     byte[] bytes = request.toString().getBytes();
-		     send(sc, bytes, (Integer)id);
+		     send(sc, bytes, attachment);
 		}
 	}
 
@@ -443,20 +460,38 @@ public class Slave implements Runnable {
 		private SocketChannel socket;
 		private int type;
 		private int ops;
-		private int ID;
+		private Attachment attachment;
 		
-		public ChangeRequest(SocketChannel socket, int type, int ops, int ID) {
+		public ChangeRequest(SocketChannel socket, int type, int ops, Attachment attachment) {
 			this.socket = socket;
 			this.type = type;
 			this.ops = ops;
-			this.ID = ID;
+			this.attachment = attachment;
 		}
 		
 		public SocketChannel getSocketChannel() { return (socket); }
 		
 		public int getType() { return (type); }
 		public int getOps() { return (ops); }
-		public int getID() { return (ID); }
+		public Attachment getAttachment() { return (attachment); }
 		
+	}
+	
+	
+	public class Attachment{
+		int ID;
+		Node node;
+		public Attachment(int id, Node node){
+			this.ID = id;
+			this.node = node;
+		}
+		
+		public int getID(){
+			return ID;
+		}
+		
+		public Node getNode(){
+			return node;
+		}
 	}
 }

@@ -104,30 +104,5 @@ public class Node implements Serializable {
 		}
 		return ret;
 	}
-	public void parseData(byte[] data) {
-		String property = new String(data);
-		int startIndex;
-        int endIndex;        
-        String Peers = new String();
-        String Agent = new String();
-        String Status = new String();
-        String Leaves = new String();
-        
-        startIndex = property.indexOf("Peers: ");
-        endIndex = property.indexOf("\n", startIndex);
-        Peers = property.substring(startIndex+7, endIndex);
-        
-        startIndex = property.indexOf("User-Agent: ");
-        endIndex = property.indexOf("\n",startIndex);
-        Agent = property.substring(startIndex+12,endIndex);
 
-        startIndex = property.indexOf("Leaves: ");
-        endIndex = property.indexOf("\n",startIndex);
-        Leaves = property.substring(startIndex+7,endIndex);
-        
-        this.setLeaves(Leaves);
-        this.setPeers(Peers);
-        this.setAgent(Agent);
-        
-	}
 }

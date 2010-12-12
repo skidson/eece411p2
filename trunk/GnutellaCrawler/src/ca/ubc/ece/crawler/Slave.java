@@ -3,8 +3,10 @@ package ca.ubc.ece.crawler;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
@@ -397,9 +399,16 @@ public class Slave implements Runnable {
 				ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
 				master = (InetAddress)ois.readObject();
 				backup = (InetAddress)ois.readObject();
+				
 				ringSize = (Integer)ois.readObject();
 				if (ringSize  == -1)
 					ringList = (String[])ois.readObject();
+				
+				BufferedWriter bw = new BufferedWriter(new FileWriter("node_list_fellowship"));
+				bw.write("");
+				while(ois.available() > 0)
+					bw.append((String)ois.readObject());
+				
 				socket.close();
 				server.close(); // Ensure we close the server so this node is not rewoken
 				break;
@@ -426,7 +435,6 @@ public class Slave implements Runnable {
 		
 		whisper = new Whisper();
 		new Thread(whisper).start();
-		run();
 	}
 	
 	public void reset() {
@@ -442,8 +450,19 @@ public class Slave implements Runnable {
 		try {
 			Socket socket = new Socket(address, WAKE_PORT);
 			ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-			oos.writeObject(-1); // Writes a ringSize of -1 to indicate the node is joining a ring
+			oos.writeObject(master);
+			oos.writeObject(backup);
+			oos.writeObject(-1); // Writes a ringSize of -1 to indicate the node is joining an existing ring
 			oos.writeObject(ringList);
+			
+			BufferedReader br = new BufferedReader(new FileReader("node_list_fellowship"));
+			while(true) {
+				String newLine = br.readLine();
+				if (newLine == null)
+					break;
+				oos.writeObject(br.readLine());
+			}
+			
 		} catch (IOException e) { return false; }
 		return true;
 	}
@@ -710,10 +729,4 @@ public class Slave implements Runnable {
 		public Node getNode(){ return node; }
 	}
 	
-	public class DumpAction implements Action {
-		// Sets dumpFlag so next whisper will dump to master
-		public void execute() {
-			dumpFlag = true;
-		}
-	}
 }

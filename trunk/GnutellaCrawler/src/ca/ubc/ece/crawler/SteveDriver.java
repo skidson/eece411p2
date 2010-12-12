@@ -1,5 +1,8 @@
 package ca.ubc.ece.crawler;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 public class SteveDriver {
 
 	public static void main(String[] args) {
@@ -10,6 +13,10 @@ public class SteveDriver {
 		System.out.println(ipCache.isCached("68.149.231.212") + " should be true");
 		System.out.println(ipCache.isCached("69.149.231.212") + " should be false");
 		System.out.println(ipCache.toString());
+		
+		try {
+			System.out.println(InetAddress.getLocalHost().getHostAddress());
+		} catch (UnknownHostException e) {}
 	}
 
 }

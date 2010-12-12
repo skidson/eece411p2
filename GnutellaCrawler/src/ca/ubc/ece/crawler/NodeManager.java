@@ -59,7 +59,11 @@ public class NodeManager {
 				try {
 					Socket socket = connect(node, WAKE_PORT);
 					ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+//					oos.writeObject();	// send this node's ip
+//					oos.writeObject();	// send backup's ip
 					oos.writeInt(RING_SIZE);
+					for (WorkerNode member :fellowship)
+						oos.writeObject(member.getAddress());
 					socket.close();
 				} catch (UnknownHostException e) { continue;
 				} catch (IOException e) { continue; }

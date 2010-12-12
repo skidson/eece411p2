@@ -47,11 +47,12 @@ public class Slave implements Runnable {
 	private Crawler crawlerB;
 	
 	private IPCache ipCache;
+	private boolean dumpFlag;
 	
 	private Vector<Node> ultraList;
 	private Vector<Node> leafList;
-	private Vector<Node> workList = new Vector<Node>();
-	private Vector<Node> dumpList = new Vector<Node>();
+	private Vector<Node> workList;
+	private Vector<Node> dumpList;
 	private String[] ringList;
 	
 	private List<ChangeRequest> changeRequests = new Vector<ChangeRequest>();
@@ -88,7 +89,7 @@ public class Slave implements Runnable {
         }
 		new Thread(new Slave(full, timeout, duration)).start();
 		
-		// TODO have slaves idle until woken by master
+		// TODO have slaves idle until woken by master (see NodeTracker)
 		
 	}
 	
@@ -97,6 +98,8 @@ public class Slave implements Runnable {
 		leafList = new Vector<Node>();
 		workList = new Vector<Node>();
 		dumpList = new Vector<Node>();
+		
+		dumpFlag = false;
 		
 		Node test = new Node("137.82.84.242", 5627);
 		Node test1 = new Node("99.233.17.243", 49461);
@@ -459,7 +462,6 @@ public class Slave implements Runnable {
 					socketChannel = createConnection(node.getAddress(), node.getPortNum(), attachment);
 				} catch (IOException e) {
 					//TODO duno wtf this exception does
-					
 				}
 				// Wait for connection to finish before writing	
 				synchronized(id) {
@@ -528,6 +530,12 @@ public class Slave implements Runnable {
 					}
 					socket.close();
 					
+					// TODO check if should dump
+					if (dumpList.size() > DUMP_THRESHOLD || dumpFlag) {
+						dumpFlag = false;
+						dump();
+					}
+					
 					String[] address = null;
 					for (int i = 0; i < ringList.length; i++) {
 						address = ringList[i].split(":");
@@ -575,5 +583,13 @@ public class Slave implements Runnable {
 		
 		public int getID(){ return ID; }
 		public Node getNode(){ return node; }
+	}
+	
+	public class DumpAction implements Action {
+		
+		// Sets dumpFlag so next whisper will dump to master
+		public void execute() {
+			dumpFlag = true;
+		}
 	}
 }

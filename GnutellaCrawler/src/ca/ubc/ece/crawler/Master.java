@@ -1,5 +1,8 @@
 package ca.ubc.ece.crawler;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.InetAddress;
@@ -15,9 +18,8 @@ public class Master implements Runnable {
 	public static final int DEFAULT_PORTNUM = 1337;
 	public static final int WHISPER_PORT = 1338;
 	
-	public static final int NUM_FELLOWSHIPS = 10;
-	public static final int RING_SIZE  = 10;
 	public static final int AWOL_TIMER = 60;
+	public static final int NUM_NODES = 550;
 	
 	public static final int MS_TO_SEC = 1000;
 	public static final int FRONT = 0;
@@ -43,38 +45,37 @@ public class Master implements Runnable {
 		int portNum = DEFAULT_PORTNUM;
 		
 		// Parse command-line bootstrap parameters
-        if (args.length < 2){
-            System.out.println("Usage:\n\tMain <-full | -minimal> timeout=XX <address:port> <timetorun>");
-            return;
-        } else {
-        	
-        	for (String arg : args) {
-        		if (arg.equals("-full")) {
-        			full = true;
-        		} else if (arg.equals("-minimal")) {
-        			full = false;
-        		} else if (arg.equals("-v")) {
-        			verbose = true;
-        		} else if (arg.startsWith("timeout=")) {
-        			String[] temp = arg.split("=");
-        			timeout = Integer.parseInt(temp[1])*MS_TO_SEC;
-        		} else if (arg.indexOf(":") != -1) {
-        			String[] temp = arg.split(":");
-        			hostName = temp[0];
-        			portNum = Integer.parseInt(temp[1]);
-        		} else {
-        			duration = Integer.parseInt(arg);
-        		}
-            }
-
-    		if (full)
-    			System.out.println("Output mode: full");
-    		else
-    			System.out.println("Output mode: minimal");
-    		System.out.println("Verbose mode: set");
-    		System.out.println("Connection timeout: " + timeout/MS_TO_SEC + " second(s)");
-    		System.out.println("Execution time: " + duration + " minute(s)\n");
-    	}
+        try {
+	    	for (String arg : args) {
+	    		if (arg.equals("-full")) {
+	    			full = true;
+	    		} else if (arg.equals("-minimal")) {
+	    			full = false;
+	    		} else if (arg.equals("-v")) {
+	    			verbose = true;
+	    		} else if (arg.startsWith("timeout=")) {
+	    			String[] temp = arg.split("=");
+	    			timeout = Integer.parseInt(temp[1])*MS_TO_SEC;
+	    		} else if (arg.indexOf(":") != -1) {
+	    			String[] temp = arg.split(":");
+	    			hostName = temp[0];
+	    			portNum = Integer.parseInt(temp[1]);
+	    		} else {
+	    			duration = Integer.parseInt(arg);
+	    		}
+	
+	    		if (full)
+	    			System.out.println("Output mode: full");
+	    		else
+	    			System.out.println("Output mode: minimal");
+	    		System.out.println("Verbose mode: set");
+	    		System.out.println("Connection timeout: " + timeout/MS_TO_SEC + " second(s)");
+	    		System.out.println("Execution time: " + duration + " minute(s)\n");
+	    	}
+        } catch (Exception e) {
+        	System.out.println("Usage:\n\tMain <-full | -minimal> timeout=XX <address:port> <timetorun>");
+        	return;
+        }
 		try {
 			new Thread(new Master(InetAddress.getByName(hostName), portNum, full, verbose, timeout, duration)).start();
 		} catch (UnknownHostException e) {
@@ -90,8 +91,6 @@ public class Master implements Runnable {
 		this.timeout = timeout;
 		this.duration = duration;
 		this.workerList = new Vector<Logger>();
-		this.fellowships = new String[NUM_FELLOWSHIPS][RING_SIZE];
-		// TODO populate
 	}
 	
 	/* Loops forever, accepting connections and dispatching to workers */
@@ -108,8 +107,25 @@ public class Master implements Runnable {
 		}
 		System.out.println("Internode communication server established.");
 		
-		// TODO wake up fellowships
+		BufferedReader br;
+		String[] allNodes = new String[NUM_NODES];
+		try {
+			br = new BufferedReader(new FileReader("node_list_all"));
+			for (int i = 0; i < allNodes.length; i++) {
+				String newLine = br.readLine();
+				if (newLine != null) {
+					allNodes[i] = newLine;
+					System.out.println(allNodes[i]);
+				}
+			}
+		} catch (FileNotFoundException e) {
+			System.err.println("Error: Could not find node list.");
+		} catch (IOException e) {}
+		NodeTracker nodeTracker = new NodeTracker(allNodes);
 		
+		// TODO wake fellowships
+		
+		// Loops waiting for dumps
 		while(true) {
 			try {
 				socket = server.accept();

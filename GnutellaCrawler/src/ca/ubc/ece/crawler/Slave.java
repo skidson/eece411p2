@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -193,29 +196,36 @@ public class Slave implements Runnable {
 	private void finishConnection(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
 		Attachment at = (Attachment) key.attachment();
+		Node node = at.getNode();
 		// Finish the connection. If the connection operation failed
 		// this will raise an IOException.
 		System.out.println("IN FINISH");
 		try {
 			socketChannel.finishConnect();
 			System.out.println("Connected");
-		} catch (IOException e) {
-			System.out.println(e);
+			setStatus(node, Status.CONNECTED, at.ID, false);
+		} catch (SocketTimeoutException ex){
+        	System.out.println("Timed out while connecting to node");
+        	setStatus(node, Status.TIMEOUT, at.ID, true);
 			key.cancel();
-			if(at.ID == (Integer)syncA){
-				synchronized(syncA){
-					crawlerA.setConnectFail(true);
-					syncA.notifyAll();
-				}
-			}
-			else{
-				synchronized(syncB){
-					crawlerB.setConnectFail(true);
-					syncB.notifyAll();
-				}
-			}
 			return;
-		}
+    	} catch (UnknownHostException ex) {
+            System.out.println("Error: Failed to connect to node "+node.getAddress() + ":" + node.getPortNum());
+            setStatus(node, Status.UNROUTABLE, at.ID, true);
+			key.cancel();
+			return;
+    	}catch (ConnectException ex) {
+    		System.out.println("Error: Connection was refused by "+node.getAddress()+":"+ node.getPortNum());
+    		setStatus(node, Status.REFUSED, at.ID, true);
+			key.cancel();
+			return;
+        } catch (IOException ex) {
+            System.out.println("Error: Failed to connect to node "+node.getAddress()+":"+ node.getPortNum());
+            setStatus(node, Status.INTERNAL, at.ID, true);
+			key.cancel();
+			return;
+        }
+		
 
 		if(at.ID == (Integer)syncA){
 			synchronized(syncA){
@@ -323,7 +333,21 @@ public class Slave implements Runnable {
 	    return socketChannel;
 	}
 	
-
+	private void setStatus(Node node, Status status, int ID, boolean connect){
+		node.setStatus(status);
+		if(ID == (Integer)syncA){
+			synchronized(syncA){
+				crawlerA.setConnectFail(connect);
+				syncA.notifyAll();
+			}
+		}
+		else{
+			synchronized(syncB){
+				crawlerB.setConnectFail(connect);
+				syncB.notifyAll();
+			}
+		}
+	}
 	// Dumps node information to master
 	public void dump() {
         try {

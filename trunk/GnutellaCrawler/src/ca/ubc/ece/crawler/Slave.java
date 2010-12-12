@@ -454,7 +454,7 @@ public class Slave implements Runnable {
 						Thread.sleep(REFRESH_RATE);
 					} catch (InterruptedException e) {}
 				}				
-				//TODO get data from each node in workList, call parseData on it
+				//TODO get data from each node in workList, call parseData on it done
 				for (int i = 0; i < workList.size();i++){
 					//System.out.println(workList.size());
 					parseData(workList.elementAt(i).getData());
@@ -464,7 +464,7 @@ public class Slave implements Runnable {
 		
 		private void parseData(byte[] data){
 			//TODO put shit from Node here, check against cachestuff, if not in, add to ultralist/leaflist appropriately.. add to dumpList
-			// and cache it
+			// and cache it. DONE
 			String[] tempArray;
 			String[] tempArray2;
 			String[] readArray;
@@ -476,18 +476,17 @@ public class Slave implements Runnable {
 	        int endIndex;        
 	        
 	        startIndex = dataS.indexOf("Peers: ");
+	        if (!(startIndex == -1)) {
 	        endIndex = dataS.indexOf("\n", startIndex);
+	        if (!(endIndex == -1)) {
 	        Peers = dataS.substring(startIndex+7, endIndex);
-
-	        startIndex = dataS.indexOf("Leaves: ");
-	        endIndex = dataS.indexOf("\n",startIndex);
-	        Leaves = dataS.substring(startIndex+8,endIndex);
 			
 			tempArray = Peers.split(",");
 			for (int j = 0; j < tempArray.length; j++) {
 				ipPort = tempArray[j];
 				readArray = ipPort.split(":");
 				if (!(ipCache.isCached(readArray[0].toString()))) {
+
 					readArray[1] = readArray[1].replaceAll("(\\r|\\n)", ""); 
 					portNum = Integer.parseInt(readArray[1]);
 					Node tempnode = new Node(readArray[0], portNum);
@@ -497,15 +496,23 @@ public class Slave implements Runnable {
 					}
 					ipCache.cache(readArray[0]);
 					dumpList.add(tempnode);
+				}
 				}	
 			}
+	        }
+	        startIndex = dataS.indexOf("Leaves: ");
+	        if (!(startIndex == -1)) {
+	        endIndex = dataS.indexOf("\n",startIndex);
+	        if (!(endIndex == -1)) {
+	        //System.out.println((startIndex+8) + "  " +  endIndex);
+	        Leaves = dataS.substring(startIndex+8,endIndex);
 			
 			tempArray2 = Leaves.split(",");
 			if (!(tempArray2.length < 2)) {
 				for (int k = 0; k< tempArray2.length; k++) {
 					ipPort = tempArray2[k];
 					readArray = ipPort.split(":");
-					if (!(ipCache.isCached(readArray[0].toString()))) {
+					if (!(ipCache.isCached(readArray[0].toString()))) { 
 						readArray[1] = readArray[1].replaceAll("(\\r|\\n)", ""); 
 						int portNum2 = Integer.parseInt(readArray[1]);
 						
@@ -514,6 +521,8 @@ public class Slave implements Runnable {
 						//System.out.println(readArray[0]);
 						ipCache.cache(readArray[0]);
 						dumpList.add(tempnode);
+					}
+				}
 					}
 				}
 			}
@@ -550,7 +559,7 @@ public class Slave implements Runnable {
 				try {
 					socketChannel = createConnection(node.getAddress(), node.getPortNum(), attachment);
 				} catch (IOException e) {
-					//TODO duno wtf this exception does
+					//TODO duno wtf this exception does.   Cant connect to that node?
 				}
 				// Wait for connection to finish before writing	
 				synchronized(id) {

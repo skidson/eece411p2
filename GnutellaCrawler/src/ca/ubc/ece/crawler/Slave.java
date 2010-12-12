@@ -43,6 +43,8 @@ public class Slave implements Runnable {
 	private ByteBuffer readBuffer = ByteBuffer.allocate(50000);
 	
 	private Worker worker;
+	private Crawler crawlerA;
+	private Crawler crawlerB;
 	
 	private IPCache ipCache;
 	
@@ -130,9 +132,12 @@ public class Slave implements Runnable {
 	}
 	
 	public void run() {
-		new Thread(new Worker()).start();
-		new Thread(new Crawler((Integer)syncA)).start();
-		new Thread(new Crawler((Integer)syncB)).start();
+		worker = new Worker();
+		new Thread(worker).start();
+		crawlerA = new Crawler((Integer)syncA);
+		crawlerB = new Crawler((Integer)syncB);
+		new Thread(crawlerA).start();
+		new Thread(crawlerB).start();
 		
 		while(true) {
 			try {
@@ -184,6 +189,7 @@ public class Slave implements Runnable {
 		
 	private void finishConnection(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
+		Attachment at = (Attachment) key.attachment();
 		// Finish the connection. If the connection operation failed
 		// this will raise an IOException.
 		System.out.println("IN FINISH");
@@ -191,13 +197,23 @@ public class Slave implements Runnable {
 			socketChannel.finishConnect();
 			System.out.println("Connected");
 		} catch (IOException e) {
-			// Cancel the channel's registration with our selector
 			System.out.println(e);
 			key.cancel();
+			if(at.ID == (Integer)syncA){
+				synchronized(syncA){
+					crawlerA.setConnectFail(true);
+					syncA.notifyAll();
+				}
+			}
+			else{
+				synchronized(syncB){
+					crawlerB.setConnectFail(true);
+					syncB.notifyAll();
+				}
+			}
 			return;
 		}
-		Attachment at = (Attachment) key.attachment();
-		System.out.println("Battach = " + at.ID + " sync iisssss" + (Integer)syncA);
+
 		if(at.ID == (Integer)syncA){
 			synchronized(syncA){
 				syncA.notifyAll();
@@ -414,6 +430,7 @@ public class Slave implements Runnable {
 	
 	public class Crawler implements Runnable {
 		private Node node;
+		private boolean connectFail = false;
 		SocketChannel socketChannel;
 		private Object id; //Used to determine which crawler needs to handle stuff
 		
@@ -423,6 +440,7 @@ public class Slave implements Runnable {
 		
 		public void run(){
 			while(true){
+				connectFail = false;
 				if(ultraList.size() > 0)
 					node = ultraList.remove(FRONT);
 				else if(leafList.size() > 0)
@@ -440,7 +458,7 @@ public class Slave implements Runnable {
 				try {
 					socketChannel = createConnection(node.getAddress(), node.getPortNum(), attachment);
 				} catch (IOException e) {
-					// Node failed move on
+					//TODO duno wtf this exception does
 					
 				}
 				// Wait for connection to finish before writing	
@@ -450,6 +468,9 @@ public class Slave implements Runnable {
 						id.wait();
 					} catch (InterruptedException e) {}
 				}
+				if(connectFail)
+					continue;
+				
 				System.out.println("Attempting to write  " + id);
 				sendRequest(socketChannel, attachment);
 
@@ -464,11 +485,15 @@ public class Slave implements Runnable {
 			}	
 		}
 		
-		public void sendRequest(SocketChannel sc, Attachment attachment){
+		private void sendRequest(SocketChannel sc, Attachment attachment){
 			 StringBuffer request = new StringBuffer();
 		     request.append(REQUEST);
 		     byte[] bytes = request.toString().getBytes();
 		     send(sc, bytes, attachment);
+		}
+		
+		public void setConnectFail(boolean f){
+			connectFail = f;
 		}
 	}
 

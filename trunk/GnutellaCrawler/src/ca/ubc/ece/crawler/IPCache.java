@@ -18,7 +18,7 @@ public class IPCache {
 	}
 	
 	public void cache(String address) {
-		IPAddress ip = new IPAddress(address);
+		IPAddress ip = new IPAddress(address.trim());
 		if (!isCached(ip))
 			this.cache.add(ip);
 	}
@@ -26,7 +26,7 @@ public class IPCache {
 	/* ************ HELPER METHODS ************ */
 	
 	public boolean isCached(String address) {
-		IPAddress target = new IPAddress(address);
+		IPAddress target = new IPAddress(address.trim());
 		if (cache.isEmpty())
 			return false;
 		for (IPAddress ip : cache) {
@@ -36,7 +36,7 @@ public class IPCache {
 		return false;
 	}
 	
-	public boolean isCached(IPAddress address) {
+	private boolean isCached(IPAddress address) {
 		if (cache.isEmpty())
 			return false;
 		for (IPAddress ip : cache) {

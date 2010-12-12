@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -15,8 +14,9 @@ import java.util.Vector;
 public class Master implements Runnable {
 	public static final String DEFAULT_HOSTNAME = "localhost";
 	public static final String DEFAULT_OUTPUT = "results.txt";
+	
 	public static final int DEFAULT_PORTNUM = 1337;
-	public static final int WHISPER_PORT = 1338;
+	public static final int WHISPER_PORT = DEFAULT_PORTNUM + 1;
 	
 	public static final int AWOL_TIMER = 60;
 	public static final int NUM_NODES = 550;
@@ -32,7 +32,7 @@ public class Master implements Runnable {
 	private static boolean verbose = false;
 	private static boolean full = false;
 	
-	private String[][] fellowships;
+	private NodeTracker nodeTracker;
 	
 	private Vector<Node> nodeList;
 	private Vector<Logger> workerList;
@@ -121,17 +121,22 @@ public class Master implements Runnable {
 		} catch (FileNotFoundException e) {
 			System.err.println("Error: Could not find node list.");
 		} catch (IOException e) {}
-		NodeTracker nodeTracker = new NodeTracker(allNodes);
+		nodeTracker = new NodeTracker(allNodes);
 		
-		// TODO wake fellowships
+		nodeTracker.wakeFellowships();
+		
+		// Start logger thread
+		Logger logger = new Logger();
+		workerList.add(logger);
+		new Thread(logger).start();
 		
 		// Loops waiting for dumps
 		while(true) {
 			try {
 				socket = server.accept();
 				ois = new ObjectInputStream(socket.getInputStream());
-				int fellowshipID = (Integer)ois.readObject();
-				fellowships[fellowshipID] = (String[])ois.readObject();
+				ois.readObject(); // Discard fellowshipID
+				ois.readObject(); // Discard ringList
 				while(ois.available() > 0) {
 					nodeList.add((Node)ois.readObject());
 					nodeList.notify();
@@ -172,18 +177,6 @@ public class Master implements Runnable {
 		public void execute() {
 			print();
 			System.exit(0);
-		}
-	}
-	
-	private class FellowshipAWOLAction implements Action {
-		int fellowshipID;
-		
-		public FellowshipAWOLAction(int fellowshipID) {
-			this.fellowshipID = fellowshipID;
-		}
-		
-		public void execute() {
-			// TODO fellowship timer has expired, request dump
 		}
 	}
 }

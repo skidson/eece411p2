@@ -2,6 +2,9 @@ package ca.ubc.ece.crawler;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
@@ -28,8 +31,15 @@ public class Slave implements Runnable {
 	public static final int FRONT = 0;
 	public static final String REQUEST = "GNUTELLA CONNECT/0.6\r\n" + "User-Agent: UBCECE (crawl)\r\n" + "Query-Routing: 0.2\r\n" + "X-Ultrapeer: False\r\n" + "Crawler: 0.1\r\n" + "\r\n";
 	public static final int DUMP_THRESHOLD = 10;
-	public static final int WHISPER_PORT = 1338;
 	public static final int REFRESH_RATE = 1000;
+	
+	public static final int DEFAULT_PORTNUM = 1337;
+	public static final int WHISPER_PORT = DEFAULT_PORTNUM + 1;
+	public static final int TRACKER_PORT = DEFAULT_PORTNUM + 2;
+	public static final int REQUEST_PORT = DEFAULT_PORTNUM + 3;
+	public static final int WAKE_PORT = DEFAULT_PORTNUM + 4;
+	
+	public static final int NIO_PORT = 9090;
 	
 	private String hostName;
 	private int portNum;
@@ -38,14 +48,16 @@ public class Slave implements Runnable {
 	private int fellowshipID;
 	private boolean full;
 	
-	private InetSocketAddress master;
-	private InetSocketAddress backup;
+	private InetAddress master;
+	private InetAddress backup;
 	
 	private Selector selector;
 	private ServerSocketChannel serverChannel;
 	private ByteBuffer readBuffer = ByteBuffer.allocate(50000);
 	
 	private Worker worker;
+	private Whisper whisper;
+	
 	private Crawler crawlerA;
 	private Crawler crawlerB;
 	
@@ -67,36 +79,41 @@ public class Slave implements Runnable {
 	/* ************ INITIALIZATION ************ */
 	
 	public static void main(String[] args) {
-		String crawlAddress = "localhost";
-		int crawlPort =  0;
-		int timeout = 20;
-		int duration = 30;
-		boolean full = false;
-		
-		// Parse command-line bootstrap parameters
-    	for (String arg : args) {
-    		if (arg.equals("-full")) {
-    			full = true;
-    		} else if (arg.equals("-minimal")) {
-    			full = false;
-    		} else if (arg.startsWith("timeout=")) {
-    			String[] temp = arg.split("=");
-    			timeout = Integer.parseInt(temp[1])*MS_TO_SEC;
-    		} else if (arg.indexOf(":") != -1) {
-    			String[] temp = arg.split(":");
-    			crawlAddress = temp[0];
-    			crawlPort = Integer.parseInt(temp[1]);
-    		} else {
-    			duration = Integer.parseInt(arg);
-    		}
-        }
-		new Thread(new Slave(full, timeout, duration)).start();
+//		String crawlAddress = "localhost";
+//		int crawlPort =  0;
+//		int timeout = 20;
+//		int duration = 30;
+//		boolean full = false;
+//		
+//		// Parse command-line bootstrap parameters
+//    	for (String arg : args) {
+//    		if (arg.equals("-full")) {
+//    			full = true;
+//    		} else if (arg.equals("-minimal")) {
+//    			full = false;
+//    		} else if (arg.startsWith("timeout=")) {
+//    			String[] temp = arg.split("=");
+//    			timeout = Integer.parseInt(temp[1])*MS_TO_SEC;
+//    		} else if (arg.indexOf(":") != -1) {
+//    			String[] temp = arg.split(":");
+//    			crawlAddress = temp[0];
+//    			crawlPort = Integer.parseInt(temp[1]);
+//    		} else {
+//    			duration = Integer.parseInt(arg);
+//    		}
+//        }
+//		new Thread(new Slave(full, timeout, duration)).start();
+		new Thread(new Slave()).start();
 		
 		// TODO have slaves idle until woken by master (see NodeTracker)
 		
 	}
 	
-	public Slave(boolean full, int timeout, int duration) {
+	public Slave() {
+		init();
+	}
+	
+	private void init() {
 		ultraList = new Vector<Node>();
 		leafList = new Vector<Node>();
 		workList = new Vector<Node>();
@@ -110,20 +127,10 @@ public class Slave implements Runnable {
 		ultraList.add(test);
 		ultraList.add(test1);
 		ultraList.add(test2);
+		
 		try {
-			this.hostName = InetAddress.getLocalHost().getHostName();
-			this.portNum = 9090;
-			this.selector = initSelector();
+			selector = initSelector();
 		} catch (IOException e) {}
-		
-		/* Crawled nodes are stored in the IPCache
-		 * Given an IP of a.b.c.d
-		 * The first dimension is indexed by a, and stores the value of b
-		 * The second dimension is indexed by c and stores the value of d
-		 */
-		this.ipCache = new IPCache();
-		
-		// TODO populate ringlist
 	}
 	
 	private Selector initSelector() throws IOException {
@@ -144,6 +151,8 @@ public class Slave implements Runnable {
 		crawlerB = new Crawler((Integer)syncB);
 		new Thread(crawlerA).start();
 		new Thread(crawlerB).start();
+		
+//		idle();
 		
 		while(true) {
 			try {
@@ -170,13 +179,13 @@ public class Slave implements Runnable {
 				while (selectedKeys.hasNext()) {
 					SelectionKey key = (SelectionKey) selectedKeys.next();
 					selectedKeys.remove();
-					if (key.isConnectable()) {
-			            this.finishConnection(key);
-			          } else if (key.isReadable()) {
-			            this.read(key);
-			          } else if (key.isWritable()) {
-			            this.write(key);
-			          }
+					
+					if (key.isConnectable())
+						this.finishConnection(key);
+					else if (key.isReadable())
+						this.read(key);
+					else if (key.isWritable())
+						this.write(key);
 				}
 			} catch (IOException e) {}
 		}
@@ -348,6 +357,7 @@ public class Slave implements Runnable {
 			}
 		}
 	}
+	
 	// Dumps node information to master
 	public void dump() {
         try {
@@ -361,11 +371,9 @@ public class Slave implements Runnable {
 	}
 	
 	// Dumps node information to target
-	public void dump(InetSocketAddress target) throws IOException {
-		Socket socket = new Socket();
-		ObjectOutputStream oos;
-    	socket.bind(target);
-		oos = new ObjectOutputStream(socket.getOutputStream());
+	public void dump(InetAddress target) throws IOException {
+		Socket socket = new Socket(target, WHISPER_PORT);
+		ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
 		oos.writeObject(fellowshipID);
 		oos.writeObject(ringList);
 		synchronized(dumpList) {
@@ -377,11 +385,68 @@ public class Slave implements Runnable {
 		socket.close();
 	}
 	
+	public void idle() {
+		int ringSize = 0;
+		while(true) {
+			try {
+				ServerSocket server = new ServerSocket(WAKE_PORT);
+				Socket socket = server.accept(); // Blocks until receives a wake signal
+				ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+				ringSize = (Integer)ois.readObject();
+				if (ringSize  == -1)
+					ringList = (String[])ois.readObject();
+				socket.close();
+				server.close(); // Ensure we close the server so this node is not rewoken
+				break;
+			} catch (IOException e) { continue; 
+			} catch (ClassNotFoundException e) { continue; }
+		}
+		
+		if (ringSize != -1) {
+			// TODO Construct ringList from node_list_fellowship. This list need not
+			// be all alive as Whisper will restructure if necessary
+			BufferedReader br = null;
+			try {
+				br = new BufferedReader(new FileReader("node_list_fellowship"));
+			} catch (FileNotFoundException e) {
+				// TODO your fucked, maybe get from master?
+			}
+			
+			for (int i = 0; i < ringSize; i++) {
+				try {
+					ringList[i] = br.readLine();
+				} catch (IOException e) {}
+			}
+		}
+		
+		whisper = new Whisper();
+		new Thread(whisper).start();
+		run();
+	}
+	
+	public void reset() {
+		// TODO kill threads if not null
+		init();
+		idle();
+	}
+	
+	public boolean wake(InetAddress address) {
+		// Attempts to wake target fellowship member to join this
+		// node's ring. True if success, false if failure
+		
+		try {
+			Socket socket = new Socket(address, WAKE_PORT);
+			ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+			oos.writeObject(-1); // Writes a ringSize of -1 to indicate the node is joining a ring
+			oos.writeObject(ringList);
+		} catch (IOException e) { return false; }
+		return true;
+	}
+	
 	/* ************ EMBEDDED THREADS ************ */
 	
 	/* Worker thread to parse collected byte arrays into Strings */
 	public class Worker implements Runnable {
-
 		public void run() {
 			while(true) {
 				while(workList.isEmpty()) {
@@ -545,8 +610,7 @@ public class Slave implements Runnable {
 					if (fellowshipID == (Integer)ois.readObject())
 						ringList = (String[])ois.readObject();
 					else
-						// Discard the incoming ringList
-						ois.readObject();
+						ois.readObject(); // Discard the incoming ringList
 					while(ois.available() > 0) {
 						try {
 							dumpList.add((Node)ois.readObject());
@@ -554,21 +618,37 @@ public class Slave implements Runnable {
 					}
 					socket.close();
 					
-					// TODO check if should dump
 					if (dumpList.size() > DUMP_THRESHOLD || dumpFlag) {
 						dumpFlag = false;
 						dump();
 					}
 					
-					String[] address = null;
+					String address = null;
+					int index = 0;
 					for (int i = 0; i < ringList.length; i++) {
-						address = ringList[i].split(":");
-						if (address[0].equals(hostName)) { // TODO hostName here must be this node's address
-							address = ringList[(i+1)%(ringList.length)].split(":");
+						address = ringList[i];
+						if (address.equals(hostName)) { // TODO hostName here must be this node's address
+							address = ringList[(i+1)%ringList.length];
+							index = i+1;
 							break;
 						}
 					}
-					dump(new InetSocketAddress(address[0], Integer.parseInt(address[1])));
+					while(true) {
+						InetAddress next = InetAddress.getByName(address);
+						try {
+							dump(next);
+							break;
+						} catch (Exception ex) {
+							// Could not whisper, wake another fellowship member, add to ring
+							BufferedReader br = new BufferedReader(new FileReader("node_list_fellowship"));
+							while(true) {
+								ringList[index] = br.readLine(); // TODO make sure not null
+								next = InetAddress.getByName(ringList[index]);
+								if (wake(next))
+									break;
+							}
+						}
+					}
 				} catch (Exception e) { continue; }
 			}
 		}
@@ -610,7 +690,6 @@ public class Slave implements Runnable {
 	}
 	
 	public class DumpAction implements Action {
-		
 		// Sets dumpFlag so next whisper will dump to master
 		public void execute() {
 			dumpFlag = true;

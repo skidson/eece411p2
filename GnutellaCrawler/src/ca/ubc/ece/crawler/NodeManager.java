@@ -7,16 +7,19 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Vector;
 
-public class NodeTracker {
+public class NodeManager {
 	public static final int NUM_FELLOWSHIPS = 10;
 	public static final int RING_SIZE  = 10;
 	
 	public static final int TRACKER_PORT = Master.DEFAULT_PORTNUM + 2;
 	public static final int DUMP_PORT = Master.DEFAULT_PORTNUM + 3;
 	public static final int WAKE_PORT = Master.DEFAULT_PORTNUM + 4;
+	
 	private Vector<WorkerNode> nodes;
 	
-	public NodeTracker(String[] nodes) {
+	
+	/* ************ INITIALIZATION ************ */
+	public NodeManager(String[] nodes) {
 		for (String address : nodes) {
 			WorkerNode worker = new WorkerNode(address);
 			this.nodes.add(worker);
@@ -24,6 +27,7 @@ public class NodeTracker {
 		for (int i = 0; i < getNumTotal(); i++)
 			this.nodes.get(i).setFellowshipID(i/(getNumTotal()/NUM_FELLOWSHIPS));
 	}
+	
 	
 	/* ************ HELPER METHODS ************ */
 	public void check(int index) {
@@ -116,6 +120,7 @@ public class NodeTracker {
 	public String getAddress(int index) {
 		return nodes.get(index).getAddress();
 	}
+	
 	
 	/* ************ EMBEDDED CLASSES ************ */
 	private class WorkerNode {

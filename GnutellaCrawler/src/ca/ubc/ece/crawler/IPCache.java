@@ -1,6 +1,9 @@
 package ca.ubc.ece.crawler;
 
 import java.util.Iterator;
+
+// TODO Remove items from cache as size gets large
+
 import java.util.Vector;
 
 public class IPCache {

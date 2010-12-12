@@ -11,9 +11,9 @@ public class NodeTracker {
 	public static final int NUM_FELLOWSHIPS = 10;
 	public static final int RING_SIZE  = 10;
 	
-	public static final int TRACKER_PORT = 1339;
-	public static final int DUMP_PORT = 1340;
-	public static final int WAKE_PORT = 1341;
+	public static final int TRACKER_PORT = Master.DEFAULT_PORTNUM + 2;
+	public static final int DUMP_PORT = Master.DEFAULT_PORTNUM + 3;
+	public static final int WAKE_PORT = Master.DEFAULT_PORTNUM + 4;
 	private Vector<WorkerNode> nodes;
 	
 	public NodeTracker(String[] nodes) {
@@ -126,11 +126,6 @@ public class NodeTracker {
 		
 		public WorkerNode(String address) {
 			this.address = address;
-		}
-		
-		public WorkerNode(String address, int fellowshipID) {
-			this.address = address;
-			this.fellowshipID = fellowshipID;
 		}
 		
 		protected void setLatency(long latency) {

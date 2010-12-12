@@ -457,14 +457,18 @@ public class Slave implements Runnable {
 				//TODO get data from each node in workList, call parseData on it done
 				for (int i = 0; i < workList.size();i++){
 					//System.out.println(workList.size());
-					parseData(workList.elementAt(i).getData());
+					if (parseData(workList.elementAt(i).getData()) == -1) {
+						workList.elementAt(i).setStatus(Status.SHIELDED);
+					}
+					
 				}
 			}
 		}
-		
-		private void parseData(byte[] data){
+	}
+		private int parseData(byte[] data){
 			//TODO put shit from Node here, check against cachestuff, if not in, add to ultralist/leaflist appropriately.. add to dumpList
 			// and cache it. DONE
+			int status = 0;
 			String[] tempArray;
 			String[] tempArray2;
 			String[] readArray;
@@ -498,8 +502,8 @@ public class Slave implements Runnable {
 					dumpList.add(tempnode);
 				}
 				}	
-			}
-	        }
+			} else status = -1;
+	        } else status = -1;
 	        startIndex = dataS.indexOf("Leaves: ");
 	        if (!(startIndex == -1)) {
 	        endIndex = dataS.indexOf("\n",startIndex);
@@ -524,10 +528,13 @@ public class Slave implements Runnable {
 					}
 				}
 					}
-				}
-			}
-		}
-	}
+				} else {status = -1;}
+			} else 
+				{status = -1;}
+	        return status;
+		} 
+
+	
 	
 	public class Crawler implements Runnable {
 		private Node node;

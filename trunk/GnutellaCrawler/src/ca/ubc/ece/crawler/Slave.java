@@ -118,7 +118,13 @@ public class Slave implements Runnable {
 		leafList = new Vector<Node>();
 		workList = new Vector<Node>();
 		dumpList = new Vector<Node>();
-		
+		try {
+			this.hostName = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		this.portNum = 9090;
 		dumpFlag = false;
 		
 		Node test = new Node("137.82.84.242", 5627);
@@ -240,7 +246,7 @@ public class Slave implements Runnable {
 			synchronized(syncA){
 				syncA.notifyAll();
 			}
-		}
+		}	
 		else{
 			synchronized(syncB){
 				syncB.notifyAll();

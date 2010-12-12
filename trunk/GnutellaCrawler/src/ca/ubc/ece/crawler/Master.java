@@ -18,7 +18,6 @@ public class Master implements Runnable {
 	public static final int DEFAULT_PORTNUM = 1337;
 	public static final int WHISPER_PORT = DEFAULT_PORTNUM + 1;
 	
-	public static final int AWOL_TIMER = 60;
 	public static final int NUM_NODES = 550;
 	
 	public static final int MS_TO_SEC = 1000;
@@ -32,7 +31,7 @@ public class Master implements Runnable {
 	private static boolean verbose = false;
 	private static boolean full = false;
 	
-	private NodeTracker nodeTracker;
+	private NodeManager nodeTracker;
 	
 	private Vector<Node> nodeList;
 	private Vector<Logger> workerList;
@@ -121,7 +120,7 @@ public class Master implements Runnable {
 		} catch (FileNotFoundException e) {
 			System.err.println("Error: Could not find node list.");
 		} catch (IOException e) {}
-		nodeTracker = new NodeTracker(allNodes);
+		nodeTracker = new NodeManager(allNodes);
 		
 		nodeTracker.wakeFellowships();
 		
@@ -152,10 +151,6 @@ public class Master implements Runnable {
 	public void print() {
 		for (Node node : nodeList)
 			System.out.println(node.toString());
-	}
-	
-	public void wakeFellowship() {
-		
 	}
 	
 	/* ************ EMBEDDED THREADS ************ */

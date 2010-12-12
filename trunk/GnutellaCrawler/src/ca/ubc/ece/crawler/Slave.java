@@ -104,9 +104,6 @@ public class Slave implements Runnable {
 //        }
 //		new Thread(new Slave(full, timeout, duration)).start();
 		new Thread(new Slave()).start();
-		
-		// TODO have slaves idle until woken by master (see NodeTracker)
-		
 	}
 	
 	public Slave() {
@@ -240,14 +237,12 @@ public class Slave implements Runnable {
 			key.cancel();
 			return;
         }
-		
 
 		if(at.ID == (Integer)syncA){
 			synchronized(syncA){
 				syncA.notifyAll();
 			}
-		}	
-		else{
+		} else {
 			synchronized(syncB){
 				syncB.notifyAll();
 			}
@@ -294,7 +289,6 @@ public class Slave implements Runnable {
 		}
 			
 		// TODO 
-		
 	}
 	
 	private void write(SelectionKey key) throws IOException {
@@ -398,6 +392,8 @@ public class Slave implements Runnable {
 				ServerSocket server = new ServerSocket(WAKE_PORT);
 				Socket socket = server.accept(); // Blocks until receives a wake signal
 				ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+				master = (InetAddress)ois.readObject();
+				backup = (InetAddress)ois.readObject();
 				ringSize = (Integer)ois.readObject();
 				if (ringSize  == -1)
 					ringList = (String[])ois.readObject();
@@ -409,7 +405,7 @@ public class Slave implements Runnable {
 		}
 		
 		if (ringSize != -1) {
-			// TODO Construct ringList from node_list_fellowship. This list need not
+			// Construct ringList from node_list_fellowship. This list need not
 			// be all alive as Whisper will restructure if necessary
 			BufferedReader br = null;
 			try {
@@ -460,7 +456,7 @@ public class Slave implements Runnable {
 						Thread.sleep(REFRESH_RATE);
 					} catch (InterruptedException e) {}
 				}				
-				//TODO get data from each node in workList, call parseData on it done
+				// Get data from each node in workList, call parseData on it
 				for (int i = 0; i < workList.size();i++){
 					//System.out.println(workList.size());
 					if (parseData(workList.elementAt(i).getData()) == -1) {
@@ -472,8 +468,6 @@ public class Slave implements Runnable {
 		}
 	}
 		private int parseData(byte[] data){
-			//TODO put shit from Node here, check against cachestuff, if not in, add to ultralist/leaflist appropriately.. add to dumpList
-			// and cache it. DONE
 			int status = 0;
 			String[] tempArray;
 			String[] tempArray2;
@@ -645,16 +639,19 @@ public class Slave implements Runnable {
 						dump();
 					}
 					
+					// TODO must divide ultraList, leafList..ugh
+					
 					String address = null;
 					int index = 0;
 					for (int i = 0; i < ringList.length; i++) {
 						address = ringList[i];
-						if (address.equals(hostName)) { // TODO hostName here must be this node's address
+						if (address.equals(InetAddress.getByName(hostName).getAddress().toString())) {
 							address = ringList[(i+1)%ringList.length];
 							index = i+1;
 							break;
 						}
 					}
+					
 					while(true) {
 						InetAddress next = InetAddress.getByName(address);
 						try {
@@ -664,7 +661,7 @@ public class Slave implements Runnable {
 							// Could not whisper, wake another fellowship member, add to ring
 							BufferedReader br = new BufferedReader(new FileReader("node_list_fellowship"));
 							while(true) {
-								ringList[index] = br.readLine(); // TODO make sure not null
+								ringList[index] = br.readLine();
 								next = InetAddress.getByName(ringList[index]);
 								if (wake(next))
 									break;

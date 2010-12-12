@@ -380,11 +380,13 @@ public class Slave implements Runnable {
 				ipPort = tempArray[j];
 				readArray = ipPort.split(":");
 				if (!(ipCache.isCached(readArray[0].toString()))) {
-					System.out.println(readArray[1] + "hi");
 					readArray[1] = readArray[1].replaceAll("(\\r|\\n)", ""); 
 					portNum = Integer.parseInt(readArray[1]);
 					Node tempnode = new Node(readArray[0], portNum);
 					ultraList.add(tempnode);
+					synchronized(ultraList){
+						ultraList.notifyAll();
+					}
 					ipCache.cache(readArray[0]);
 					dumpList.add(tempnode);
 				}	
@@ -438,9 +440,9 @@ public class Slave implements Runnable {
 				try {
 					socketChannel = createConnection(node.getAddress(), node.getPortNum(), attachment);
 				} catch (IOException e) {
-					// TODO you're fucked
+					// Node failed move on
+					
 				}
-				
 				// Wait for connection to finish before writing	
 				synchronized(id) {
 					try {
